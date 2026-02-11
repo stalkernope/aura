@@ -1,11 +1,130 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AURA</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #0b0f1a;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    transition: 0.3s ease;
+}
+.light {
+    background: #f2f4f8;
+    color: #111;
+}
+h1 {
+    margin-top: 40px;
+    font-size: 32px;
+    letter-spacing: 2px;
+}
+.input-box {
+    width: 100%;
+    max-width: 400px;
+    margin-top: 30px;
+}
+input {
+    width: 100%;
+    padding: 16px;
+    border-radius: 16px;
+    border: none;
+    outline: none;
+    font-size: 16px;
+}
+.dark input {
+    background: #121826;
+    color: white;
+    box-shadow: 0 0 10px rgba(138, 43, 226, 0.4);
+}
+.light input {
+    background: white;
+    color: #111;
+}
+button {
+    margin-top: 20px;
+    padding: 14px 20px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+.dark button {
+    background: linear-gradient(90deg, #6a11cb, #2575fc);
+    color: white;
+    box-shadow: 0 0 15px rgba(106, 17, 203, 0.6);
+}
+.light button {
+    background: #111;
+    color: white;
+}
+.result {
+    margin-top: 30px;
+    max-width: 400px;
+    text-align: center;
+    line-height: 1.5;
+}
+.theme-toggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    cursor: pointer;
+}
+</style>
 </head>
-<body style="background:black;color:white;font-family:sans-serif;text-align:center;margin-top:100px;">
+<body class="dark">
+
+<div class="theme-toggle" onclick="toggleTheme()">🌙</div>
+
 <h1>AURA</h1>
-<p>AI Command Center</p>
+
+<div class="input-box">
+    <input id="commandInput" placeholder="Опиши атмосферу или действие...">
+    <button onclick="generate()">Сформировать атмосферу</button>
+</div>
+
+<div class="result" id="result"></div>
+
+<script>
+function toggleTheme() {
+    const body = document.body;
+    if (body.classList.contains("dark")) {
+        body.classList.remove("dark");
+        body.classList.add("light");
+        document.querySelector(".theme-toggle").innerText = "☀️";
+    } else {
+        body.classList.remove("light");
+        body.classList.add("dark");
+        document.querySelector(".theme-toggle").innerText = "🌙";
+    }
+}
+
+function generate() {
+    const input = document.getElementById("commandInput").value.toLowerCase();
+    let response = "";
+
+    if (input.includes("кино")) {
+        response = "Алиса, приглуши свет до 15% и включи режим кино.";
+    } else if (input.includes("сон")) {
+        response = "Алиса, включи тёплый свет 30% и поставь спокойную музыку.";
+    } else if (input.includes("работа")) {
+        response = "Алиса, включи яркий белый свет и фокус-режим.";
+    } else if (input.includes("гости")) {
+        response = "Алиса, включи вечерний свет и поставь фоновую музыку.";
+    } else {
+        response = "Попробуй описать атмосферу подробнее.";
+    }
+
+    document.getElementById("result").innerText = response;
+}
+</script>
+
 </body>
 </html>
