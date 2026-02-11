@@ -1,130 +1,1139 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AURA</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<style>
-body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    background: #0b0f1a;
-    color: white;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-    transition: 0.3s ease;
-}
-.light {
-    background: #f2f4f8;
-    color: #111;
-}
-h1 {
-    margin-top: 40px;
-    font-size: 32px;
-    letter-spacing: 2px;
-}
-.input-box {
-    width: 100%;
-    max-width: 400px;
-    margin-top: 30px;
-}
-input {
-    width: 100%;
-    padding: 16px;
-    border-radius: 16px;
-    border: none;
-    outline: none;
-    font-size: 16px;
-}
-.dark input {
-    background: #121826;
-    color: white;
-    box-shadow: 0 0 10px rgba(138, 43, 226, 0.4);
-}
-.light input {
-    background: white;
-    color: #111;
-}
-button {
-    margin-top: 20px;
-    padding: 14px 20px;
-    border-radius: 20px;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-}
-.dark button {
-    background: linear-gradient(90deg, #6a11cb, #2575fc);
-    color: white;
-    box-shadow: 0 0 15px rgba(106, 17, 203, 0.6);
-}
-.light button {
-    background: #111;
-    color: white;
-}
-.result {
-    margin-top: 30px;
-    max-width: 400px;
-    text-align: center;
-    line-height: 1.5;
-}
-.theme-toggle {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    cursor: pointer;
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>AURA</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root{
+      --bg0:#070A12;
+      --bg1:#0B0F1A;
+      --card: rgba(255,255,255,.06);
+      --card2: rgba(255,255,255,.08);
+      --txt:#EAF0FF;
+      --muted: rgba(234,240,255,.65);
+      --line: rgba(255,255,255,.10);
+
+      --a1:#7A2BFF;
+      --a2:#2B7CFF;
+      --glow: rgba(122,43,255,.45);
+
+      --ok:#37D67A;
+      --warn:#FFCC66;
+      --bad:#FF5C7A;
+
+      --shadow: 0 18px 55px rgba(0,0,0,.55);
+      --radius: 18px;
+    }
+
+    body.light{
+      --bg0:#F4F7FF;
+      --bg1:#EEF3FF;
+      --card: rgba(17,20,30,.05);
+      --card2: rgba(17,20,30,.07);
+      --txt:#0E1220;
+      --muted: rgba(14,18,32,.62);
+      --line: rgba(14,18,32,.10);
+      --glow: rgba(43,124,255,.22);
+      --shadow: 0 18px 55px rgba(10,20,40,.18);
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Arial,sans-serif;
+      background: radial-gradient(1200px 800px at 50% -10%, rgba(122,43,255,.25), transparent 60%),
+                  radial-gradient(900px 700px at 85% 20%, rgba(43,124,255,.18), transparent 55%),
+                  linear-gradient(180deg, var(--bg0), var(--bg1));
+      color:var(--txt);
+      overflow:hidden;
+    }
+
+    /* Safe area */
+    .safeTop{ padding-top: env(safe-area-inset-top); }
+    .safeBottom{ padding-bottom: env(safe-area-inset-bottom); }
+
+    /* Layout */
+    .app{
+      height:100%;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:20;
+      padding: 14px 14px 10px;
+      backdrop-filter: blur(12px);
+      background: linear-gradient(180deg, rgba(0,0,0,.22), transparent);
+    }
+    body.light .topbar{
+      background: linear-gradient(180deg, rgba(255,255,255,.70), transparent);
+    }
+
+    .row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+    .logo{
+      width:34px;height:34px;
+      border-radius:12px;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.35), transparent 55%),
+                  linear-gradient(135deg, var(--a1), var(--a2));
+      box-shadow: 0 0 22px var(--glow);
+      flex:0 0 auto;
+    }
+    .titleWrap{ min-width:0; }
+    .title{
+      font-weight:700;
+      letter-spacing:.08em;
+      font-size:15px;
+      opacity:.95;
+    }
+    .subtitle{
+      font-size:12px;
+      color:var(--muted);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 62vw;
+    }
+
+    .iconBtn{
+      border:1px solid var(--line);
+      background: var(--card);
+      color:var(--txt);
+      border-radius: 14px;
+      padding:10px 12px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      box-shadow: 0 0 0 rgba(0,0,0,0);
+      transition: .18s ease;
+      cursor:pointer;
+      user-select:none;
+    }
+    .iconBtn:active{ transform: scale(.98); }
+    .pill{
+      font-size:12px;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      color:var(--muted);
+    }
+
+    .content{
+      flex:1;
+      overflow:auto;
+      padding: 6px 14px 92px;
+    }
+
+    .card{
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, var(--card2), var(--card));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:14px;
+    }
+
+    .glowCard{
+      position:relative;
+      overflow:hidden;
+    }
+    .glowCard:before{
+      content:"";
+      position:absolute;
+      inset:-1px;
+      border-radius: calc(var(--radius) + 1px);
+      background: radial-gradient(700px 220px at 50% 0%, rgba(122,43,255,.35), transparent 55%),
+                  radial-gradient(700px 220px at 85% 55%, rgba(43,124,255,.22), transparent 55%);
+      opacity:.75;
+      pointer-events:none;
+      filter: blur(10px);
+    }
+    .glowCard > *{ position:relative; z-index:1; }
+
+    .h1{
+      font-size:18px;
+      margin:0 0 10px;
+      letter-spacing:.02em;
+    }
+    .muted{ color:var(--muted); font-size:13px; line-height:1.35; }
+
+    .input{
+      width:100%;
+      border-radius: 16px;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.18);
+      color:var(--txt);
+      padding: 14px 14px;
+      font-size:15px;
+      outline:none;
+      box-shadow: 0 0 18px rgba(122,43,255,.16);
+    }
+    body.light .input{
+      background: rgba(255,255,255,.72);
+      box-shadow: 0 0 18px rgba(43,124,255,.12);
+    }
+
+    .btn{
+      width:100%;
+      border:none;
+      border-radius: 18px;
+      padding: 14px 14px;
+      font-size:15px;
+      color:white;
+      background: linear-gradient(90deg, var(--a1), var(--a2));
+      box-shadow: 0 0 26px var(--glow);
+      cursor:pointer;
+      transition:.18s ease;
+      user-select:none;
+    }
+    .btn:active{ transform:scale(.99); }
+    .btn.secondary{
+      background: rgba(255,255,255,.06);
+      color:var(--txt);
+      border:1px solid var(--line);
+      box-shadow:none;
+    }
+
+    .grid2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    .chip{
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.05);
+      color: var(--txt);
+      border-radius: 16px;
+      padding: 12px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .chip:active{ transform: scale(.99); }
+    .chip small{ color:var(--muted); display:block; margin-top:2px; }
+
+    .kbar{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+    .kbtn{
+      padding:10px 12px;
+      border-radius: 999px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.05);
+      color: var(--txt);
+      cursor:pointer;
+      user-select:none;
+      font-size:13px;
+    }
+    .kbtn:active{ transform:scale(.99); }
+
+    .resultBox{
+      margin-top:12px;
+      border-radius: 16px;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.20);
+      padding: 12px;
+      line-height:1.4;
+    }
+    body.light .resultBox{ background: rgba(255,255,255,.65); }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      margin-top:10px;
+    }
+    .actions .btn{ flex:1; padding: 12px; border-radius: 16px; font-size:14px; }
+
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      margin-top:10px;
+    }
+    .item{
+      border:1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255,255,255,.05);
+      padding: 12px;
+    }
+    .itemTop{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:flex-start;
+    }
+    .itemTitle{ font-weight:700; font-size:14px; }
+    .itemMeta{ color:var(--muted); font-size:12px; margin-top:2px; }
+    .miniBtn{
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      color: var(--txt);
+      padding:8px 10px;
+      border-radius: 12px;
+      font-size:12px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .miniBtn:active{ transform:scale(.99); }
+
+    /* Bottom nav */
+    .nav{
+      position:fixed;
+      left:0; right:0; bottom:0;
+      z-index:30;
+      padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+      backdrop-filter: blur(14px);
+      background: linear-gradient(180deg, transparent, rgba(0,0,0,.35));
+    }
+    body.light .nav{
+      background: linear-gradient(180deg, transparent, rgba(255,255,255,.78));
+    }
+    .navBar{
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      border-radius: 22px;
+      display:flex;
+      overflow:hidden;
+      box-shadow: var(--shadow);
+    }
+    .tab{
+      flex:1;
+      padding: 10px 8px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:4px;
+      color: var(--muted);
+      cursor:pointer;
+      user-select:none;
+    }
+    .tab strong{
+      font-size:11px;
+      font-weight:600;
+      letter-spacing:.02em;
+    }
+    .tab.active{
+      color: var(--txt);
+      background: radial-gradient(180px 90px at 50% 0%, rgba(122,43,255,.20), transparent 60%),
+                  radial-gradient(180px 90px at 60% 60%, rgba(43,124,255,.16), transparent 60%),
+                  rgba(255,255,255,.05);
+    }
+
+    /* Modal */
+    .modalWrap{
+      position:fixed;
+      inset:0;
+      z-index:50;
+      display:none;
+      align-items:flex-end;
+      background: rgba(0,0,0,.45);
+      padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+    }
+    .modalWrap.show{ display:flex; }
+    .modal{
+      width:100%;
+      border-radius: 22px;
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+      box-shadow: var(--shadow);
+      padding: 12px;
+    }
+    .modalHeader{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      margin-bottom:8px;
+    }
+    .modalHeader h3{ margin:0; font-size:14px; }
+    .closeX{ font-size:18px; line-height:1; padding:8px 10px; }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.05);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size:12px;
+      color: var(--muted);
+    }
+    .dot{ width:8px;height:8px;border-radius:99px;background: var(--warn); }
+    .dot.ok{ background: var(--ok); }
+    .dot.bad{ background: var(--bad); }
+
+    .sp8{ height:8px; }
+    .sp12{ height:12px; }
+    .sp16{ height:16px; }
+  </style>
 </head>
-<body class="dark">
+<body class="safeTop safeBottom">
+  <div class="app" id="app">
+    <div class="topbar">
+      <div class="row">
+        <div class="brand">
+          <div class="logo"></div>
+          <div class="titleWrap">
+            <div class="title">AURA</div>
+            <div class="subtitle" id="subtitle">AI-панель атмосферы для Алисы</div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="iconBtn" id="themeBtn" title="Тема">🌙 <span class="pill" id="themeLabel">Тёмная</span></div>
+          <div class="iconBtn" id="helpBtn" title="Справка">?</div>
+        </div>
+      </div>
+    </div>
 
-<div class="theme-toggle" onclick="toggleTheme()">🌙</div>
+    <div class="content" id="content"></div>
 
-<h1>AURA</h1>
+    <div class="nav">
+      <div class="navBar">
+        <div class="tab active" data-tab="core">🧠<strong>Центр</strong></div>
+        <div class="tab" data-tab="library">✨<strong>Режимы</strong></div>
+        <div class="tab" data-tab="scenes">⭐<strong>Сценарии</strong></div>
+        <div class="tab" data-tab="account">👤<strong>Аккаунт</strong></div>
+      </div>
+    </div>
+  </div>
 
-<div class="input-box">
-    <input id="commandInput" placeholder="Опиши атмосферу или действие...">
-    <button onclick="generate()">Сформировать атмосферу</button>
-</div>
-
-<div class="result" id="result"></div>
+  <!-- Modal -->
+  <div class="modalWrap" id="modalWrap">
+    <div class="modal">
+      <div class="modalHeader">
+        <h3 id="modalTitle">AURA</h3>
+        <div class="miniBtn closeX" id="modalClose">✕</div>
+      </div>
+      <div class="muted" id="modalBody"></div>
+      <div class="sp12"></div>
+      <button class="btn secondary" id="modalOk">Ок</button>
+    </div>
+  </div>
 
 <script>
-function toggleTheme() {
-    const body = document.body;
-    if (body.classList.contains("dark")) {
-        body.classList.remove("dark");
-        body.classList.add("light");
-        document.querySelector(".theme-toggle").innerText = "☀️";
-    } else {
-        body.classList.remove("light");
-        body.classList.add("dark");
-        document.querySelector(".theme-toggle").innerText = "🌙";
-    }
+/* ---------- Telegram WebApp (не ломает Safari) ---------- */
+const tg = window.Telegram?.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
 }
 
-function generate() {
-    const input = document.getElementById("commandInput").value.toLowerCase();
-    let response = "";
+/* ---------- Storage ---------- */
+const SKEY = "aura_v1";
+const state = loadState();
 
-    if (input.includes("кино")) {
-        response = "Алиса, приглуши свет до 15% и включи режим кино.";
-    } else if (input.includes("сон")) {
-        response = "Алиса, включи тёплый свет 30% и поставь спокойную музыку.";
-    } else if (input.includes("работа")) {
-        response = "Алиса, включи яркий белый свет и фокус-режим.";
-    } else if (input.includes("гости")) {
-        response = "Алиса, включи вечерний свет и поставь фоновую музыку.";
-    } else {
-        response = "Попробуй описать атмосферу подробнее.";
-    }
-
-    document.getElementById("result").innerText = response;
+function loadState(){
+  try{
+    const raw = localStorage.getItem(SKEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return {
+    theme: "dark",
+    onboarded: false,
+    profile: {
+      name: "",
+      createdAt: Date.now(),
+      aliceConnected: false,
+      aliceToken: "" // в MVP просто заглушка
+    },
+    home: {
+      rooms: ["Гостиная", "Спальня"],
+      devices: ["Свет", "Колонка"]
+    },
+    scenes: [], // {id, title, command, createdAt}
+    lastResult: ""
+  };
 }
+function saveState(){
+  localStorage.setItem(SKEY, JSON.stringify(state));
+}
+
+/* ---------- UI Helpers ---------- */
+const $ = (q)=>document.querySelector(q);
+const content = $("#content");
+
+function showModal(title, body){
+  $("#modalTitle").textContent = title;
+  $("#modalBody").innerHTML = body;
+  $("#modalWrap").classList.add("show");
+}
+function hideModal(){ $("#modalWrap").classList.remove("show"); }
+
+$("#modalClose").onclick = hideModal;
+$("#modalOk").onclick = hideModal;
+$("#modalWrap").addEventListener("click",(e)=>{ if(e.target.id==="modalWrap") hideModal(); });
+
+/* ---------- Theme ---------- */
+function applyTheme(){
+  document.body.classList.toggle("light", state.theme === "light");
+  const isLight = state.theme === "light";
+  $("#themeBtn").firstChild.textContent = isLight ? "☀️ " : "🌙 ";
+  $("#themeLabel").textContent = isLight ? "Светлая" : "Тёмная";
+}
+$("#themeBtn").onclick = ()=>{
+  state.theme = (state.theme === "dark") ? "light" : "dark";
+  saveState();
+  applyTheme();
+};
+applyTheme();
+
+/* ---------- Navigation ---------- */
+let currentTab = "core";
+document.querySelectorAll(".tab").forEach(t=>{
+  t.onclick = ()=>{
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+    t.classList.add("active");
+    currentTab = t.dataset.tab;
+    render();
+  };
+});
+
+$("#helpBtn").onclick = ()=>{
+  showModal("Как это работает",
+    `
+    <div class="badge"><span class="dot ok"></span> Идея</div>
+    <div class="sp8"></div>
+    AURA не “заменяет” Алису — она <b>усиливает команды</b> и собирает <b>сценарии</b>.<br><br>
+    <b>1)</b> Опиши желание (например: «кино», «сон», «вечер»)<br>
+    <b>2)</b> AURA сформирует команду для Алисы<br>
+    <b>3)</b> Нажми <b>Скопировать</b> и скажи/вставь в Алису<br><br>
+    Дальше мы добавим реальную интеграцию Яндекса (OAuth/умный дом), когда решишь.
+    `
+  );
+};
+
+/* ---------- Onboarding ---------- */
+function renderOnboarding(){
+  $("#subtitle").textContent = "Настройка AURA";
+  content.innerHTML = `
+    <div class="card glowCard">
+      <div class="h1">Добро пожаловать в AURA</div>
+      <div class="muted">Сначала коротко настроим дом. Это нужно, чтобы команды были точнее.</div>
+      <div class="sp12"></div>
+      <button class="btn" id="obStart">Начать настройку</button>
+      <div class="sp12"></div>
+      <button class="btn secondary" id="obSkip">Пропустить (можно позже)</button>
+    </div>
+  `;
+
+  $("#obStart").onclick = ()=> renderOnboardingRooms();
+  $("#obSkip").onclick = ()=>{
+    state.onboarded = true;
+    saveState();
+    render();
+  };
+}
+
+function renderOnboardingRooms(){
+  $("#subtitle").textContent = "Комнаты";
+  const rooms = state.home.rooms.slice();
+  content.innerHTML = `
+    <div class="card glowCard">
+      <div class="h1">Выбери комнаты</div>
+      <div class="muted">Можно оставить как есть или добавить свои.</div>
+      <div class="sp12"></div>
+      <div class="list" id="roomsList"></div>
+      <div class="sp12"></div>
+      <input class="input" id="roomInput" placeholder="Добавить комнату (например: Кухня)" />
+      <div class="sp12"></div>
+      <button class="btn" id="addRoom">Добавить</button>
+      <div class="sp12"></div>
+      <button class="btn secondary" id="toDevices">Далее</button>
+    </div>
+  `;
+
+  const list = $("#roomsList");
+  function draw(){
+    list.innerHTML = rooms.map((r,i)=>`
+      <div class="item">
+        <div class="itemTop">
+          <div>
+            <div class="itemTitle">${escapeHtml(r)}</div>
+            <div class="itemMeta">Комната</div>
+          </div>
+          <div class="miniBtn" data-i="${i}">Удалить</div>
+        </div>
+      </div>
+    `).join("");
+    list.querySelectorAll(".miniBtn").forEach(b=>{
+      b.onclick = ()=>{
+        const i = +b.dataset.i;
+        rooms.splice(i,1);
+        draw();
+      };
+    });
+  }
+  draw();
+
+  $("#addRoom").onclick = ()=>{
+    const v = ($("#roomInput").value || "").trim();
+    if(!v) return;
+    rooms.push(v);
+    $("#roomInput").value = "";
+    draw();
+  };
+
+  $("#toDevices").onclick = ()=>{
+    state.home.rooms = rooms.length ? rooms : ["Гостиная"];
+    saveState();
+    renderOnboardingDevices();
+  };
+}
+
+function renderOnboardingDevices(){
+  $("#subtitle").textContent = "Устройства";
+  const all = ["Свет","Колонка","ТВ","Розетки","Климат","Увлажнитель","Пылесос","Шторы"];
+  const selected = new Set(state.home.devices);
+
+  content.innerHTML = `
+    <div class="card glowCard">
+      <div class="h1">Что есть в доме?</div>
+      <div class="muted">Выбери — AURA будет учитывать это в командах.</div>
+      <div class="sp12"></div>
+      <div class="grid2" id="devGrid"></div>
+      <div class="sp12"></div>
+      <button class="btn secondary" id="backRooms">Назад</button>
+      <div class="sp12"></div>
+      <button class="btn" id="finishOb">Готово</button>
+    </div>
+  `;
+
+  const grid = $("#devGrid");
+  function draw(){
+    grid.innerHTML = all.map(d=>{
+      const on = selected.has(d);
+      return `
+        <div class="chip" data-d="${d}">
+          <div>
+            <b>${escapeHtml(d)}</b>
+            <small>${on ? "Подключено" : "Не выбрано"}</small>
+          </div>
+          <span class="pill" style="color:${on ? "var(--ok)" : "var(--muted)"}">${on ? "ON" : "OFF"}</span>
+        </div>
+      `;
+    }).join("");
+    grid.querySelectorAll(".chip").forEach(c=>{
+      c.onclick = ()=>{
+        const d = c.dataset.d;
+        if(selected.has(d)) selected.delete(d); else selected.add(d);
+        draw();
+      };
+    });
+  }
+  draw();
+
+  $("#backRooms").onclick = renderOnboardingRooms;
+  $("#finishOb").onclick = ()=>{
+    const arr = Array.from(selected);
+    state.home.devices = arr.length ? arr : ["Свет"];
+    state.onboarded = true;
+    saveState();
+    render();
+    showModal("Готово", `AURA настроена. Теперь можно формировать атмосферу и сохранять сценарии.`);
+  };
+}
+
+/* ---------- Core (Command Center) ---------- */
+function renderCore(){
+  $("#subtitle").textContent = "Центр управления";
+  const name = (state.profile.name || "").trim();
+  const hello = name ? `Привет, ${escapeHtml(name)}.` : "Привет.";
+  const alice = state.profile.aliceConnected ? `<span class="badge"><span class="dot ok"></span> Алиса подключена</span>` : `<span class="badge"><span class="dot"></span> Алиса не подключена</span>`;
+
+  content.innerHTML = `
+    <div class="card glowCard">
+      <div class="h1">${hello} Что создаём?</div>
+      <div class="muted">Опиши атмосферу или действие. AURA соберёт команду для Алисы под твой дом.</div>
+      <div class="sp12"></div>
+      <input class="input" id="q" placeholder="Например: кино / сон / спокойный вечер / уборка" />
+      <div class="sp12"></div>
+      <button class="btn" id="gen">Сформировать атмосферу</button>
+      <div class="sp12"></div>
+      <div class="kbar">
+        <div class="kbtn" data-p="кино">🎬 Кино</div>
+        <div class="kbtn" data-p="сон">💤 Сон</div>
+        <div class="kbtn" data-p="работа">💻 Работа</div>
+        <div class="kbtn" data-p="гости">🎉 Гости</div>
+        <div class="kbtn" data-p="релакс">🧘 Релакс</div>
+        <div class="kbtn" data-p="уборка">🧹 Уборка</div>
+      </div>
+
+      <div class="sp12"></div>
+      ${alice}
+      <div class="sp12"></div>
+
+      <div class="resultBox" id="result" style="display:${state.lastResult ? "block":"none"}"></div>
+
+      <div class="actions" id="acts" style="display:${state.lastResult ? "flex":"none"}">
+        <button class="btn secondary" id="copy">Скопировать</button>
+        <button class="btn" id="saveScene">Сохранить</button>
+      </div>
+    </div>
+
+    <div class="sp12"></div>
+
+    <div class="card">
+      <div class="h1">Быстрые панели</div>
+      <div class="muted">Много кнопок — как ты хотел. Это “командный пульт”.</div>
+      <div class="sp12"></div>
+      <div class="grid2">
+        <div class="chip" id="goConnect"><div><b>Подключение к Алисе</b><small>мастер подключения</small></div><span class="pill">→</span></div>
+        <div class="chip" id="goHome"><div><b>Мой дом</b><small>комнаты и устройства</small></div><span class="pill">→</span></div>
+        <div class="chip" id="goLibrary"><div><b>Библиотека режимов</b><small>готовые кнопки</small></div><span class="pill">→</span></div>
+        <div class="chip" id="goScenes"><div><b>Мои сценарии</b><small>избранное</small></div><span class="pill">→</span></div>
+      </div>
+    </div>
+  `;
+
+  const q = $("#q");
+  $("#gen").onclick = ()=> generate(q.value);
+  document.querySelectorAll(".kbtn").forEach(b=>{
+    b.onclick = ()=>{
+      q.value = b.dataset.p;
+      generate(q.value);
+    };
+  });
+
+  $("#goConnect").onclick = ()=> openConnectWizard();
+  $("#goHome").onclick = ()=> openHomePanel();
+  $("#goLibrary").onclick = ()=> switchTab("library");
+  $("#goScenes").onclick = ()=> switchTab("scenes");
+
+  if(state.lastResult){
+    $("#result").textContent = state.lastResult;
+    $("#copy").onclick = ()=> copyText(state.lastResult);
+    $("#saveScene").onclick = ()=> saveCurrentScene();
+  }
+}
+
+/* ---------- Library ---------- */
+const LIB = [
+  {key:"Кино", icon:"🎬", prompt:"кино", desc:"приглушить свет + фокус"},
+  {key:"Сон", icon:"💤", prompt:"сон", desc:"тёплый свет + тишина"},
+  {key:"Релакс", icon:"🧘", prompt:"релакс", desc:"мягкий режим"},
+  {key:"Гости", icon:"🎉", prompt:"гости", desc:"уют + фоновая музыка"},
+  {key:"Уборка", icon:"🧹", prompt:"уборка", desc:"ярко + бодро"},
+  {key:"Работа", icon:"💻", prompt:"работа", desc:"яркий белый"},
+  {key:"Утро", icon:"🌅", prompt:"утро", desc:"мягкий старт"},
+  {key:"Ночь", icon:"🌙", prompt:"ночь", desc:"ночник"},
+  {key:"Громче", icon:"🔊", prompt:"громче", desc:"музыка + громкость"},
+  {key:"Тише", icon:"🔉", prompt:"тише", desc:"снизить громкость"},
+  {key:"Таймер", icon:"⏱", prompt:"таймер 30", desc:"выключить через 30 мин"},
+  {key:"Камин", icon:"🔥", prompt:"камин", desc:"уютный режим"},
+];
+
+function renderLibrary(){
+  $("#subtitle").textContent = "Библиотека режимов";
+  content.innerHTML = `
+    <div class="card glowCard">
+      <div class="h1">Готовые кнопки</div>
+      <div class="muted">Нажимай — AURA сформирует команду. Можно сохранять в сценарии.</div>
+      <div class="sp12"></div>
+      <div class="grid2" id="libGrid"></div>
+      <div class="sp12"></div>
+      <div class="muted">Хочешь ещё больше кнопок — добавим 50+ (пакеты: “вечеринки”, “сон”, “детская”, “кухня”).</div>
+    </div>
+  `;
+  const grid = $("#libGrid");
+  grid.innerHTML = LIB.map(x=>`
+    <div class="chip" data-p="${escapeAttr(x.prompt)}">
+      <div><b>${x.icon} ${escapeHtml(x.key)}</b><small>${escapeHtml(x.desc)}</small></div>
+      <span class="pill">Запуск</span>
+    </div>
+  `).join("");
+  grid.querySelectorAll(".chip").forEach(c=>{
+    c.onclick = ()=>{
+      state.lastResult = "";
+      saveState();
+      switchTab("core");
+      // небольшая задержка, чтобы отрисовался core
+      setTimeout(()=> generate(c.dataset.p), 120);
+    };
+  });
+}
+
+/* ---------- Scenes ---------- */
+function renderScenes(){
+  $("#subtitle").textContent = "Мои сценарии";
+  const scenes = state.scenes.slice().sort((a,b)=>b.createdAt-a.createdAt);
+
+  content.innerHTML = `
+    <div class="card glowCard">
+      <div class="h1">Избранное</div>
+      <div class="muted">Твои сохранённые команды. Нажимай “Скопировать” и используй с Алисой.</div>
+      <div class="sp12"></div>
+      <button class="btn secondary" id="export">Экспорт (копировать все)</button>
+      <div class="sp12"></div>
+      <div class="list" id="sceneList"></div>
+    </div>
+  `;
+
+  const list = $("#sceneList");
+  if(!scenes.length){
+    list.innerHTML = `<div class="muted">Пока пусто. Сгенерируй команду в “Центре” и нажми “Сохранить”.</div>`;
+    $("#export").onclick = ()=> showModal("Экспорт", "Пока нечего экспортировать 🙂");
+    return;
+  }
+
+  list.innerHTML = scenes.map(s=>`
+    <div class="item">
+      <div class="itemTop">
+        <div>
+          <div class="itemTitle">${escapeHtml(s.title)}</div>
+          <div class="itemMeta">${new Date(s.createdAt).toLocaleString("ru-RU")}</div>
+        </div>
+        <div class="row" style="gap:8px;">
+          <div class="miniBtn" data-act="copy" data-id="${s.id}">Скопировать</div>
+          <div class="miniBtn" data-act="del" data-id="${s.id}">Удалить</div>
+        </div>
+      </div>
+      <div class="sp8"></div>
+      <div class="muted">${escapeHtml(s.command)}</div>
+    </div>
+  `).join("");
+
+  list.querySelectorAll(".miniBtn").forEach(b=>{
+    b.onclick = ()=>{
+      const id = b.dataset.id;
+      const act = b.dataset.act;
+      const sc = state.scenes.find(x=>x.id===id);
+      if(!sc) return;
+      if(act==="copy") copyText(sc.command);
+      if(act==="del"){
+        state.scenes = state.scenes.filter(x=>x.id!==id);
+        saveState();
+        render();
+      }
+    };
+  });
+
+  $("#export").onclick = ()=>{
+    const txt = scenes.map(s=>`• ${s.title}\n${s.command}\n`).join("\n");
+    copyText(txt);
+  };
+}
+
+/* ---------- Account ---------- */
+function renderAccount(){
+  $("#subtitle").textContent = "Аккаунт";
+  const name = (state.profile.name || "").trim();
+  const connected = !!state.profile.aliceConnected;
+
+  content.innerHTML = `
+    <div class="card glowCard">
+      <div class="h1">Профиль</div>
+      <div class="muted">Сохраняется на твоём устройстве (iPhone). Без серверов — бесплатно.</div>
+      <div class="sp12"></div>
+
+      <div class="badge">
+        <span class="dot ${connected ? "ok" : ""}"></span>
+        ${connected ? "Алиса подключена" : "Алиса не подключена"}
+      </div>
+
+      <div class="sp12"></div>
+      <input class="input" id="name" placeholder="Имя (например: Артём)" value="${escapeAttr(name)}" />
+      <div class="sp12"></div>
+      <button class="btn" id="saveName">Сохранить имя</button>
+
+      <div class="sp12"></div>
+      <div class="grid2">
+        <div class="chip" id="connectBtn"><div><b>Подключить Алису</b><small>мастер</small></div><span class="pill">→</span></div>
+        <div class="chip" id="homeBtn"><div><b>Настройки дома</b><small>комнаты / устройства</small></div><span class="pill">→</span></div>
+      </div>
+
+      <div class="sp12"></div>
+      <button class="btn secondary" id="reset">Сбросить приложение</button>
+    </div>
+  `;
+
+  $("#saveName").onclick = ()=>{
+    state.profile.name = ($("#name").value || "").trim();
+    saveState();
+    showModal("Готово", "Имя сохранено.");
+    render();
+  };
+  $("#connectBtn").onclick = ()=> openConnectWizard();
+  $("#homeBtn").onclick = ()=> openHomePanel();
+
+  $("#reset").onclick = ()=>{
+    showModal("Сброс", `
+      Это удалит сценарии и настройки только на этом телефоне.<br><br>
+      <button class="btn" id="doReset" style="margin-top:10px;">Да, сбросить</button>
+    `);
+    setTimeout(()=>{
+      const btn = document.getElementById("doReset");
+      if(btn){
+        btn.onclick = ()=>{
+          localStorage.removeItem(SKEY);
+          location.reload();
+        };
+      }
+    }, 50);
+  };
+}
+
+/* ---------- “Connect to Alice” Wizard (MVP) ---------- */
+function openConnectWizard(){
+  const connected = !!state.profile.aliceConnected;
+  showModal("Подключение к Алисе", `
+    <div class="muted">
+      Сейчас это <b>MVP-подключение</b>: мы сохраняем статус и готовим базу под реальную интеграцию Яндекса.
+      <div class="sp12"></div>
+      <div class="badge"><span class="dot ${connected ? "ok":""}"></span>${connected ? "Подключено" : "Не подключено"}</div>
+      <div class="sp12"></div>
+
+      <b>Вариант MVP (бесплатно):</b><br>
+      AURA генерирует команды → ты нажимаешь “Скопировать” → вставляешь/говоришь Алисе.
+      <div class="sp12"></div>
+
+      <b>Вариант 2 (позже, реально управлять):</b><br>
+      Добавим сервер + OAuth Яндекса или навык → и тогда кнопки смогут управлять устройствами напрямую.
+      <div class="sp12"></div>
+
+      <button class="btn" id="mkConnect">Отметить как подключено</button>
+      <div class="sp12"></div>
+      <button class="btn secondary" id="mkDisconnect">Отключить</button>
+    </div>
+  `);
+  setTimeout(()=>{
+    const c = document.getElementById("mkConnect");
+    const d = document.getElementById("mkDisconnect");
+    if(c) c.onclick = ()=>{
+      state.profile.aliceConnected = true;
+      saveState();
+      hideModal();
+      render();
+    };
+    if(d) d.onclick = ()=>{
+      state.profile.aliceConnected = false;
+      state.profile.aliceToken = "";
+      saveState();
+      hideModal();
+      render();
+    };
+  }, 60);
+}
+
+/* ---------- Home panel ---------- */
+function openHomePanel(){
+  showModal("Мой дом", `
+    <div class="muted">
+      <b>Комнаты:</b> ${state.home.rooms.map(escapeHtml).join(", ")}<br>
+      <b>Устройства:</b> ${state.home.devices.map(escapeHtml).join(", ")}
+      <div class="sp12"></div>
+      Настройки меняются через Onboarding. Хочешь — я добавлю редактор прямо здесь (добавить/удалить без мастера).
+      <div class="sp12"></div>
+      <button class="btn" id="reOnb">Перенастроить</button>
+    </div>
+  `);
+  setTimeout(()=>{
+    const b = document.getElementById("reOnb");
+    if(b) b.onclick = ()=>{
+      hideModal();
+      state.onboarded = false;
+      saveState();
+      render();
+    };
+  }, 60);
+}
+
+/* ---------- Generator (rules-based “AI”) ---------- */
+function generate(text){
+  const q = (text || "").trim().toLowerCase();
+  const rooms = state.home.rooms;
+  const devices = new Set(state.home.devices);
+  const isNight = (new Date()).getHours() >= 22 || (new Date()).getHours() <= 6;
+
+  const roomHint = rooms.length ? `в ${rooms[0]}` : "";
+  const hasLight = devices.has("Свет");
+  const hasSpeaker = devices.has("Колонка");
+  const hasTV = devices.has("ТВ");
+  const hasClimate = devices.has("Климат");
+
+  let cmd = "";
+
+  // “Смысловые” режимы
+  if(q.includes("кино")){
+    cmd = "Алиса, включи режим кино: ";
+    cmd += hasLight ? "приглуши свет до 15%, " : "";
+    cmd += hasTV ? "включи телевизор, " : "";
+    cmd += "установи комфортную громкость.";
+  } else if(q.includes("сон") || q.includes("спать")){
+    cmd = "Алиса, режим сон: ";
+    cmd += hasLight ? "тёплый свет 25%, " : "";
+    cmd += hasSpeaker ? "поставь спокойную музыку тихо, " : "";
+    cmd += "и напомни лечь спать.";
+  } else if(q.includes("работа") || q.includes("фокус")){
+    cmd = "Алиса, режим работа: ";
+    cmd += hasLight ? "включи яркий белый свет 80%, " : "";
+    cmd += hasSpeaker ? "включи фоновый ло-фай очень тихо, " : "";
+    cmd += "не беспокоить на час.";
+  } else if(q.includes("гости") || q.includes("вечерин")){
+    cmd = "Алиса, режим гости: ";
+    cmd += hasLight ? "сделай свет тёплым 45%, " : "";
+    cmd += hasSpeaker ? "включи фоновую музыку, " : "";
+    cmd += "создай уютную атмосферу.";
+  } else if(q.includes("релакс") || q.includes("расслаб")){
+    cmd = "Алиса, режим релакс: ";
+    cmd += hasLight ? "мягкий тёплый свет 30%, " : "";
+    cmd += hasSpeaker ? "поставь спокойный джаз, " : "";
+    cmd += "таймер 45 минут.";
+  } else if(q.includes("уборк")){
+    cmd = "Алиса, режим уборка: ";
+    cmd += hasLight ? "яркий свет 90%, " : "";
+    cmd += hasSpeaker ? "включи бодрую музыку, " : "";
+    cmd += "таймер 30 минут.";
+  } else if(q.includes("утро")){
+    cmd = "Алиса, доброе утро: ";
+    cmd += hasLight ? "плавно включи свет до 60%, " : "";
+    cmd += hasSpeaker ? "включи бодрую музыку тихо, " : "";
+    cmd += "скажи погоду.";
+  } else if(q.includes("ночь") || q.includes("ночник") || isNight){
+    cmd = "Алиса, ночной режим: ";
+    cmd += hasLight ? "включи ночник на 10% тёплым светом, " : "";
+    cmd += "и сделай тише уведомления.";
+  } else if(q.includes("громче")){
+    cmd = "Алиса, сделай громкость выше на 10%.";
+  } else if(q.includes("тише")){
+    cmd = "Алиса, сделай громкость ниже на 10%.";
+  } else if(q.startsWith("таймер")){
+    const m = q.match(/(\d{1,3})/);
+    const mins = m ? m[1] : "30";
+    cmd = `Алиса, поставь таймер на ${mins} минут.`;
+  } else if(q.includes("камин") || q.includes("уют")){
+    cmd = "Алиса, уютный режим: ";
+    cmd += hasLight ? "тёплый свет 35%, " : "";
+    cmd += hasSpeaker ? "включи спокойную музыку, " : "";
+    if(hasClimate) cmd += "сделай чуть теплее, ";
+    cmd += "и создай атмосферу уюта.";
+  } else {
+    // универсальный “умный” ответ
+    cmd = "Алиса, ";
+    cmd += hasLight ? `сделай свет ${isNight ? "мягким и тёплым 25%" : "комфортным 45%"}, ` : "";
+    cmd += hasSpeaker ? `${isNight ? "включи спокойную музыку тихо" : "включи фоновую музыку"}, ` : "";
+    cmd += "создай приятную атмосферу.";
+  }
+
+  // финальная полировка
+  cmd = cmd.replace(/\s+/g," ").replace(/,\s*$/, ".").trim();
+
+  state.lastResult = cmd;
+  saveState();
+
+  const result = document.getElementById("result");
+  const acts = document.getElementById("acts");
+  if(result && acts){
+    result.style.display = "block";
+    acts.style.display = "flex";
+    result.textContent = cmd;
+    document.getElementById("copy").onclick = ()=> copyText(cmd);
+    document.getElementById("saveScene").onclick = ()=> saveCurrentScene();
+  } else {
+    // если мы не на вкладке core — вернёмся
+    switchTab("core");
+    setTimeout(()=> renderCore(), 50);
+  }
+}
+
+/* ---------- Save scene ---------- */
+function saveCurrentScene(){
+  const cmd = (state.lastResult || "").trim();
+  if(!cmd){
+    showModal("Нечего сохранять", "Сначала сформируй атмосферу.");
+    return;
+  }
+  const title = guessTitle(cmd);
+  state.scenes.push({
+    id: String(Date.now()) + "_" + Math.random().toString(16).slice(2),
+    title,
+    command: cmd,
+    createdAt: Date.now()
+  });
+  saveState();
+  showModal("Сохранено", `Сценарий <b>${escapeHtml(title)}</b> добавлен в “Мои сценарии”.`);
+}
+
+/* ---------- Utils ---------- */
+function switchTab(tab){
+  const el = document.querySelector(`.tab[data-tab="${tab}"]`);
+  if(!el) return;
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  el.classList.add("active");
+  currentTab = tab;
+  render();
+}
+
+async function copyText(text){
+  try{
+    await navigator.clipboard.writeText(text);
+    if(tg) tg.HapticFeedback?.notificationOccurred("success");
+    showModal("Скопировано", "Команда в буфере обмена. Вставь её в Алису или скажи голосом.");
+  }catch(e){
+    // fallback
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    ta.remove();
+    showModal("Скопировано", "Команда в буфере обмена.");
+  }
+}
+
+function guessTitle(cmd){
+  const c = cmd.toLowerCase();
+  if(c.includes("кино")) return "Режим Кино";
+  if(c.includes("сон")) return "Режим Сон";
+  if(c.includes("работ")) return "Режим Работа";
+  if(c.includes("гост")) return "Режим Гости";
+  if(c.includes("уборк")) return "Режим Уборка";
+  if(c.includes("релакс") || c.includes("джаз")) return "Режим Релакс";
+  if(c.includes("ноч")) return "Ночной режим";
+  return "Сценарий AURA";
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, m => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[m]));
+}
+function escapeAttr(s){ return escapeHtml(s).replace(/"/g,"&quot;"); }
+
+/* ---------- Render ---------- */
+function render(){
+  if(!state.onboarded){
+    renderOnboarding();
+    return;
+  }
+  if(currentTab==="core") renderCore();
+  if(currentTab==="library") renderLibrary();
+  if(currentTab==="scenes") renderScenes();
+  if(currentTab==="account") renderAccount();
+}
+render();
 </script>
-
 </body>
 </html>
