@@ -1,420 +1,554 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>AURA</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    :root{
-      --bg0:#070A12;
-      --bg1:#0B0F1A;
-      --card: rgba(255,255,255,.06);
-      --card2: rgba(255,255,255,.08);
-      --txt:#EAF0FF;
-      --muted: rgba(234,240,255,.65);
-      --line: rgba(255,255,255,.10);
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>AURA — Smart Home Center</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-      --a1:#7A2BFF;
-      --a2:#2B7CFF;
-      --glow: rgba(122,43,255,.45);
+<style>
+  :root{
+    --bg0:#070A12;
+    --bg1:#0B0F1A;
 
-      --ok:#37D67A;
-      --warn:#FFCC66;
-      --bad:#FF5C7A;
+    --cardA: rgba(255,255,255,.07);
+    --cardB: rgba(255,255,255,.05);
+    --line: rgba(255,255,255,.10);
 
-      --shadow: 0 18px 55px rgba(0,0,0,.55);
-      --radius: 18px;
-    }
+    --txt:#EAF0FF;
+    --muted: rgba(234,240,255,.62);
 
-    body.light{
-      --bg0:#F4F7FF;
-      --bg1:#EEF3FF;
-      --card: rgba(17,20,30,.05);
-      --card2: rgba(17,20,30,.07);
-      --txt:#0E1220;
-      --muted: rgba(14,18,32,.62);
-      --line: rgba(14,18,32,.10);
-      --glow: rgba(43,124,255,.22);
-      --shadow: 0 18px 55px rgba(10,20,40,.18);
-    }
+    --a1:#7A2BFF;
+    --a2:#2B7CFF;
+    --glow: rgba(122,43,255,.38);
+    --glow2: rgba(43,124,255,.28);
 
-    *{ box-sizing:border-box; }
-    html,body{ height:100%; }
-    body{
-      margin:0;
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Arial,sans-serif;
-      background: radial-gradient(1200px 800px at 50% -10%, rgba(122,43,255,.25), transparent 60%),
-                  radial-gradient(900px 700px at 85% 20%, rgba(43,124,255,.18), transparent 55%),
-                  linear-gradient(180deg, var(--bg0), var(--bg1));
-      color:var(--txt);
-      overflow:hidden;
-    }
+    --ok:#37D67A;
+    --warn:#FFCC66;
+    --bad:#FF5C7A;
 
-    /* Safe area */
-    .safeTop{ padding-top: env(safe-area-inset-top); }
-    .safeBottom{ padding-bottom: env(safe-area-inset-bottom); }
+    --radius: 18px;
+    --shadow: 0 18px 55px rgba(0,0,0,.55);
+    --tap: 0.985;
+  }
 
-    /* Layout */
-    .app{
-      height:100%;
-      display:flex;
-      flex-direction:column;
-    }
+  body.light{
+    --bg0:#F4F7FF;
+    --bg1:#EEF3FF;
 
-    .topbar{
-      position:sticky;
-      top:0;
-      z-index:20;
-      padding: 14px 14px 10px;
-      backdrop-filter: blur(12px);
-      background: linear-gradient(180deg, rgba(0,0,0,.22), transparent);
-    }
-    body.light .topbar{
-      background: linear-gradient(180deg, rgba(255,255,255,.70), transparent);
-    }
+    --cardA: rgba(14,18,32,.07);
+    --cardB: rgba(14,18,32,.05);
+    --line: rgba(14,18,32,.10);
 
-    .row{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-    }
+    --txt:#0E1220;
+    --muted: rgba(14,18,32,.62);
 
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      min-width:0;
-    }
-    .logo{
-      width:34px;height:34px;
-      border-radius:12px;
-      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.35), transparent 55%),
-                  linear-gradient(135deg, var(--a1), var(--a2));
-      box-shadow: 0 0 22px var(--glow);
-      flex:0 0 auto;
-    }
-    .titleWrap{ min-width:0; }
-    .title{
-      font-weight:700;
-      letter-spacing:.08em;
-      font-size:15px;
-      opacity:.95;
-    }
-    .subtitle{
-      font-size:12px;
-      color:var(--muted);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      max-width: 62vw;
-    }
+    --glow: rgba(43,124,255,.20);
+    --glow2: rgba(122,43,255,.14);
 
-    .iconBtn{
-      border:1px solid var(--line);
-      background: var(--card);
-      color:var(--txt);
-      border-radius: 14px;
-      padding:10px 12px;
-      display:flex;
-      align-items:center;
-      gap:8px;
-      box-shadow: 0 0 0 rgba(0,0,0,0);
-      transition: .18s ease;
-      cursor:pointer;
-      user-select:none;
-    }
-    .iconBtn:active{ transform: scale(.98); }
-    .pill{
-      font-size:12px;
-      padding:4px 8px;
-      border-radius:999px;
-      border:1px solid var(--line);
-      background: rgba(255,255,255,.04);
-      color:var(--muted);
-    }
+    --shadow: 0 18px 55px rgba(10,20,40,.18);
+  }
 
-    .content{
-      flex:1;
-      overflow:auto;
-      padding: 6px 14px 92px;
-    }
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Arial,sans-serif;
+    color:var(--txt);
+    overflow:hidden;
+    background:
+      radial-gradient(1200px 800px at 50% -10%, rgba(122,43,255,.24), transparent 60%),
+      radial-gradient(900px 700px at 85% 20%, rgba(43,124,255,.16), transparent 55%),
+      linear-gradient(180deg, var(--bg0), var(--bg1));
+  }
 
-    .card{
-      border:1px solid var(--line);
-      background: linear-gradient(180deg, var(--card2), var(--card));
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding:14px;
-    }
+  .safeTop{ padding-top: env(safe-area-inset-top); }
+  .safeBottom{ padding-bottom: env(safe-area-inset-bottom); }
 
-    .glowCard{
-      position:relative;
-      overflow:hidden;
-    }
-    .glowCard:before{
-      content:"";
-      position:absolute;
-      inset:-1px;
-      border-radius: calc(var(--radius) + 1px);
-      background: radial-gradient(700px 220px at 50% 0%, rgba(122,43,255,.35), transparent 55%),
-                  radial-gradient(700px 220px at 85% 55%, rgba(43,124,255,.22), transparent 55%);
-      opacity:.75;
-      pointer-events:none;
-      filter: blur(10px);
-    }
-    .glowCard > *{ position:relative; z-index:1; }
+  .app{
+    height:100%;
+    display:flex;
+    flex-direction:column;
+  }
 
-    .h1{
-      font-size:18px;
-      margin:0 0 10px;
-      letter-spacing:.02em;
-    }
-    .muted{ color:var(--muted); font-size:13px; line-height:1.35; }
+  /* Top bar */
+  .topbar{
+    position:sticky;
+    top:0;
+    z-index:30;
+    padding: 14px 14px 10px;
+    backdrop-filter: blur(14px);
+    background: linear-gradient(180deg, rgba(0,0,0,.24), transparent);
+  }
+  body.light .topbar{
+    background: linear-gradient(180deg, rgba(255,255,255,.70), transparent);
+  }
+  .row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-width:0;
+  }
+  .logoWrap{
+    width:36px;height:36px;
+    border-radius:14px;
+    background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.35), transparent 55%),
+                linear-gradient(135deg, var(--a1), var(--a2));
+    box-shadow: 0 0 22px var(--glow);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex:0 0 auto;
+  }
+  .logoWrap svg{ width:22px;height:22px; }
+  .titleWrap{ min-width:0; }
+  .title{
+    font-weight:800;
+    letter-spacing:.08em;
+    font-size:14px;
+  }
+  .subtitle{
+    font-size:12px;
+    color:var(--muted);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    max-width: 62vw;
+  }
 
-    .input{
-      width:100%;
-      border-radius: 16px;
-      border:1px solid var(--line);
-      background: rgba(0,0,0,.18);
-      color:var(--txt);
-      padding: 14px 14px;
-      font-size:15px;
-      outline:none;
-      box-shadow: 0 0 18px rgba(122,43,255,.16);
-    }
-    body.light .input{
-      background: rgba(255,255,255,.72);
-      box-shadow: 0 0 18px rgba(43,124,255,.12);
-    }
+  .iconBtn{
+    border:1px solid var(--line);
+    background: linear-gradient(180deg, var(--cardA), var(--cardB));
+    color:var(--txt);
+    border-radius: 14px;
+    padding:10px 12px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.12);
+    transition: transform .12s ease, box-shadow .18s ease, opacity .18s ease;
+    cursor:pointer;
+    user-select:none;
+  }
+  .iconBtn:active{ transform: scale(var(--tap)); }
+  .pill{
+    font-size:12px;
+    padding:4px 8px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background: rgba(255,255,255,.04);
+    color:var(--muted);
+  }
 
-    .btn{
-      width:100%;
-      border:none;
-      border-radius: 18px;
-      padding: 14px 14px;
-      font-size:15px;
-      color:white;
-      background: linear-gradient(90deg, var(--a1), var(--a2));
-      box-shadow: 0 0 26px var(--glow);
-      cursor:pointer;
-      transition:.18s ease;
-      user-select:none;
-    }
-    .btn:active{ transform:scale(.99); }
-    .btn.secondary{
-      background: rgba(255,255,255,.06);
-      color:var(--txt);
-      border:1px solid var(--line);
-      box-shadow:none;
-    }
+  /* Content with smooth tab transitions */
+  .content{
+    flex:1;
+    overflow:auto;
+    padding: 6px 14px 98px;
+  }
+  .view{
+    opacity:0;
+    transform: translateY(8px);
+    transition: opacity .22s ease, transform .22s ease;
+  }
+  .view.show{
+    opacity:1;
+    transform: translateY(0);
+  }
 
-    .grid2{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:10px;
-    }
-    .chip{
-      border:1px solid var(--line);
-      background: rgba(255,255,255,.05);
-      color: var(--txt);
-      border-radius: 16px;
-      padding: 12px 12px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      cursor:pointer;
-      user-select:none;
-    }
-    .chip:active{ transform: scale(.99); }
-    .chip small{ color:var(--muted); display:block; margin-top:2px; }
+  .card{
+    border:1px solid var(--line);
+    background: linear-gradient(180deg, var(--cardA), var(--cardB));
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding:14px;
+  }
 
-    .kbar{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:10px;
-    }
-    .kbtn{
-      padding:10px 12px;
-      border-radius: 999px;
-      border:1px solid var(--line);
-      background: rgba(255,255,255,.05);
-      color: var(--txt);
-      cursor:pointer;
-      user-select:none;
-      font-size:13px;
-    }
-    .kbtn:active{ transform:scale(.99); }
+  .glowBorder{
+    position:relative;
+    overflow:hidden;
+  }
+  .glowBorder:before{
+    content:"";
+    position:absolute;
+    inset:-1px;
+    border-radius: calc(var(--radius) + 1px);
+    background:
+      radial-gradient(700px 220px at 50% 0%, rgba(122,43,255,.35), transparent 55%),
+      radial-gradient(700px 220px at 85% 55%, rgba(43,124,255,.20), transparent 55%);
+    opacity:.75;
+    pointer-events:none;
+    filter: blur(10px);
+  }
+  .glowBorder > *{ position:relative; z-index:1; }
 
-    .resultBox{
-      margin-top:12px;
-      border-radius: 16px;
-      border:1px solid var(--line);
-      background: rgba(0,0,0,.20);
-      padding: 12px;
-      line-height:1.4;
-    }
-    body.light .resultBox{ background: rgba(255,255,255,.65); }
+  .h1{
+    font-size:16px;
+    margin:0 0 10px;
+    letter-spacing:.02em;
+  }
+  .muted{
+    color:var(--muted);
+    font-size:13px;
+    line-height:1.35;
+  }
 
-    .actions{
-      display:flex;
-      gap:10px;
-      margin-top:10px;
-    }
-    .actions .btn{ flex:1; padding: 12px; border-radius: 16px; font-size:14px; }
+  .input{
+    width:100%;
+    border-radius: 16px;
+    border:1px solid var(--line);
+    background: rgba(0,0,0,.18);
+    color:var(--txt);
+    padding: 14px 14px;
+    font-size:15px;
+    outline:none;
+    box-shadow: 0 0 18px rgba(122,43,255,.14);
+    transition: box-shadow .18s ease, transform .12s ease;
+  }
+  .input:focus{
+    box-shadow: 0 0 26px var(--glow);
+    transform: translateY(-1px);
+  }
+  body.light .input{
+    background: rgba(255,255,255,.72);
+    box-shadow: 0 0 18px rgba(43,124,255,.10);
+  }
 
-    .list{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      margin-top:10px;
-    }
-    .item{
-      border:1px solid var(--line);
-      border-radius: 16px;
-      background: rgba(255,255,255,.05);
-      padding: 12px;
-    }
-    .itemTop{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      align-items:flex-start;
-    }
-    .itemTitle{ font-weight:700; font-size:14px; }
-    .itemMeta{ color:var(--muted); font-size:12px; margin-top:2px; }
-    .miniBtn{
-      border:1px solid var(--line);
-      background: rgba(255,255,255,.06);
-      color: var(--txt);
-      padding:8px 10px;
-      border-radius: 12px;
-      font-size:12px;
-      cursor:pointer;
-      user-select:none;
-    }
-    .miniBtn:active{ transform:scale(.99); }
+  .btn{
+    width:100%;
+    border:none;
+    border-radius: 18px;
+    padding: 14px 14px;
+    font-size:15px;
+    color:white;
+    background: linear-gradient(90deg, var(--a1), var(--a2));
+    box-shadow: 0 0 26px var(--glow);
+    cursor:pointer;
+    transition: transform .12s ease, box-shadow .18s ease, opacity .18s ease;
+    user-select:none;
+  }
+  .btn:active{ transform: scale(var(--tap)); }
+  .btn.secondary{
+    background: rgba(255,255,255,.06);
+    color:var(--txt);
+    border:1px solid var(--line);
+    box-shadow:none;
+  }
 
-    /* Bottom nav */
-    .nav{
-      position:fixed;
-      left:0; right:0; bottom:0;
-      z-index:30;
-      padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
-      backdrop-filter: blur(14px);
-      background: linear-gradient(180deg, transparent, rgba(0,0,0,.35));
-    }
-    body.light .nav{
-      background: linear-gradient(180deg, transparent, rgba(255,255,255,.78));
-    }
-    .navBar{
-      border:1px solid var(--line);
-      background: rgba(255,255,255,.06);
-      border-radius: 22px;
-      display:flex;
-      overflow:hidden;
-      box-shadow: var(--shadow);
-    }
-    .tab{
-      flex:1;
-      padding: 10px 8px;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:4px;
-      color: var(--muted);
-      cursor:pointer;
-      user-select:none;
-    }
-    .tab strong{
-      font-size:11px;
-      font-weight:600;
-      letter-spacing:.02em;
-    }
-    .tab.active{
-      color: var(--txt);
-      background: radial-gradient(180px 90px at 50% 0%, rgba(122,43,255,.20), transparent 60%),
-                  radial-gradient(180px 90px at 60% 60%, rgba(43,124,255,.16), transparent 60%),
-                  rgba(255,255,255,.05);
-    }
+  .kbar{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-top:10px;
+  }
+  .kbtn{
+    padding:10px 12px;
+    border-radius: 999px;
+    border:1px solid var(--line);
+    background: rgba(255,255,255,.05);
+    color: var(--txt);
+    cursor:pointer;
+    user-select:none;
+    font-size:13px;
+    transition: transform .12s ease, box-shadow .18s ease;
+  }
+  .kbtn:active{ transform:scale(var(--tap)); }
+  .kbtn:hover{ box-shadow: 0 0 18px rgba(122,43,255,.10); }
 
-    /* Modal */
-    .modalWrap{
-      position:fixed;
-      inset:0;
-      z-index:50;
-      display:none;
-      align-items:flex-end;
-      background: rgba(0,0,0,.45);
-      padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
-    }
-    .modalWrap.show{ display:flex; }
-    .modal{
-      width:100%;
-      border-radius: 22px;
-      border:1px solid var(--line);
-      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
-      box-shadow: var(--shadow);
-      padding: 12px;
-    }
-    .modalHeader{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:10px;
-      margin-bottom:8px;
-    }
-    .modalHeader h3{ margin:0; font-size:14px; }
-    .closeX{ font-size:18px; line-height:1; padding:8px 10px; }
+  .grid2{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:10px;
+  }
 
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      border:1px solid var(--line);
-      background: rgba(255,255,255,.05);
-      border-radius: 999px;
-      padding: 6px 10px;
-      font-size:12px;
-      color: var(--muted);
-    }
-    .dot{ width:8px;height:8px;border-radius:99px;background: var(--warn); }
-    .dot.ok{ background: var(--ok); }
-    .dot.bad{ background: var(--bad); }
+  .chip{
+    border:1px solid var(--line);
+    background: rgba(255,255,255,.05);
+    color: var(--txt);
+    border-radius: 16px;
+    padding: 12px 12px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    cursor:pointer;
+    user-select:none;
+    transition: transform .12s ease, box-shadow .18s ease;
+  }
+  .chip:active{ transform: scale(var(--tap)); }
+  .chip small{ color:var(--muted); display:block; margin-top:2px; }
 
-    .sp8{ height:8px; }
-    .sp12{ height:12px; }
-    .sp16{ height:16px; }
-  </style>
+  .badge{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    border:1px solid var(--line);
+    background: rgba(255,255,255,.05);
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size:12px;
+    color: var(--muted);
+  }
+  .dot{ width:8px;height:8px;border-radius:99px;background: var(--warn); }
+  .dot.ok{ background: var(--ok); }
+  .dot.bad{ background: var(--bad); }
+
+  .resultBox{
+    margin-top:12px;
+    border-radius: 16px;
+    border:1px solid var(--line);
+    background: rgba(0,0,0,.18);
+    padding: 12px;
+    line-height:1.45;
+    white-space:pre-wrap;
+  }
+  body.light .resultBox{ background: rgba(255,255,255,.65); }
+
+  .actions{
+    display:flex;
+    gap:10px;
+    margin-top:10px;
+  }
+  .actions .btn{ flex:1; padding: 12px; border-radius: 16px; font-size:14px; }
+
+  .list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-top:10px;
+  }
+  .item{
+    border:1px solid var(--line);
+    border-radius: 16px;
+    background: rgba(255,255,255,.05);
+    padding: 12px;
+  }
+  .itemTop{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    align-items:flex-start;
+  }
+  .itemTitle{ font-weight:700; font-size:14px; }
+  .itemMeta{ color:var(--muted); font-size:12px; margin-top:2px; }
+  .miniBtn{
+    border:1px solid var(--line);
+    background: rgba(255,255,255,.06);
+    color: var(--txt);
+    padding:8px 10px;
+    border-radius: 12px;
+    font-size:12px;
+    cursor:pointer;
+    user-select:none;
+    transition: transform .12s ease;
+  }
+  .miniBtn:active{ transform:scale(var(--tap)); }
+
+  /* Device cards (Panel) */
+  .deviceCard{
+    border:1px solid var(--line);
+    background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
+    border-radius: var(--radius);
+    padding: 12px;
+    box-shadow: var(--shadow);
+    position:relative;
+    overflow:hidden;
+  }
+  .deviceCard.active:before{
+    content:"";
+    position:absolute;
+    inset:-2px;
+    background:
+      radial-gradient(420px 200px at 20% 20%, rgba(122,43,255,.22), transparent 60%),
+      radial-gradient(420px 200px at 80% 80%, rgba(43,124,255,.18), transparent 60%);
+    filter: blur(10px);
+    opacity: .9;
+    pointer-events:none;
+  }
+  .deviceCard > *{ position:relative; z-index:1; }
+
+  .deviceTop{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:10px;
+  }
+  .deviceName{ font-weight:800; }
+  .deviceHint{ font-size:12px; color:var(--muted); margin-top:2px; }
+  .deviceState{
+    font-size:12px;
+    color:var(--muted);
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .pulse{
+    width:8px;height:8px;border-radius:99px;background: var(--ok);
+    box-shadow: 0 0 16px rgba(55,214,122,.45);
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{ transform: scale(1); opacity: .75; }
+    50%{ transform: scale(1.35); opacity: 1; }
+  }
+
+  .controlRow{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+
+  .seg{
+    display:inline-flex;
+    gap:6px;
+    padding:6px;
+    border-radius: 999px;
+    border:1px solid var(--line);
+    background: rgba(255,255,255,.04);
+  }
+  .seg .miniBtn{ border-radius: 999px; padding:8px 10px; }
+
+  /* Mini status bar */
+  .statusBar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .statusLine{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    align-items:center;
+  }
+
+  /* Bottom nav */
+  .nav{
+    position:fixed;
+    left:0; right:0; bottom:0;
+    z-index:40;
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+    backdrop-filter: blur(14px);
+    background: linear-gradient(180deg, transparent, rgba(0,0,0,.35));
+  }
+  body.light .nav{
+    background: linear-gradient(180deg, transparent, rgba(255,255,255,.78));
+  }
+  .navBar{
+    border:1px solid var(--line);
+    background: rgba(255,255,255,.06);
+    border-radius: 22px;
+    display:flex;
+    overflow:hidden;
+    box-shadow: var(--shadow);
+  }
+  .tab{
+    flex:1;
+    padding: 10px 8px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4px;
+    color: var(--muted);
+    cursor:pointer;
+    user-select:none;
+    transition: background .18s ease, color .18s ease;
+  }
+  .tab strong{
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.02em;
+  }
+  .tab.active{
+    color: var(--txt);
+    background:
+      radial-gradient(180px 90px at 50% 0%, rgba(122,43,255,.18), transparent 60%),
+      radial-gradient(180px 90px at 60% 60%, rgba(43,124,255,.14), transparent 60%),
+      rgba(255,255,255,.05);
+  }
+
+  /* Modal */
+  .modalWrap{
+    position:fixed;
+    inset:0;
+    z-index:60;
+    display:none;
+    align-items:flex-end;
+    background: rgba(0,0,0,.45);
+    padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+  }
+  .modalWrap.show{ display:flex; }
+  .modal{
+    width:100%;
+    border-radius: 22px;
+    border:1px solid var(--line);
+    background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+    box-shadow: var(--shadow);
+    padding: 12px;
+  }
+  .modalHeader{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    margin-bottom:8px;
+  }
+  .modalHeader h3{ margin:0; font-size:14px; }
+  .closeX{ font-size:18px; line-height:1; padding:8px 10px; }
+
+  .sp8{ height:8px; }
+  .sp12{ height:12px; }
+  .sp16{ height:16px; }
+</style>
 </head>
+
 <body class="safeTop safeBottom">
-  <div class="app" id="app">
+  <div class="app">
     <div class="topbar">
       <div class="row">
         <div class="brand">
-          <div class="logo"></div>
+          <div class="logoWrap" title="AURA">
+            <!-- Минималистичный логотип (SVG внутри кода) -->
+            <svg viewBox="0 0 100 100" aria-hidden="true">
+              <defs>
+                <linearGradient id="gA" x1="0" x2="1">
+                  <stop offset="0%" stop-color="#7A2BFF"/>
+                  <stop offset="100%" stop-color="#2B7CFF"/>
+                </linearGradient>
+              </defs>
+              <polygon points="50,10 90,90 75,90 65,70 35,70 25,90 10,90" fill="url(#gA)"/>
+            </svg>
+          </div>
           <div class="titleWrap">
             <div class="title">AURA</div>
-            <div class="subtitle" id="subtitle">AI-панель атмосферы для Алисы</div>
+            <div class="subtitle" id="subtitle">Smart Home Center</div>
           </div>
         </div>
+
         <div class="row">
-          <div class="iconBtn" id="themeBtn" title="Тема">🌙 <span class="pill" id="themeLabel">Тёмная</span></div>
-          <div class="iconBtn" id="helpBtn" title="Справка">?</div>
+          <div class="iconBtn" id="themeBtn">🌙 <span class="pill" id="themeLabel">Тёмная</span></div>
+          <div class="iconBtn" id="helpBtn">?</div>
         </div>
       </div>
     </div>
 
-    <div class="content" id="content"></div>
+    <div class="content">
+      <div class="view" id="view"></div>
+    </div>
 
     <div class="nav">
       <div class="navBar">
-        <div class="tab active" data-tab="core">🧠<strong>Центр</strong></div>
-        <div class="tab" data-tab="library">✨<strong>Режимы</strong></div>
-        <div class="tab" data-tab="scenes">⭐<strong>Сценарии</strong></div>
+        <div class="tab active" data-tab="center">🧠<strong>Центр</strong></div>
+        <div class="tab" data-tab="panel">🎛<strong>Пульт</strong></div>
+        <div class="tab" data-tab="scenes">✨<strong>Сцены</strong></div>
         <div class="tab" data-tab="account">👤<strong>Аккаунт</strong></div>
       </div>
     </div>
@@ -434,59 +568,118 @@
   </div>
 
 <script>
-/* ---------- Telegram WebApp (не ломает Safari) ---------- */
+/* ===================== Telegram ===================== */
 const tg = window.Telegram?.WebApp;
 if (tg) {
   tg.ready();
   tg.expand();
 }
 
-/* ---------- Storage ---------- */
-const SKEY = "aura_v1";
-const state = loadState();
+/* ===================== Storage ===================== */
+const KEY = "aura_pro_v1_1";
 
-function loadState(){
+const DEVICE_REGISTRY = {
+  light:      { key:"light",      name:"Свет",         icon:"💡" },
+  speaker:    { key:"speaker",    name:"Колонка",      icon:"🔊" },
+  climate:    { key:"climate",    name:"Климат",       icon:"🌡" },
+  tv:         { key:"tv",         name:"ТВ",           icon:"📺" },
+  curtains:   { key:"curtains",   name:"Шторы",        icon:"🪟" },
+  sockets:    { key:"sockets",    name:"Розетки",      icon:"🔌" },
+  vacuum:     { key:"vacuum",     name:"Пылесос",      icon:"🤖" },
+  humidifier: { key:"humidifier", name:"Увлажнитель",  icon:"💧" },
+};
+
+const DEFAULT_DEVICE_STATE = {
+  light:      { power:false, brightness:50, temp:"warm" },  // temp warm/cool
+  speaker:    { playing:false, volume:30, preset:"lofi" },  // preset jazz/lofi/ambient
+  climate:    { power:false, temperature:23, mode:"auto" }, // mode auto/heat/cool
+  tv:         { power:false, input:"home" },                // input home/youtube/netflix
+  curtains:   { open:false },                               
+  sockets:    { power:false },
+  vacuum:     { running:false, mode:"auto" },               // mode auto/turbo
+  humidifier: { power:false, level:2 },                     // level 1-3
+};
+
+function nowISO(){
+  const d = new Date();
+  return d.toISOString();
+}
+function isNight(){
+  const h = new Date().getHours();
+  return (h >= 22 || h <= 6);
+}
+
+function load(){
   try{
-    const raw = localStorage.getItem(SKEY);
-    if(raw) return JSON.parse(raw);
+    const raw = localStorage.getItem(KEY);
+    if(raw){
+      const s = JSON.parse(raw);
+
+      // migrations / defaults
+      s.theme ??= "dark";
+      s.user ??= { role:"owner", name:"", telegramId:null };
+      s.system ??= { online:true };
+      s.home ??= { available:{} };
+      s.devices ??= {};
+      s.logs ??= [];
+      s.lastCommand ??= "";
+      s.scenes ??= [];
+      s.lastIntent ??= "";
+
+      // ensure available devices exist (default: true for all on first run)
+      if(!s.home.available || Object.keys(s.home.available).length === 0){
+        s.home.available = {};
+        Object.keys(DEVICE_REGISTRY).forEach(k => s.home.available[k] = true);
+      } else {
+        Object.keys(DEVICE_REGISTRY).forEach(k => { if(typeof s.home.available[k] !== "boolean") s.home.available[k] = true; });
+      }
+
+      // ensure device state objects
+      Object.keys(DEVICE_REGISTRY).forEach(k => {
+        s.devices[k] = { ...(DEFAULT_DEVICE_STATE[k] || {}), ...(s.devices[k] || {}) };
+      });
+
+      return s;
+    }
   }catch(e){}
+  // new state
+  const devices = {};
+  Object.keys(DEVICE_REGISTRY).forEach(k => devices[k] = { ...(DEFAULT_DEVICE_STATE[k] || {}) });
+  const available = {};
+  Object.keys(DEVICE_REGISTRY).forEach(k => available[k] = true);
+
   return {
-    theme: "dark",
-    onboarded: false,
-    profile: {
-      name: "",
-      createdAt: Date.now(),
-      aliceConnected: false,
-      aliceToken: "" // в MVP просто заглушка
-    },
-    home: {
-      rooms: ["Гостиная", "Спальня"],
-      devices: ["Свет", "Колонка"]
-    },
-    scenes: [], // {id, title, command, createdAt}
-    lastResult: ""
+    theme:"dark",
+    user:{ role:"owner", name:"", telegramId:null },
+    system:{ online:true },
+    home:{ available },
+    devices,
+    logs:[],
+    lastCommand:"",
+    lastIntent:"",
+    scenes:[],
   };
 }
-function saveState(){
-  localStorage.setItem(SKEY, JSON.stringify(state));
+
+let state = load();
+
+function save(){
+  localStorage.setItem(KEY, JSON.stringify(state));
 }
 
-/* ---------- UI Helpers ---------- */
+/* ===================== Modal ===================== */
 const $ = (q)=>document.querySelector(q);
-const content = $("#content");
-
-function showModal(title, body){
+function showModal(title, bodyHTML){
   $("#modalTitle").textContent = title;
-  $("#modalBody").innerHTML = body;
+  $("#modalBody").innerHTML = bodyHTML;
   $("#modalWrap").classList.add("show");
 }
 function hideModal(){ $("#modalWrap").classList.remove("show"); }
-
 $("#modalClose").onclick = hideModal;
 $("#modalOk").onclick = hideModal;
 $("#modalWrap").addEventListener("click",(e)=>{ if(e.target.id==="modalWrap") hideModal(); });
 
-/* ---------- Theme ---------- */
+/* ===================== Theme ===================== */
 function applyTheme(){
   document.body.classList.toggle("light", state.theme === "light");
   const isLight = state.theme === "light";
@@ -495,602 +688,27 @@ function applyTheme(){
 }
 $("#themeBtn").onclick = ()=>{
   state.theme = (state.theme === "dark") ? "light" : "dark";
-  saveState();
+  save();
   applyTheme();
 };
 applyTheme();
 
-/* ---------- Navigation ---------- */
-let currentTab = "core";
-document.querySelectorAll(".tab").forEach(t=>{
-  t.onclick = ()=>{
-    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
-    t.classList.add("active");
-    currentTab = t.dataset.tab;
-    render();
-  };
-});
-
-$("#helpBtn").onclick = ()=>{
-  showModal("Как это работает",
-    `
-    <div class="badge"><span class="dot ok"></span> Идея</div>
-    <div class="sp8"></div>
-    AURA не “заменяет” Алису — она <b>усиливает команды</b> и собирает <b>сценарии</b>.<br><br>
-    <b>1)</b> Опиши желание (например: «кино», «сон», «вечер»)<br>
-    <b>2)</b> AURA сформирует команду для Алисы<br>
-    <b>3)</b> Нажми <b>Скопировать</b> и скажи/вставь в Алису<br><br>
-    Дальше мы добавим реальную интеграцию Яндекса (OAuth/умный дом), когда решишь.
-    `
-  );
-};
-
-/* ---------- Onboarding ---------- */
-function renderOnboarding(){
-  $("#subtitle").textContent = "Настройка AURA";
-  content.innerHTML = `
-    <div class="card glowCard">
-      <div class="h1">Добро пожаловать в AURA</div>
-      <div class="muted">Сначала коротко настроим дом. Это нужно, чтобы команды были точнее.</div>
-      <div class="sp12"></div>
-      <button class="btn" id="obStart">Начать настройку</button>
-      <div class="sp12"></div>
-      <button class="btn secondary" id="obSkip">Пропустить (можно позже)</button>
-    </div>
-  `;
-
-  $("#obStart").onclick = ()=> renderOnboardingRooms();
-  $("#obSkip").onclick = ()=>{
-    state.onboarded = true;
-    saveState();
-    render();
-  };
-}
-
-function renderOnboardingRooms(){
-  $("#subtitle").textContent = "Комнаты";
-  const rooms = state.home.rooms.slice();
-  content.innerHTML = `
-    <div class="card glowCard">
-      <div class="h1">Выбери комнаты</div>
-      <div class="muted">Можно оставить как есть или добавить свои.</div>
-      <div class="sp12"></div>
-      <div class="list" id="roomsList"></div>
-      <div class="sp12"></div>
-      <input class="input" id="roomInput" placeholder="Добавить комнату (например: Кухня)" />
-      <div class="sp12"></div>
-      <button class="btn" id="addRoom">Добавить</button>
-      <div class="sp12"></div>
-      <button class="btn secondary" id="toDevices">Далее</button>
-    </div>
-  `;
-
-  const list = $("#roomsList");
-  function draw(){
-    list.innerHTML = rooms.map((r,i)=>`
-      <div class="item">
-        <div class="itemTop">
-          <div>
-            <div class="itemTitle">${escapeHtml(r)}</div>
-            <div class="itemMeta">Комната</div>
-          </div>
-          <div class="miniBtn" data-i="${i}">Удалить</div>
-        </div>
-      </div>
-    `).join("");
-    list.querySelectorAll(".miniBtn").forEach(b=>{
-      b.onclick = ()=>{
-        const i = +b.dataset.i;
-        rooms.splice(i,1);
-        draw();
-      };
-    });
-  }
-  draw();
-
-  $("#addRoom").onclick = ()=>{
-    const v = ($("#roomInput").value || "").trim();
-    if(!v) return;
-    rooms.push(v);
-    $("#roomInput").value = "";
-    draw();
-  };
-
-  $("#toDevices").onclick = ()=>{
-    state.home.rooms = rooms.length ? rooms : ["Гостиная"];
-    saveState();
-    renderOnboardingDevices();
-  };
-}
-
-function renderOnboardingDevices(){
-  $("#subtitle").textContent = "Устройства";
-  const all = ["Свет","Колонка","ТВ","Розетки","Климат","Увлажнитель","Пылесос","Шторы"];
-  const selected = new Set(state.home.devices);
-
-  content.innerHTML = `
-    <div class="card glowCard">
-      <div class="h1">Что есть в доме?</div>
-      <div class="muted">Выбери — AURA будет учитывать это в командах.</div>
-      <div class="sp12"></div>
-      <div class="grid2" id="devGrid"></div>
-      <div class="sp12"></div>
-      <button class="btn secondary" id="backRooms">Назад</button>
-      <div class="sp12"></div>
-      <button class="btn" id="finishOb">Готово</button>
-    </div>
-  `;
-
-  const grid = $("#devGrid");
-  function draw(){
-    grid.innerHTML = all.map(d=>{
-      const on = selected.has(d);
-      return `
-        <div class="chip" data-d="${d}">
-          <div>
-            <b>${escapeHtml(d)}</b>
-            <small>${on ? "Подключено" : "Не выбрано"}</small>
-          </div>
-          <span class="pill" style="color:${on ? "var(--ok)" : "var(--muted)"}">${on ? "ON" : "OFF"}</span>
-        </div>
-      `;
-    }).join("");
-    grid.querySelectorAll(".chip").forEach(c=>{
-      c.onclick = ()=>{
-        const d = c.dataset.d;
-        if(selected.has(d)) selected.delete(d); else selected.add(d);
-        draw();
-      };
-    });
-  }
-  draw();
-
-  $("#backRooms").onclick = renderOnboardingRooms;
-  $("#finishOb").onclick = ()=>{
-    const arr = Array.from(selected);
-    state.home.devices = arr.length ? arr : ["Свет"];
-    state.onboarded = true;
-    saveState();
-    render();
-    showModal("Готово", `AURA настроена. Теперь можно формировать атмосферу и сохранять сценарии.`);
-  };
-}
-
-/* ---------- Core (Command Center) ---------- */
-function renderCore(){
-  $("#subtitle").textContent = "Центр управления";
-  const name = (state.profile.name || "").trim();
-  const hello = name ? `Привет, ${escapeHtml(name)}.` : "Привет.";
-  const alice = state.profile.aliceConnected ? `<span class="badge"><span class="dot ok"></span> Алиса подключена</span>` : `<span class="badge"><span class="dot"></span> Алиса не подключена</span>`;
-
-  content.innerHTML = `
-    <div class="card glowCard">
-      <div class="h1">${hello} Что создаём?</div>
-      <div class="muted">Опиши атмосферу или действие. AURA соберёт команду для Алисы под твой дом.</div>
-      <div class="sp12"></div>
-      <input class="input" id="q" placeholder="Например: кино / сон / спокойный вечер / уборка" />
-      <div class="sp12"></div>
-      <button class="btn" id="gen">Сформировать атмосферу</button>
-      <div class="sp12"></div>
-      <div class="kbar">
-        <div class="kbtn" data-p="кино">🎬 Кино</div>
-        <div class="kbtn" data-p="сон">💤 Сон</div>
-        <div class="kbtn" data-p="работа">💻 Работа</div>
-        <div class="kbtn" data-p="гости">🎉 Гости</div>
-        <div class="kbtn" data-p="релакс">🧘 Релакс</div>
-        <div class="kbtn" data-p="уборка">🧹 Уборка</div>
-      </div>
-
-      <div class="sp12"></div>
-      ${alice}
-      <div class="sp12"></div>
-
-      <div class="resultBox" id="result" style="display:${state.lastResult ? "block":"none"}"></div>
-
-      <div class="actions" id="acts" style="display:${state.lastResult ? "flex":"none"}">
-        <button class="btn secondary" id="copy">Скопировать</button>
-        <button class="btn" id="saveScene">Сохранить</button>
-      </div>
-    </div>
-
-    <div class="sp12"></div>
-
-    <div class="card">
-      <div class="h1">Быстрые панели</div>
-      <div class="muted">Много кнопок — как ты хотел. Это “командный пульт”.</div>
-      <div class="sp12"></div>
-      <div class="grid2">
-        <div class="chip" id="goConnect"><div><b>Подключение к Алисе</b><small>мастер подключения</small></div><span class="pill">→</span></div>
-        <div class="chip" id="goHome"><div><b>Мой дом</b><small>комнаты и устройства</small></div><span class="pill">→</span></div>
-        <div class="chip" id="goLibrary"><div><b>Библиотека режимов</b><small>готовые кнопки</small></div><span class="pill">→</span></div>
-        <div class="chip" id="goScenes"><div><b>Мои сценарии</b><small>избранное</small></div><span class="pill">→</span></div>
-      </div>
-    </div>
-  `;
-
-  const q = $("#q");
-  $("#gen").onclick = ()=> generate(q.value);
-  document.querySelectorAll(".kbtn").forEach(b=>{
-    b.onclick = ()=>{
-      q.value = b.dataset.p;
-      generate(q.value);
-    };
-  });
-
-  $("#goConnect").onclick = ()=> openConnectWizard();
-  $("#goHome").onclick = ()=> openHomePanel();
-  $("#goLibrary").onclick = ()=> switchTab("library");
-  $("#goScenes").onclick = ()=> switchTab("scenes");
-
-  if(state.lastResult){
-    $("#result").textContent = state.lastResult;
-    $("#copy").onclick = ()=> copyText(state.lastResult);
-    $("#saveScene").onclick = ()=> saveCurrentScene();
-  }
-}
-
-/* ---------- Library ---------- */
-const LIB = [
-  {key:"Кино", icon:"🎬", prompt:"кино", desc:"приглушить свет + фокус"},
-  {key:"Сон", icon:"💤", prompt:"сон", desc:"тёплый свет + тишина"},
-  {key:"Релакс", icon:"🧘", prompt:"релакс", desc:"мягкий режим"},
-  {key:"Гости", icon:"🎉", prompt:"гости", desc:"уют + фоновая музыка"},
-  {key:"Уборка", icon:"🧹", prompt:"уборка", desc:"ярко + бодро"},
-  {key:"Работа", icon:"💻", prompt:"работа", desc:"яркий белый"},
-  {key:"Утро", icon:"🌅", prompt:"утро", desc:"мягкий старт"},
-  {key:"Ночь", icon:"🌙", prompt:"ночь", desc:"ночник"},
-  {key:"Громче", icon:"🔊", prompt:"громче", desc:"музыка + громкость"},
-  {key:"Тише", icon:"🔉", prompt:"тише", desc:"снизить громкость"},
-  {key:"Таймер", icon:"⏱", prompt:"таймер 30", desc:"выключить через 30 мин"},
-  {key:"Камин", icon:"🔥", prompt:"камин", desc:"уютный режим"},
-];
-
-function renderLibrary(){
-  $("#subtitle").textContent = "Библиотека режимов";
-  content.innerHTML = `
-    <div class="card glowCard">
-      <div class="h1">Готовые кнопки</div>
-      <div class="muted">Нажимай — AURA сформирует команду. Можно сохранять в сценарии.</div>
-      <div class="sp12"></div>
-      <div class="grid2" id="libGrid"></div>
-      <div class="sp12"></div>
-      <div class="muted">Хочешь ещё больше кнопок — добавим 50+ (пакеты: “вечеринки”, “сон”, “детская”, “кухня”).</div>
-    </div>
-  `;
-  const grid = $("#libGrid");
-  grid.innerHTML = LIB.map(x=>`
-    <div class="chip" data-p="${escapeAttr(x.prompt)}">
-      <div><b>${x.icon} ${escapeHtml(x.key)}</b><small>${escapeHtml(x.desc)}</small></div>
-      <span class="pill">Запуск</span>
-    </div>
-  `).join("");
-  grid.querySelectorAll(".chip").forEach(c=>{
-    c.onclick = ()=>{
-      state.lastResult = "";
-      saveState();
-      switchTab("core");
-      // небольшая задержка, чтобы отрисовался core
-      setTimeout(()=> generate(c.dataset.p), 120);
-    };
-  });
-}
-
-/* ---------- Scenes ---------- */
-function renderScenes(){
-  $("#subtitle").textContent = "Мои сценарии";
-  const scenes = state.scenes.slice().sort((a,b)=>b.createdAt-a.createdAt);
-
-  content.innerHTML = `
-    <div class="card glowCard">
-      <div class="h1">Избранное</div>
-      <div class="muted">Твои сохранённые команды. Нажимай “Скопировать” и используй с Алисой.</div>
-      <div class="sp12"></div>
-      <button class="btn secondary" id="export">Экспорт (копировать все)</button>
-      <div class="sp12"></div>
-      <div class="list" id="sceneList"></div>
-    </div>
-  `;
-
-  const list = $("#sceneList");
-  if(!scenes.length){
-    list.innerHTML = `<div class="muted">Пока пусто. Сгенерируй команду в “Центре” и нажми “Сохранить”.</div>`;
-    $("#export").onclick = ()=> showModal("Экспорт", "Пока нечего экспортировать 🙂");
-    return;
-  }
-
-  list.innerHTML = scenes.map(s=>`
-    <div class="item">
-      <div class="itemTop">
-        <div>
-          <div class="itemTitle">${escapeHtml(s.title)}</div>
-          <div class="itemMeta">${new Date(s.createdAt).toLocaleString("ru-RU")}</div>
-        </div>
-        <div class="row" style="gap:8px;">
-          <div class="miniBtn" data-act="copy" data-id="${s.id}">Скопировать</div>
-          <div class="miniBtn" data-act="del" data-id="${s.id}">Удалить</div>
-        </div>
-      </div>
-      <div class="sp8"></div>
-      <div class="muted">${escapeHtml(s.command)}</div>
-    </div>
-  `).join("");
-
-  list.querySelectorAll(".miniBtn").forEach(b=>{
-    b.onclick = ()=>{
-      const id = b.dataset.id;
-      const act = b.dataset.act;
-      const sc = state.scenes.find(x=>x.id===id);
-      if(!sc) return;
-      if(act==="copy") copyText(sc.command);
-      if(act==="del"){
-        state.scenes = state.scenes.filter(x=>x.id!==id);
-        saveState();
-        render();
-      }
-    };
-  });
-
-  $("#export").onclick = ()=>{
-    const txt = scenes.map(s=>`• ${s.title}\n${s.command}\n`).join("\n");
-    copyText(txt);
-  };
-}
-
-/* ---------- Account ---------- */
-function renderAccount(){
-  $("#subtitle").textContent = "Аккаунт";
-  const name = (state.profile.name || "").trim();
-  const connected = !!state.profile.aliceConnected;
-
-  content.innerHTML = `
-    <div class="card glowCard">
-      <div class="h1">Профиль</div>
-      <div class="muted">Сохраняется на твоём устройстве (iPhone). Без серверов — бесплатно.</div>
-      <div class="sp12"></div>
-
-      <div class="badge">
-        <span class="dot ${connected ? "ok" : ""}"></span>
-        ${connected ? "Алиса подключена" : "Алиса не подключена"}
-      </div>
-
-      <div class="sp12"></div>
-      <input class="input" id="name" placeholder="Имя (например: Артём)" value="${escapeAttr(name)}" />
-      <div class="sp12"></div>
-      <button class="btn" id="saveName">Сохранить имя</button>
-
-      <div class="sp12"></div>
-      <div class="grid2">
-        <div class="chip" id="connectBtn"><div><b>Подключить Алису</b><small>мастер</small></div><span class="pill">→</span></div>
-        <div class="chip" id="homeBtn"><div><b>Настройки дома</b><small>комнаты / устройства</small></div><span class="pill">→</span></div>
-      </div>
-
-      <div class="sp12"></div>
-      <button class="btn secondary" id="reset">Сбросить приложение</button>
-    </div>
-  `;
-
-  $("#saveName").onclick = ()=>{
-    state.profile.name = ($("#name").value || "").trim();
-    saveState();
-    showModal("Готово", "Имя сохранено.");
-    render();
-  };
-  $("#connectBtn").onclick = ()=> openConnectWizard();
-  $("#homeBtn").onclick = ()=> openHomePanel();
-
-  $("#reset").onclick = ()=>{
-    showModal("Сброс", `
-      Это удалит сценарии и настройки только на этом телефоне.<br><br>
-      <button class="btn" id="doReset" style="margin-top:10px;">Да, сбросить</button>
-    `);
-    setTimeout(()=>{
-      const btn = document.getElementById("doReset");
-      if(btn){
-        btn.onclick = ()=>{
-          localStorage.removeItem(SKEY);
-          location.reload();
-        };
-      }
-    }, 50);
-  };
-}
-
-/* ---------- “Connect to Alice” Wizard (MVP) ---------- */
-function openConnectWizard(){
-  const connected = !!state.profile.aliceConnected;
-  showModal("Подключение к Алисе", `
-    <div class="muted">
-      Сейчас это <b>MVP-подключение</b>: мы сохраняем статус и готовим базу под реальную интеграцию Яндекса.
-      <div class="sp12"></div>
-      <div class="badge"><span class="dot ${connected ? "ok":""}"></span>${connected ? "Подключено" : "Не подключено"}</div>
-      <div class="sp12"></div>
-
-      <b>Вариант MVP (бесплатно):</b><br>
-      AURA генерирует команды → ты нажимаешь “Скопировать” → вставляешь/говоришь Алисе.
-      <div class="sp12"></div>
-
-      <b>Вариант 2 (позже, реально управлять):</b><br>
-      Добавим сервер + OAuth Яндекса или навык → и тогда кнопки смогут управлять устройствами напрямую.
-      <div class="sp12"></div>
-
-      <button class="btn" id="mkConnect">Отметить как подключено</button>
-      <div class="sp12"></div>
-      <button class="btn secondary" id="mkDisconnect">Отключить</button>
-    </div>
-  `);
-  setTimeout(()=>{
-    const c = document.getElementById("mkConnect");
-    const d = document.getElementById("mkDisconnect");
-    if(c) c.onclick = ()=>{
-      state.profile.aliceConnected = true;
-      saveState();
-      hideModal();
-      render();
-    };
-    if(d) d.onclick = ()=>{
-      state.profile.aliceConnected = false;
-      state.profile.aliceToken = "";
-      saveState();
-      hideModal();
-      render();
-    };
-  }, 60);
-}
-
-/* ---------- Home panel ---------- */
-function openHomePanel(){
-  showModal("Мой дом", `
-    <div class="muted">
-      <b>Комнаты:</b> ${state.home.rooms.map(escapeHtml).join(", ")}<br>
-      <b>Устройства:</b> ${state.home.devices.map(escapeHtml).join(", ")}
-      <div class="sp12"></div>
-      Настройки меняются через Onboarding. Хочешь — я добавлю редактор прямо здесь (добавить/удалить без мастера).
-      <div class="sp12"></div>
-      <button class="btn" id="reOnb">Перенастроить</button>
-    </div>
-  `);
-  setTimeout(()=>{
-    const b = document.getElementById("reOnb");
-    if(b) b.onclick = ()=>{
-      hideModal();
-      state.onboarded = false;
-      saveState();
-      render();
-    };
-  }, 60);
-}
-
-/* ---------- Generator (rules-based “AI”) ---------- */
-function generate(text){
-  const q = (text || "").trim().toLowerCase();
-  const rooms = state.home.rooms;
-  const devices = new Set(state.home.devices);
-  const isNight = (new Date()).getHours() >= 22 || (new Date()).getHours() <= 6;
-
-  const roomHint = rooms.length ? `в ${rooms[0]}` : "";
-  const hasLight = devices.has("Свет");
-  const hasSpeaker = devices.has("Колонка");
-  const hasTV = devices.has("ТВ");
-  const hasClimate = devices.has("Климат");
-
-  let cmd = "";
-
-  // “Смысловые” режимы
-  if(q.includes("кино")){
-    cmd = "Алиса, включи режим кино: ";
-    cmd += hasLight ? "приглуши свет до 15%, " : "";
-    cmd += hasTV ? "включи телевизор, " : "";
-    cmd += "установи комфортную громкость.";
-  } else if(q.includes("сон") || q.includes("спать")){
-    cmd = "Алиса, режим сон: ";
-    cmd += hasLight ? "тёплый свет 25%, " : "";
-    cmd += hasSpeaker ? "поставь спокойную музыку тихо, " : "";
-    cmd += "и напомни лечь спать.";
-  } else if(q.includes("работа") || q.includes("фокус")){
-    cmd = "Алиса, режим работа: ";
-    cmd += hasLight ? "включи яркий белый свет 80%, " : "";
-    cmd += hasSpeaker ? "включи фоновый ло-фай очень тихо, " : "";
-    cmd += "не беспокоить на час.";
-  } else if(q.includes("гости") || q.includes("вечерин")){
-    cmd = "Алиса, режим гости: ";
-    cmd += hasLight ? "сделай свет тёплым 45%, " : "";
-    cmd += hasSpeaker ? "включи фоновую музыку, " : "";
-    cmd += "создай уютную атмосферу.";
-  } else if(q.includes("релакс") || q.includes("расслаб")){
-    cmd = "Алиса, режим релакс: ";
-    cmd += hasLight ? "мягкий тёплый свет 30%, " : "";
-    cmd += hasSpeaker ? "поставь спокойный джаз, " : "";
-    cmd += "таймер 45 минут.";
-  } else if(q.includes("уборк")){
-    cmd = "Алиса, режим уборка: ";
-    cmd += hasLight ? "яркий свет 90%, " : "";
-    cmd += hasSpeaker ? "включи бодрую музыку, " : "";
-    cmd += "таймер 30 минут.";
-  } else if(q.includes("утро")){
-    cmd = "Алиса, доброе утро: ";
-    cmd += hasLight ? "плавно включи свет до 60%, " : "";
-    cmd += hasSpeaker ? "включи бодрую музыку тихо, " : "";
-    cmd += "скажи погоду.";
-  } else if(q.includes("ночь") || q.includes("ночник") || isNight){
-    cmd = "Алиса, ночной режим: ";
-    cmd += hasLight ? "включи ночник на 10% тёплым светом, " : "";
-    cmd += "и сделай тише уведомления.";
-  } else if(q.includes("громче")){
-    cmd = "Алиса, сделай громкость выше на 10%.";
-  } else if(q.includes("тише")){
-    cmd = "Алиса, сделай громкость ниже на 10%.";
-  } else if(q.startsWith("таймер")){
-    const m = q.match(/(\d{1,3})/);
-    const mins = m ? m[1] : "30";
-    cmd = `Алиса, поставь таймер на ${mins} минут.`;
-  } else if(q.includes("камин") || q.includes("уют")){
-    cmd = "Алиса, уютный режим: ";
-    cmd += hasLight ? "тёплый свет 35%, " : "";
-    cmd += hasSpeaker ? "включи спокойную музыку, " : "";
-    if(hasClimate) cmd += "сделай чуть теплее, ";
-    cmd += "и создай атмосферу уюта.";
-  } else {
-    // универсальный “умный” ответ
-    cmd = "Алиса, ";
-    cmd += hasLight ? `сделай свет ${isNight ? "мягким и тёплым 25%" : "комфортным 45%"}, ` : "";
-    cmd += hasSpeaker ? `${isNight ? "включи спокойную музыку тихо" : "включи фоновую музыку"}, ` : "";
-    cmd += "создай приятную атмосферу.";
-  }
-
-  // финальная полировка
-  cmd = cmd.replace(/\s+/g," ").replace(/,\s*$/, ".").trim();
-
-  state.lastResult = cmd;
-  saveState();
-
-  const result = document.getElementById("result");
-  const acts = document.getElementById("acts");
-  if(result && acts){
-    result.style.display = "block";
-    acts.style.display = "flex";
-    result.textContent = cmd;
-    document.getElementById("copy").onclick = ()=> copyText(cmd);
-    document.getElementById("saveScene").onclick = ()=> saveCurrentScene();
-  } else {
-    // если мы не на вкладке core — вернёмся
-    switchTab("core");
-    setTimeout(()=> renderCore(), 50);
-  }
-}
-
-/* ---------- Save scene ---------- */
-function saveCurrentScene(){
-  const cmd = (state.lastResult || "").trim();
-  if(!cmd){
-    showModal("Нечего сохранять", "Сначала сформируй атмосферу.");
-    return;
-  }
-  const title = guessTitle(cmd);
-  state.scenes.push({
-    id: String(Date.now()) + "_" + Math.random().toString(16).slice(2),
-    title,
-    command: cmd,
-    createdAt: Date.now()
-  });
-  saveState();
-  showModal("Сохранено", `Сценарий <b>${escapeHtml(title)}</b> добавлен в “Мои сценарии”.`);
-}
-
-/* ---------- Utils ---------- */
-function switchTab(tab){
-  const el = document.querySelector(`.tab[data-tab="${tab}"]`);
-  if(!el) return;
-  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
-  el.classList.add("active");
-  currentTab = tab;
-  render();
+/* ===================== UX helpers ===================== */
+function haptic(type){
+  if(!tg) return;
+  try{
+    if(type === "success") tg.HapticFeedback?.notificationOccurred("success");
+    if(type === "warning") tg.HapticFeedback?.notificationOccurred("warning");
+    if(type === "error") tg.HapticFeedback?.notificationOccurred("error");
+    if(type === "tap") tg.HapticFeedback?.impactOccurred("light");
+  }catch(e){}
 }
 
 async function copyText(text){
   try{
     await navigator.clipboard.writeText(text);
-    if(tg) tg.HapticFeedback?.notificationOccurred("success");
-    showModal("Скопировано", "Команда в буфере обмена. Вставь её в Алису или скажи голосом.");
+    haptic("success");
+    showModal("Скопировано", "Команда в буфере. Вставь в Алису или скажи голосом.");
   }catch(e){
     // fallback
     const ta = document.createElement("textarea");
@@ -1099,8 +717,377 @@ async function copyText(text){
     ta.select();
     document.execCommand("copy");
     ta.remove();
-    showModal("Скопировано", "Команда в буфере обмена.");
+    haptic("success");
+    showModal("Скопировано", "Команда в буфере.");
   }
+}
+
+function logAction(text){
+  const t = new Date().toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"});
+  state.logs.unshift(`${t} — ${text}`);
+  if(state.logs.length > 5) state.logs.pop();
+  save();
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, m => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[m]));
+}
+function escapeAttr(s){ return escapeHtml(s).replace(/"/g,"&quot;"); }
+
+/* ===================== Smart Command Engine ===================== */
+function getAvailableKeys(){
+  return Object.keys(DEVICE_REGISTRY).filter(k => !!state.home.available[k]);
+}
+function hasDev(key){ return !!state.home.available[key]; }
+
+function intentFromText(text){
+  const q = (text || "").toLowerCase().trim();
+  // normalize
+  const t = q.replace(/\s+/g," ");
+
+  const map = [
+    { intent:"cinema",   keys:["кино","фильм","сериал","театр"] },
+    { intent:"sleep",    keys:["сон","спать","ночь","уснуть","кровать"] },
+    { intent:"work",     keys:["работа","фокус","учёба","дела"] },
+    { intent:"guests",   keys:["гости","вечерин","туса","компания"] },
+    { intent:"relax",    keys:["релакс","расслаб","спокойно","медитац","йога"] },
+    { intent:"cleaning", keys:["уборк","пылесос","чисто"] },
+    { intent:"morning",  keys:["утро","доброе","подъём"] },
+    { intent:"cozy",     keys:["уют","камин","тепло","атмосфера"] },
+    { intent:"music",    keys:["музык","включи музыку","поставь","джаз","лофай","lofi","ambient","фон"] },
+    { intent:"lights",   keys:["свет","ламп","ярче","темнее","тёплый","холодный"] },
+    { intent:"timer",    keys:["таймер"] },
+  ];
+
+  for(const r of map){
+    if(r.keys.some(k => t.includes(k))) return r.intent;
+  }
+  return "auto";
+}
+
+function buildCommand(intent, rawText){
+  const night = isNight();
+  const avail = {
+    light: hasDev("light"),
+    speaker: hasDev("speaker"),
+    climate: hasDev("climate"),
+    tv: hasDev("tv"),
+    curtains: hasDev("curtains"),
+    sockets: hasDev("sockets"),
+    vacuum: hasDev("vacuum"),
+    humidifier: hasDev("humidifier"),
+  };
+
+  const d = state.devices;
+
+  // Helper: include only if makes sense
+  const parts = [];
+
+  function add(part){
+    if(part) parts.push(part);
+  }
+
+  // extract possible minutes from text
+  const m = String(rawText || "").match(/(\d{1,3})\s*(мин|мину|minutes|minute|m)\b/i);
+  const minutes = m ? Math.max(1, Math.min(180, parseInt(m[1],10))) : null;
+
+  // Music presets by keywords
+  const q = (rawText || "").toLowerCase();
+  let musicPreset = null;
+  if(q.includes("джаз")) musicPreset = "джаз";
+  else if(q.includes("лоф") || q.includes("lofi")) musicPreset = "ло-фай";
+  else if(q.includes("фон") || q.includes("ambient")) musicPreset = "фоновую";
+
+  // Build by intent
+  if(intent === "cinema"){
+    add("Алиса, включи режим кино:");
+    if(avail.light){
+      const target = night ? 15 : 20;
+      add(d.light.power ? `приглуши свет до ${target}%.` : `включи свет и приглуши до ${target}%.`);
+    }
+    if(avail.speaker && d.speaker.playing){
+      add("выключи музыку.");
+    }
+    if(avail.tv){
+      add(d.tv.power ? "подготовь ТВ для просмотра." : "включи телевизор.");
+    }
+    if(!avail.light && !avail.tv){
+      add("создай атмосферу кино.");
+    }
+  }
+  else if(intent === "sleep"){
+    add("Алиса, режим сон:");
+    if(avail.light){
+      add(d.light.power ? "сделай тёплый свет 20%." : "включи тёплый свет 20%.");
+    }
+    if(avail.speaker){
+      add(d.speaker.playing ? "сделай музыку тише." : "включи спокойную музыку очень тихо.");
+    }
+    if(avail.climate){
+      add(d.climate.power ? "переведи климат в авто и сделай комфортнее." : "включи климат в авто режим.");
+    }
+    if(avail.curtains){
+      add(d.curtains.open ? "закрой шторы." : "убедись, что шторы закрыты.");
+    }
+    add("поставь таймер на 45 минут.");
+  }
+  else if(intent === "work"){
+    add("Алиса, режим работа:");
+    if(avail.light){
+      add(d.light.power ? "сделай яркий холодный свет 80%." : "включи яркий холодный свет 80%.");
+    }
+    if(avail.speaker){
+      add(d.speaker.playing ? "сделай музыку очень тихо." : "включи фоновый ло-фай очень тихо.");
+    }
+    add("включи режим фокуса.");
+  }
+  else if(intent === "guests"){
+    add("Алиса, режим гости:");
+    if(avail.light){
+      add(d.light.power ? "сделай тёплый свет 45%." : "включи тёплый свет 45%.");
+    }
+    if(avail.speaker){
+      add(d.speaker.playing ? "сделай музыку чуть громче." : "включи фоновую музыку.");
+    }
+    if(avail.climate){
+      add(d.climate.power ? "поддерживай комфортную температуру." : "включи климат в авто режим.");
+    }
+  }
+  else if(intent === "relax"){
+    add("Алиса, режим релакс:");
+    if(avail.light){
+      add(d.light.power ? "мягкий тёплый свет 30%." : "включи мягкий тёплый свет 30%.");
+    }
+    if(avail.speaker){
+      add(d.speaker.playing ? "сделай музыку тише." : "включи спокойный джаз тихо.");
+    }
+    add("таймер 40 минут.");
+  }
+  else if(intent === "cleaning"){
+    add("Алиса, режим уборка:");
+    if(avail.light){
+      add(d.light.power ? "яркий свет 90%." : "включи яркий свет 90%.");
+    }
+    if(avail.vacuum){
+      add(d.vacuum.running ? "увеличь мощность пылесоса." : "запусти пылесос в авто режиме.");
+    } else {
+      add("включи бодрую музыку.");
+    }
+    add("таймер 30 минут.");
+  }
+  else if(intent === "morning"){
+    add("Алиса, доброе утро:");
+    if(avail.light){
+      add(d.light.power ? "плавно увеличь свет до 60%." : "плавно включи свет до 60%.");
+    }
+    if(avail.speaker){
+      add(d.speaker.playing ? "сделай музыку чуть громче." : "включи бодрую музыку тихо.");
+    }
+    add("скажи погоду и планы на день.");
+  }
+  else if(intent === "cozy"){
+    add("Алиса, уютный режим:");
+    if(avail.light){
+      add(d.light.power ? "тёплый свет 35%." : "включи тёплый свет 35%.");
+    }
+    if(avail.speaker){
+      add(d.speaker.playing ? "сделай музыку комфортнее." : "включи фоновую музыку.");
+    }
+    if(avail.humidifier){
+      add(d.humidifier.power ? "увеличь увлажнение на уровень 2." : "включи увлажнитель на уровень 2.");
+    }
+  }
+  else if(intent === "music"){
+    add("Алиса, музыка:");
+    if(avail.speaker){
+      if(d.speaker.playing){
+        add("переключи трек и сделай комфортную громкость.");
+      } else {
+        add(`включи ${musicPreset ? musicPreset : "фоновую"} музыку.`);
+      }
+    } else {
+      add("включи музыку на колонке.");
+    }
+    if(minutes) add(`таймер ${minutes} минут.`);
+  }
+  else if(intent === "lights"){
+    add("Алиса, свет:");
+    if(avail.light){
+      // Simple heuristic brightness
+      let b = null;
+      if(q.includes("ярче")) b = 80;
+      if(q.includes("темнее")) b = 20;
+      if(q.includes("100")) b = 100;
+      if(q.includes("60")) b = 60;
+      if(q.includes("30")) b = 30;
+      if(q.includes("10")) b = 10;
+
+      const temp = (q.includes("холод")) ? "холодный" : (q.includes("тёпл") ? "тёплый" : null);
+      if(!d.light.power) add("включи свет.");
+      if(temp) add(`сделай ${temp} свет.`);
+      if(b !== null) add(`установи яркость ${b}%.`);
+      if(!temp && b === null) add(`сделай свет ${night ? "мягким тёплым 25%" : "комфортным 45%"}.`);
+    } else {
+      add("включи свет.");
+    }
+  }
+  else if(intent === "timer"){
+    add("Алиса, таймер:");
+    add(`поставь таймер на ${minutes ?? 30} минут.`);
+  }
+  else {
+    // AUTO: best effort based on time and current device states
+    add("Алиса, создай приятную атмосферу:");
+    if(avail.light){
+      const target = night ? 25 : 45;
+      add(d.light.power ? `сделай тёплый свет ${target}%.` : `включи тёплый свет ${target}%.`);
+    }
+    if(avail.speaker){
+      if(d.speaker.playing){
+        add(`сделай музыку ${night ? "тише" : "комфортнее"}.`);
+      } else {
+        add(`включи ${night ? "спокойную" : "фоновую"} музыку тихо.`);
+      }
+    }
+    if(avail.climate){
+      add(d.climate.power ? "поддерживай комфортную температуру." : "включи климат в авто режим.");
+    }
+    if(night) add("таймер 45 минут.");
+  }
+
+  // join and cleanup punctuation
+  let cmd = parts.join(" ");
+  cmd = cmd.replace(/\s+/g," ").trim();
+  // Ensure ending
+  if(!/[.!?]$/.test(cmd)) cmd += ".";
+  return cmd;
+}
+
+function applySmartSideEffects(intent){
+  // Update "virtual device state" so dashboard feels alive
+  // We keep it conservative to avoid weirdness.
+  const d = state.devices;
+  const avail = (k)=>hasDev(k);
+
+  const night = isNight();
+
+  if(intent === "cinema"){
+    if(avail("light")){
+      d.light.power = true;
+      d.light.brightness = night ? 15 : 20;
+      d.light.temp = "warm";
+    }
+    if(avail("speaker")){
+      d.speaker.playing = false;
+      d.speaker.volume = Math.max(10, d.speaker.volume - 5);
+    }
+    if(avail("tv")) d.tv.power = true;
+  }
+  else if(intent === "sleep"){
+    if(avail("light")){
+      d.light.power = true;
+      d.light.brightness = 20;
+      d.light.temp = "warm";
+    }
+    if(avail("speaker")){
+      d.speaker.playing = true;
+      d.speaker.volume = 15;
+      d.speaker.preset = "ambient";
+    }
+    if(avail("climate")){
+      d.climate.power = true;
+      d.climate.mode = "auto";
+      d.climate.temperature = Math.max(20, Math.min(24, d.climate.temperature));
+    }
+    if(avail("curtains")) d.curtains.open = false;
+  }
+  else if(intent === "work"){
+    if(avail("light")){
+      d.light.power = true;
+      d.light.brightness = 80;
+      d.light.temp = "cool";
+    }
+    if(avail("speaker")){
+      d.speaker.playing = true;
+      d.speaker.volume = 12;
+      d.speaker.preset = "lofi";
+    }
+  }
+  else if(intent === "guests"){
+    if(avail("light")){
+      d.light.power = true;
+      d.light.brightness = 45;
+      d.light.temp = "warm";
+    }
+    if(avail("speaker")){
+      d.speaker.playing = true;
+      d.speaker.volume = 40;
+      d.speaker.preset = "ambient";
+    }
+    if(avail("climate")){
+      d.climate.power = true;
+      d.climate.mode = "auto";
+    }
+  }
+  else if(intent === "relax"){
+    if(avail("light")){
+      d.light.power = true;
+      d.light.brightness = 30;
+      d.light.temp = "warm";
+    }
+    if(avail("speaker")){
+      d.speaker.playing = true;
+      d.speaker.volume = 18;
+      d.speaker.preset = "jazz";
+    }
+  }
+  else if(intent === "cleaning"){
+    if(avail("light")){
+      d.light.power = true;
+      d.light.brightness = 90;
+      d.light.temp = "cool";
+    }
+    if(avail("vacuum")) d.vacuum.running = true;
+    if(avail("speaker")){
+      d.speaker.playing = true;
+      d.speaker.volume = 35;
+      d.speaker.preset = "ambient";
+    }
+  }
+  else if(intent === "music"){
+    if(avail("speaker")){
+      d.speaker.playing = true;
+      d.speaker.volume = Math.max(18, d.speaker.volume);
+    }
+  }
+  else if(intent === "lights"){
+    if(avail("light")){
+      d.light.power = true;
+    }
+  }
+}
+
+/* ===================== Scenes ===================== */
+function saveSceneFromLast(){
+  const cmd = (state.lastCommand || "").trim();
+  if(!cmd){
+    showModal("Нечего сохранять", "Сначала сформируй команду.");
+    return;
+  }
+  const title = guessTitle(cmd);
+  state.scenes.unshift({
+    id: String(Date.now()) + "_" + Math.random().toString(16).slice(2),
+    title,
+    command: cmd,
+    createdAt: nowISO(),
+  });
+  save();
+  logAction(`Сценарий сохранён: ${title}`);
+  haptic("success");
+  render();
+  showModal("Сохранено", `Сценарий <b>${escapeHtml(title)}</b> добавлен.`);
 }
 
 function guessTitle(cmd){
@@ -1111,28 +1098,745 @@ function guessTitle(cmd){
   if(c.includes("гост")) return "Режим Гости";
   if(c.includes("уборк")) return "Режим Уборка";
   if(c.includes("релакс") || c.includes("джаз")) return "Режим Релакс";
-  if(c.includes("ноч")) return "Ночной режим";
+  if(c.includes("уют")) return "Уютный режим";
   return "Сценарий AURA";
 }
 
-function escapeHtml(s){
-  return String(s).replace(/[&<>"']/g, m => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-  }[m]));
-}
-function escapeAttr(s){ return escapeHtml(s).replace(/"/g,"&quot;"); }
+/* ===================== UI Render ===================== */
+const view = $("#view");
+let currentTab = "center";
 
-/* ---------- Render ---------- */
-function render(){
-  if(!state.onboarded){
-    renderOnboarding();
+/* Navigation */
+document.querySelectorAll(".tab").forEach(t=>{
+  t.onclick = ()=>{
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+    t.classList.add("active");
+    currentTab = t.dataset.tab;
+    render();
+  };
+});
+
+/* Help */
+$("#helpBtn").onclick = ()=>{
+  showModal("Как пользоваться", `
+    AURA — это <b>центр управления</b> и <b>усилитель команд</b> для Алисы.<br><br>
+    <b>1)</b> В “Центре” опиши желание (кино/сон/уборка).<br>
+    <b>2)</b> Нажми “Сформировать” → получишь умную команду.<br>
+    <b>3)</b> Нажми “Скопировать” → вставь/скажи Алисе.<br><br>
+    В “Аккаунте” отметь, какие устройства есть дома — пульт и команды подстроятся.
+  `);
+};
+
+function setSubtitle(text){ $("#subtitle").textContent = text; }
+
+function renderWithTransition(html){
+  view.classList.remove("show");
+  view.innerHTML = html;
+  requestAnimationFrame(()=> view.classList.add("show"));
+}
+
+function miniStatus(){
+  const online = state.system.online;
+  const dot = online ? "ok" : "bad";
+  const availKeys = getAvailableKeys();
+  const d = state.devices;
+
+  const lightOn = hasDev("light") && d.light.power;
+  const musicOn = hasDev("speaker") && d.speaker.playing;
+  const vacOn = hasDev("vacuum") && d.vacuum.running;
+
+  const lights = lightOn ? 1 : 0;
+  const music = musicOn ? 1 : 0;
+
+  const temp = hasDev("climate") ? `${d.climate.temperature}°` : "—";
+
+  return `
+    <div class="statusBar">
+      <div class="statusLine">
+        <span class="badge"><span class="dot ${dot}"></span>${online ? "Дом онлайн" : "Дом оффлайн"}</span>
+        <span class="badge">💡 ${lights}</span>
+        <span class="badge">🔊 ${music}</span>
+        <span class="badge">🌡 ${temp}</span>
+        ${vacOn ? `<span class="badge">🤖 уборка</span>` : ``}
+      </div>
+      <span class="pill">${availKeys.length} устройств</span>
+    </div>
+  `;
+}
+
+function dashboardCard(){
+  const d = state.devices;
+  const online = state.system.online;
+
+  const lightText = hasDev("light")
+    ? (d.light.power ? `вкл · ${d.light.brightness}% · ${d.light.temp === "warm" ? "тёплый" : "холодный"}` : "выкл")
+    : "нет";
+
+  const speakerText = hasDev("speaker")
+    ? (d.speaker.playing ? `играет · ${d.speaker.volume}% · ${d.speaker.preset}` : "не играет")
+    : "нет";
+
+  const climateText = hasDev("climate")
+    ? (d.climate.power ? `${d.climate.temperature}° · ${d.climate.mode}` : "выкл")
+    : "нет";
+
+  const timerText = "—"; // задел на будущий scheduler
+
+  return `
+    <div class="card glowBorder">
+      ${miniStatus()}
+      <div class="sp12"></div>
+      <div class="grid2">
+        <div class="chip" style="cursor:default;">
+          <div><b>💡 Свет</b><small>${escapeHtml(lightText)}</small></div>
+          <span class="pill">${hasDev("light") ? (d.light.power ? "ON" : "OFF") : "—"}</span>
+        </div>
+        <div class="chip" style="cursor:default;">
+          <div><b>🔊 Музыка</b><small>${escapeHtml(speakerText)}</small></div>
+          <span class="pill">${hasDev("speaker") ? (d.speaker.playing ? "ON" : "OFF") : "—"}</span>
+        </div>
+        <div class="chip" style="cursor:default;">
+          <div><b>🌡 Климат</b><small>${escapeHtml(climateText)}</small></div>
+          <span class="pill">${hasDev("climate") ? (d.climate.power ? "ON" : "OFF") : "—"}</span>
+        </div>
+        <div class="chip" style="cursor:default;">
+          <div><b>⏱ Таймер</b><small>${timerText}</small></div>
+          <span class="pill">—</span>
+        </div>
+      </div>
+      <div class="sp12"></div>
+      <div class="muted">Состояния — “виртуальные”, чтобы ощущалось как реальный центр. Позже подключим API и они станут настоящими.</div>
+    </div>
+  `;
+}
+
+function renderCenter(){
+  setSubtitle("Smart Home Center");
+  const name = (state.user.name || "").trim();
+  const hello = name ? `Привет, ${escapeHtml(name)}.` : "Привет.";
+  const suggestion = isNight() ? "Например: сон, ночной режим, релакс" : "Например: кино, гости, уборка, работа";
+
+  const last = state.lastCommand ? `
+    <div class="resultBox" id="result">${escapeHtml(state.lastCommand)}</div>
+    <div class="actions">
+      <button class="btn secondary" id="copyBtn">Скопировать</button>
+      <button class="btn" id="saveBtn">Сохранить</button>
+    </div>
+    <div class="actions">
+      <button class="btn secondary" id="repeatBtn">Повторить</button>
+      <button class="btn secondary" id="boostBtn">Усилить</button>
+    </div>
+  ` : ``;
+
+  const logs = state.logs.length
+    ? state.logs.map(l=>`<div class="muted">• ${escapeHtml(l)}</div>`).join("")
+    : `<div class="muted">Пока пусто. Нажми кнопки или сформируй команду.</div>`;
+
+  return `
+    ${dashboardCard()}
+
+    <div class="sp12"></div>
+
+    <div class="card glowBorder">
+      <div class="h1">${hello} Что создаём?</div>
+      <div class="muted">${escapeHtml(suggestion)}</div>
+      <div class="sp12"></div>
+      <input class="input" id="q" placeholder="Опиши атмосферу или действие..." />
+      <div class="sp12"></div>
+      <button class="btn" id="genBtn">Сформировать атмосферу</button>
+
+      <div class="kbar">
+        <div class="kbtn" data-p="кино">🎬 Кино</div>
+        <div class="kbtn" data-p="сон">💤 Сон</div>
+        <div class="kbtn" data-p="работа">💻 Работа</div>
+        <div class="kbtn" data-p="гости">🎉 Гости</div>
+        <div class="kbtn" data-p="релакс">🧘 Релакс</div>
+        <div class="kbtn" data-p="уборка">🧹 Уборка</div>
+        <div class="kbtn" data-p="уют">🔥 Уют</div>
+      </div>
+
+      ${last}
+    </div>
+
+    <div class="sp12"></div>
+
+    <div class="card">
+      <div class="h1">Лента действий</div>
+      <div class="muted">${logs}</div>
+    </div>
+  `;
+}
+
+function renderPanel(){
+  setSubtitle("Пульт");
+  const keys = getAvailableKeys();
+  if(!keys.length){
+    return `
+      <div class="card glowBorder">
+        <div class="h1">Пульт пуст</div>
+        <div class="muted">Открой “Аккаунт” и отметь устройства, которые есть дома.</div>
+      </div>
+    `;
+  }
+
+  const d = state.devices;
+
+  function cardHeader(k, stateText, active){
+    const meta = DEVICE_REGISTRY[k];
+    return `
+      <div class="deviceTop">
+        <div>
+          <div class="deviceName">${meta.icon} ${escapeHtml(meta.name)}</div>
+          <div class="deviceHint">${escapeHtml(stateText)}</div>
+        </div>
+        <div class="deviceState">
+          ${active ? `<span class="pulse"></span> активно` : `не активно`}
+        </div>
+      </div>
+    `;
+  }
+
+  const blocks = [];
+
+  // LIGHT
+  if(hasDev("light")){
+    const active = d.light.power;
+    const st = active ? `вкл · ${d.light.brightness}% · ${d.light.temp==="warm"?"тёплый":"холодный"}` : "выкл";
+    blocks.push(`
+      <div class="deviceCard ${active ? "active" : ""}">
+        ${cardHeader("light", st, active)}
+        <div class="controlRow">
+          <div class="seg">
+            <div class="miniBtn" data-act="light:power:on">Вкл</div>
+            <div class="miniBtn" data-act="light:power:off">Выкл</div>
+          </div>
+          <div class="seg">
+            <div class="miniBtn" data-act="light:br:10">10%</div>
+            <div class="miniBtn" data-act="light:br:30">30%</div>
+            <div class="miniBtn" data-act="light:br:60">60%</div>
+            <div class="miniBtn" data-act="light:br:100">100%</div>
+          </div>
+          <div class="seg">
+            <div class="miniBtn" data-act="light:temp:warm">Тёплый</div>
+            <div class="miniBtn" data-act="light:temp:cool">Холодный</div>
+          </div>
+        </div>
+      </div>
+    `);
+  }
+
+  // SPEAKER
+  if(hasDev("speaker")){
+    const active = d.speaker.playing;
+    const st = active ? `играет · ${d.speaker.volume}% · ${d.speaker.preset}` : "не играет";
+    blocks.push(`
+      <div class="deviceCard ${active ? "active" : ""}">
+        ${cardHeader("speaker", st, active)}
+        <div class="controlRow">
+          <div class="seg">
+            <div class="miniBtn" data-act="speaker:play">Play</div>
+            <div class="miniBtn" data-act="speaker:pause">Pause</div>
+          </div>
+          <div class="seg">
+            <div class="miniBtn" data-act="speaker:vol:-10">Тише</div>
+            <div class="miniBtn" data-act="speaker:vol:+10">Громче</div>
+          </div>
+          <div class="seg">
+            <div class="miniBtn" data-act="speaker:preset:jazz">Джаз</div>
+            <div class="miniBtn" data-act="speaker:preset:lofi">Ло-фай</div>
+            <div class="miniBtn" data-act="speaker:preset:ambient">Фон</div>
+          </div>
+        </div>
+      </div>
+    `);
+  }
+
+  // CLIMATE
+  if(hasDev("climate")){
+    const active = d.climate.power;
+    const st = active ? `${d.climate.temperature}° · ${d.climate.mode}` : "выкл";
+    blocks.push(`
+      <div class="deviceCard ${active ? "active" : ""}">
+        ${cardHeader("climate", st, active)}
+        <div class="controlRow">
+          <div class="seg">
+            <div class="miniBtn" data-act="climate:power:on">Вкл</div>
+            <div class="miniBtn" data-act="climate:power:off">Выкл</div>
+          </div>
+          <div class="seg">
+            <div class="miniBtn" data-act="climate:t:-1">-1°</div>
+            <div class="miniBtn" data-act="climate:t:+1">+1°</div>
+            <div class="miniBtn" data-act="climate:mode:auto">Авто</div>
+          </div>
+        </div>
+      </div>
+    `);
+  }
+
+  // TV
+  if(hasDev("tv")){
+    const active = d.tv.power;
+    const st = active ? `вкл · ${d.tv.input}` : "выкл";
+    blocks.push(`
+      <div class="deviceCard ${active ? "active" : ""}">
+        ${cardHeader("tv", st, active)}
+        <div class="controlRow">
+          <div class="seg">
+            <div class="miniBtn" data-act="tv:power:on">Вкл</div>
+            <div class="miniBtn" data-act="tv:power:off">Выкл</div>
+          </div>
+          <div class="seg">
+            <div class="miniBtn" data-act="tv:input:youtube">YouTube</div>
+            <div class="miniBtn" data-act="tv:input:netflix">Netflix</div>
+            <div class="miniBtn" data-act="tv:input:home">Дом</div>
+          </div>
+        </div>
+      </div>
+    `);
+  }
+
+  // CURTAINS
+  if(hasDev("curtains")){
+    const active = d.curtains.open; // open == active visual
+    const st = active ? "открыты" : "закрыты";
+    blocks.push(`
+      <div class="deviceCard ${active ? "active" : ""}">
+        ${cardHeader("curtains", st, active)}
+        <div class="controlRow">
+          <div class="seg">
+            <div class="miniBtn" data-act="curtains:open">Открыть</div>
+            <div class="miniBtn" data-act="curtains:close">Закрыть</div>
+          </div>
+        </div>
+      </div>
+    `);
+  }
+
+  // SOCKETS
+  if(hasDev("sockets")){
+    const active = d.sockets.power;
+    const st = active ? "вкл" : "выкл";
+    blocks.push(`
+      <div class="deviceCard ${active ? "active" : ""}">
+        ${cardHeader("sockets", st, active)}
+        <div class="controlRow">
+          <div class="seg">
+            <div class="miniBtn" data-act="sockets:power:on">Вкл</div>
+            <div class="miniBtn" data-act="sockets:power:off">Выкл</div>
+          </div>
+        </div>
+      </div>
+    `);
+  }
+
+  // VACUUM
+  if(hasDev("vacuum")){
+    const active = d.vacuum.running;
+    const st = active ? `работает · ${d.vacuum.mode}` : "остановлен";
+    blocks.push(`
+      <div class="deviceCard ${active ? "active" : ""}">
+        ${cardHeader("vacuum", st, active)}
+        <div class="controlRow">
+          <div class="seg">
+            <div class="miniBtn" data-act="vacuum:start">Старт</div>
+            <div class="miniBtn" data-act="vacuum:stop">Стоп</div>
+          </div>
+          <div class="seg">
+            <div class="miniBtn" data-act="vacuum:mode:auto">Авто</div>
+            <div class="miniBtn" data-act="vacuum:mode:turbo">Турбо</div>
+          </div>
+        </div>
+      </div>
+    `);
+  }
+
+  // HUMIDIFIER
+  if(hasDev("humidifier")){
+    const active = d.humidifier.power;
+    const st = active ? `вкл · уровень ${d.humidifier.level}` : "выкл";
+    blocks.push(`
+      <div class="deviceCard ${active ? "active" : ""}">
+        ${cardHeader("humidifier", st, active)}
+        <div class="controlRow">
+          <div class="seg">
+            <div class="miniBtn" data-act="humidifier:power:on">Вкл</div>
+            <div class="miniBtn" data-act="humidifier:power:off">Выкл</div>
+          </div>
+          <div class="seg">
+            <div class="miniBtn" data-act="humidifier:level:1">1</div>
+            <div class="miniBtn" data-act="humidifier:level:2">2</div>
+            <div class="miniBtn" data-act="humidifier:level:3">3</div>
+          </div>
+        </div>
+      </div>
+    `);
+  }
+
+  return `
+    <div class="card glowBorder">
+      <div class="h1">Командный пульт</div>
+      <div class="muted">Кнопки меняют “виртуальное” состояние и создают команду, которую можно скопировать для Алисы.</div>
+      <div class="sp12"></div>
+      ${blocks.join('<div class="sp12"></div>')}
+    </div>
+  `;
+}
+
+function renderScenes(){
+  setSubtitle("Сцены");
+  const list = state.scenes.length
+    ? state.scenes.map(s=>`
+      <div class="item">
+        <div class="itemTop">
+          <div>
+            <div class="itemTitle">${escapeHtml(s.title)}</div>
+            <div class="itemMeta">${new Date(s.createdAt).toLocaleString("ru-RU")}</div>
+          </div>
+          <div class="row" style="gap:8px;">
+            <div class="miniBtn" data-scopy="${s.id}">Скопировать</div>
+            <div class="miniBtn" data-sdel="${s.id}">Удалить</div>
+          </div>
+        </div>
+        <div class="sp8"></div>
+        <div class="muted">${escapeHtml(s.command)}</div>
+      </div>
+    `).join("")
+    : `<div class="muted">Пока нет сцен. Сформируй команду в “Центре” и нажми “Сохранить”.</div>`;
+
+  return `
+    <div class="card glowBorder">
+      <div class="h1">Мои сцены</div>
+      <div class="muted">Сохраняй лучшие режимы и используй в один тап.</div>
+      <div class="sp12"></div>
+      <button class="btn secondary" id="exportBtn">Экспорт (скопировать все)</button>
+      <div class="sp12"></div>
+      <div class="list" id="sceneList">${list}</div>
+    </div>
+  `;
+}
+
+function renderAccount(){
+  setSubtitle("Аккаунт");
+
+  // auto-fill from Telegram
+  if(tg && tg.initDataUnsafe?.user){
+    state.user.name = state.user.name || tg.initDataUnsafe.user.first_name || "";
+    state.user.telegramId = state.user.telegramId || tg.initDataUnsafe.user.id || null;
+    save();
+  }
+
+  const ua = navigator.userAgent || "";
+  const deviceLine = ua.includes("iPhone") ? "iPhone" : "Устройство";
+  const role = state.user.role || "owner";
+
+  const keys = Object.keys(DEVICE_REGISTRY);
+  const toggles = keys.map(k=>{
+    const v = !!state.home.available[k];
+    const meta = DEVICE_REGISTRY[k];
+    return `
+      <div class="chip" data-toggle="${k}">
+        <div>
+          <b>${meta.icon} ${escapeHtml(meta.name)}</b>
+          <small>${v ? "Есть дома" : "Нет"}</small>
+        </div>
+        <span class="pill" style="color:${v ? "var(--ok)" : "var(--muted)"}">${v ? "ON" : "OFF"}</span>
+      </div>
+    `;
+  }).join("");
+
+  return `
+    <div class="card glowBorder">
+      <div class="h1">Профиль</div>
+      <div class="muted">Данные хранятся локально на телефоне.</div>
+      <div class="sp12"></div>
+
+      <span class="badge"><span class="dot ok"></span>Роль: ${escapeHtml(role)}</span>
+      <div class="sp12"></div>
+
+      <div class="muted"><b>Имя:</b> ${escapeHtml(state.user.name || "Гость")}</div>
+      <div class="muted"><b>Telegram ID:</b> ${state.user.telegramId ? escapeHtml(String(state.user.telegramId)) : "—"}</div>
+      <div class="muted"><b>${escapeHtml(deviceLine)}:</b> ${escapeHtml(ua)}</div>
+
+      <div class="sp12"></div>
+      <button class="btn secondary" id="resetBtn">Сбросить приложение</button>
+    </div>
+
+    <div class="sp12"></div>
+
+    <div class="card">
+      <div class="h1">Устройства дома</div>
+      <div class="muted">Отметь, что реально есть — “Пульт” и команды подстроятся.</div>
+      <div class="sp12"></div>
+      <div class="grid2" id="toggles">${toggles}</div>
+    </div>
+  `;
+}
+
+/* ===================== Actions ===================== */
+function generateFromText(text){
+  const intent = intentFromText(text);
+  state.lastIntent = intent;
+
+  const cmd = buildCommand(intent, text);
+  state.lastCommand = cmd;
+
+  // animate + make device state feel real
+  applySmartSideEffects(intent);
+
+  save();
+  logAction(`Команда: ${cmd}`);
+  haptic("tap");
+  render();
+}
+
+function boostLast(){
+  // "Smart boost": based on intent & time
+  const intent = state.lastIntent || "auto";
+  const night = isNight();
+
+  // Add a context-aware extra sentence (not too long)
+  let extra = "";
+  if(intent === "cinema") extra = night ? " И сделай уведомления тише." : " И приглуши уведомления.";
+  else if(intent === "sleep") extra = " И поставь мягкий таймер на 60 минут.";
+  else if(intent === "work") extra = " И поставь таймер фокуса на 50 минут.";
+  else if(intent === "guests") extra = " И сделай громкость комфортной.";
+  else if(intent === "relax") extra = " И добавь таймер 45 минут.";
+  else if(intent === "cleaning") extra = " И напомни проветрить через 20 минут.";
+  else extra = night ? " И поставь таймер 45 минут." : " И добавь таймер 30 минут.";
+
+  if(!state.lastCommand) return;
+  if(state.lastCommand.includes(extra.trim())) return;
+
+  state.lastCommand = state.lastCommand.replace(/\.\s*$/,"") + extra + ".";
+  save();
+  logAction("Усиление команды");
+  haptic("success");
+  render();
+}
+
+function repeatLast(){
+  if(!state.lastCommand){
+    haptic("warning");
+    showModal("Нечего повторять", "Сначала сформируй команду.");
     return;
   }
-  if(currentTab==="core") renderCore();
-  if(currentTab==="library") renderLibrary();
-  if(currentTab==="scenes") renderScenes();
-  if(currentTab==="account") renderAccount();
+  logAction("Повтор команды");
+  haptic("tap");
+  render();
+  showModal("Повтор", "Команда отмечена в ленте. Скопируй её и повтори в Алисе.");
 }
+
+function applyDeviceAction(act){
+  // act format examples:
+  // light:power:on, light:br:30, speaker:play, speaker:vol:+10, climate:t:+1, vacuum:mode:turbo
+  const parts = String(act).split(":");
+  const dev = parts[0];
+  const cmd = parts[1];
+  const val = parts[2];
+
+  const d = state.devices;
+  if(!d[dev]) return;
+
+  if(dev === "light"){
+    if(cmd === "power"){
+      d.light.power = (val === "on");
+      if(d.light.power && d.light.brightness < 10) d.light.brightness = 30;
+    }
+    if(cmd === "br"){
+      d.light.power = true;
+      d.light.brightness = Math.max(1, Math.min(100, parseInt(val,10)));
+    }
+    if(cmd === "temp"){
+      d.light.power = true;
+      d.light.temp = (val === "cool") ? "cool" : "warm";
+    }
+    state.lastCommand = buildCommand("lights", `свет ${d.light.temp === "warm" ? "тёплый" : "холодный"} ${d.light.brightness}`);
+  }
+
+  if(dev === "speaker"){
+    if(cmd === "play"){ d.speaker.playing = true; }
+    if(cmd === "pause"){ d.speaker.playing = false; }
+    if(cmd === "vol"){
+      d.speaker.volume = Math.max(0, Math.min(100, d.speaker.volume + (val.startsWith("+") ? 10 : -10)));
+      d.speaker.playing = true;
+    }
+    if(cmd === "preset"){
+      d.speaker.preset = val;
+      d.speaker.playing = true;
+    }
+    state.lastCommand = buildCommand("music", `музыка ${d.speaker.preset} ${d.speaker.volume}`);
+  }
+
+  if(dev === "climate"){
+    if(cmd === "power"){ d.climate.power = (val === "on"); }
+    if(cmd === "t"){
+      d.climate.power = true;
+      d.climate.temperature = Math.max(16, Math.min(30, d.climate.temperature + (val.startsWith("+") ? 1 : -1)));
+    }
+    if(cmd === "mode"){
+      d.climate.power = true;
+      d.climate.mode = val;
+    }
+    state.lastCommand = buildCommand("auto", "комфорт");
+  }
+
+  if(dev === "tv"){
+    if(cmd === "power"){ d.tv.power = (val === "on"); }
+    if(cmd === "input"){ d.tv.power = true; d.tv.input = val; }
+    state.lastCommand = buildCommand("cinema", "кино");
+  }
+
+  if(dev === "curtains"){
+    if(cmd === "open"){ d.curtains.open = true; }
+    if(cmd === "close"){ d.curtains.open = false; }
+    state.lastCommand = `Алиса, ${d.curtains.open ? "открой" : "закрой"} шторы.`;
+  }
+
+  if(dev === "sockets"){
+    if(cmd === "power"){ d.sockets.power = (val === "on"); }
+    state.lastCommand = `Алиса, ${d.sockets.power ? "включи" : "выключи"} розетки.`;
+  }
+
+  if(dev === "vacuum"){
+    if(cmd === "start"){ d.vacuum.running = true; }
+    if(cmd === "stop"){ d.vacuum.running = false; }
+    if(cmd === "mode"){ d.vacuum.mode = val; d.vacuum.running = true; }
+    state.lastCommand = buildCommand("cleaning", "уборка");
+  }
+
+  if(dev === "humidifier"){
+    if(cmd === "power"){ d.humidifier.power = (val === "on"); }
+    if(cmd === "level"){ d.humidifier.power = true; d.humidifier.level = Math.max(1, Math.min(3, parseInt(val,10))); }
+    state.lastCommand = buildCommand("cozy", "уют");
+  }
+
+  save();
+  logAction(`Пульт: ${DEVICE_REGISTRY[dev].name}`);
+  haptic("tap");
+  render();
+}
+
+/* ===================== Wire UI after render ===================== */
+function bindCenter(){
+  const genBtn = document.getElementById("genBtn");
+  const q = document.getElementById("q");
+  if(genBtn && q){
+    genBtn.onclick = ()=> generateFromText(q.value);
+    document.querySelectorAll(".kbtn").forEach(b=>{
+      b.onclick = ()=>{
+        q.value = b.dataset.p;
+        generateFromText(q.value);
+      };
+    });
+  }
+
+  const copyBtn = document.getElementById("copyBtn");
+  if(copyBtn) copyBtn.onclick = ()=> copyText(state.lastCommand);
+
+  const saveBtn = document.getElementById("saveBtn");
+  if(saveBtn) saveBtn.onclick = ()=> saveSceneFromLast();
+
+  const repeatBtn = document.getElementById("repeatBtn");
+  if(repeatBtn) repeatBtn.onclick = ()=> repeatLast();
+
+  const boostBtn = document.getElementById("boostBtn");
+  if(boostBtn) boostBtn.onclick = ()=> boostLast();
+}
+
+function bindPanel(){
+  document.querySelectorAll("[data-act]").forEach(el=>{
+    el.onclick = ()=> applyDeviceAction(el.getAttribute("data-act"));
+  });
+}
+
+function bindScenes(){
+  const exportBtn = document.getElementById("exportBtn");
+  if(exportBtn){
+    exportBtn.onclick = ()=>{
+      if(!state.scenes.length){
+        showModal("Экспорт", "Сцен нет 🙂");
+        return;
+      }
+      const txt = state.scenes.map(s=>`• ${s.title}\n${s.command}\n`).join("\n");
+      copyText(txt);
+    };
+  }
+  document.querySelectorAll("[data-scopy]").forEach(el=>{
+    el.onclick = ()=>{
+      const id = el.getAttribute("data-scopy");
+      const sc = state.scenes.find(x=>x.id===id);
+      if(sc) copyText(sc.command);
+    };
+  });
+  document.querySelectorAll("[data-sdel]").forEach(el=>{
+    el.onclick = ()=>{
+      const id = el.getAttribute("data-sdel");
+      state.scenes = state.scenes.filter(x=>x.id!==id);
+      save();
+      logAction("Сцена удалена");
+      render();
+    };
+  });
+}
+
+function bindAccount(){
+  const resetBtn = document.getElementById("resetBtn");
+  if(resetBtn){
+    resetBtn.onclick = ()=>{
+      showModal("Сброс", `
+        Это удалит настройки и сцены на этом телефоне.<br><br>
+        <button class="btn" id="doReset" style="margin-top:10px;">Да, сбросить</button>
+      `);
+      setTimeout(()=>{
+        const b = document.getElementById("doReset");
+        if(b){
+          b.onclick = ()=>{
+            localStorage.removeItem(KEY);
+            location.reload();
+          };
+        }
+      }, 50);
+    };
+  }
+
+  document.querySelectorAll("[data-toggle]").forEach(el=>{
+    el.onclick = ()=>{
+      const k = el.getAttribute("data-toggle");
+      state.home.available[k] = !state.home.available[k];
+      save();
+      logAction(`Устройство: ${DEVICE_REGISTRY[k].name} = ${state.home.available[k] ? "ON" : "OFF"}`);
+      haptic("tap");
+      render();
+    };
+  });
+}
+
+/* ===================== Render ===================== */
+function render(){
+  // update user info if Telegram provides
+  if(tg && tg.initDataUnsafe?.user){
+    state.user.name = state.user.name || tg.initDataUnsafe.user.first_name || "";
+    state.user.telegramId = state.user.telegramId || tg.initDataUnsafe.user.id || null;
+    save();
+  }
+
+  let html = "";
+  if(currentTab === "center") html = renderCenter();
+  if(currentTab === "panel")  html = renderPanel();
+  if(currentTab === "scenes") html = renderScenes();
+  if(currentTab === "account") html = renderAccount();
+
+  renderWithTransition(html);
+
+  // bind after DOM update
+  setTimeout(()=>{
+    if(currentTab === "center") bindCenter();
+    if(currentTab === "panel") bindPanel();
+    if(currentTab === "scenes") bindScenes();
+    if(currentTab === "account") bindAccount();
+  }, 0);
+}
+
 render();
 </script>
 </body>
