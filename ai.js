@@ -1,99 +1,158 @@
-console.log("AURA X AI initializing...");
+console.log("AURA X Decision Engine v1 initializing...");
 
 const AI = {
-  detectIntent(text){
-    const t = (text||"").toLowerCase();
-    if(t.includes("кино") || t.includes("фильм") || t.includes("сериал")) return "cinema";
-    if(t.includes("сон") || t.includes("спать") || t.includes("ноч")) return "sleep";
-    if(t.includes("работ")) return "work";
-    if(t.includes("гост")) return "guests";
-    if(t.includes("уборк") || t.includes("пылесос")) return "cleaning";
-    if(t.includes("свет") || t.includes("ярк")) return "light";
-    if(t.includes("музык") || t.includes("лоф") || t.includes("джаз")) return "music";
+
+  /* ========================
+     INTENT DETECTION
+  ======================== */
+  detectIntent(text) {
+    const t = (text || "").toLowerCase();
+
+    if (t.includes("кино") || t.includes("фильм")) return "cinema";
+    if (t.includes("сон") || t.includes("ноч")) return "sleep";
+    if (t.includes("работ")) return "work";
+    if (t.includes("гост")) return "guests";
+    if (t.includes("уборк")) return "cleaning";
+    if (t.includes("свет")) return "light";
+    if (t.includes("музык")) return "music";
+
     return "auto";
   },
 
-  extractNumber(text){
-    const m = String(text||"").match(/(\d{1,3})/);
-    if(!m) return null;
-    const n = parseInt(m[1],10);
-    if(Number.isNaN(n)) return null;
-    return Math.max(0, Math.min(100, n));
+  /* ========================
+     CONTEXT ANALYSIS
+  ======================== */
+  getContext() {
+    const hour = new Date().getHours();
+    const night = hour >= 22 || hour <= 6;
+
+    return {
+      night,
+      devices: AURA.state.devices,
+      preferences: AURA.state.preferences
+    };
   },
 
-  isNight(){
-    const h = new Date().getHours();
-    return (h >= 22 || h <= 6);
-  },
+  /* ========================
+     DECISION ENGINE
+  ======================== */
+  buildPlan(text) {
 
-  buildCommand(text){
     const intent = this.detectIntent(text);
-    const n = this.extractNumber(text);
-    const night = this.isNight();
-    const d = AURA.state.devices;
+    const context = this.getContext();
+    const plan = [];
+    const reasoning = [];
 
-    const parts = [];
+    const pref = context.preferences;
 
-    if(intent === "cinema"){
-      parts.push("Алиса, включи режим кино:");
-      parts.push(`приглуши свет до ${night ? 15 : 20}%.`);
-      if(d.speaker.playing) parts.push("выключи музыку.");
-      parts.push("подготовь атмосферу для просмотра.");
-    } else if(intent === "sleep"){
-      parts.push("Алиса, режим сон:");
-      parts.push("сделай тёплый свет 20%.");
-      parts.push("включи спокойную музыку тихо.");
-      parts.push("поставь таймер 45 минут.");
-    } else if(intent === "work"){
-      parts.push("Алиса, режим работа:");
-      parts.push("сделай холодный яркий свет 80%.");
-      parts.push("включи фоновую музыку очень тихо.");
-    } else if(intent === "guests"){
-      parts.push("Алиса, режим гости:");
-      parts.push("сделай тёплый свет 45%.");
-      parts.push("включи музыку.");
-    } else if(intent === "cleaning"){
-      parts.push("Алиса, режим уборка:");
-      parts.push("яркий свет 90%.");
-      parts.push("запусти уборку.");
-      parts.push("таймер 30 минут.");
-    } else if(intent === "light"){
-      const br = (n ?? 50);
-      parts.push(`Алиса, установи яркость ${br}%.`);
-    } else if(intent === "music"){
-      parts.push("Алиса, включи фоновую музыку.");
-    } else {
-      parts.push("Алиса, создай комфортную атмосферу:");
-      parts.push(`сделай тёплый свет ${night ? 25 : 45}%.`);
-      parts.push(night ? "музыку тише." : "музыку комфортнее.");
+    // CINEMA
+    if (intent === "cinema") {
+
+      const brightness = context.night ? 15 : 25;
+
+      plan.push({
+        device: "light",
+        brightness,
+        temp: "warm"
+      });
+
+      plan.push({
+        device: "speaker",
+        volume: context.night ? 15 : pref.preferredVolume,
+        preset: "lofi"
+      });
+
+      plan.push({
+        device: "climate",
+        temperature: 22
+      });
+
+      reasoning.push("Режим кино выбран");
+      if (context.night) reasoning.push("Ночь → снижена яркость");
+
     }
 
-    let cmd = parts.join(" ").replace(/\s+/g," ").trim();
-    if(!/[.!?]$/.test(cmd)) cmd += ".";
-    return cmd;
-  },
+    // SLEEP
+    else if (intent === "sleep") {
 
-  generate(text){
-    const cmd = this.buildCommand(text);
+      plan.push({
+        device: "light",
+        brightness: 20,
+        temp: "warm"
+      });
 
-    // anti-repeat
-    if((AURA.state.lastCommand || "") === cmd){
-      const extra = this.isNight() ? " Сделай чуть тише." : " Сделай чуть ярче.";
-      const fixed = cmd.replace(/\.\s*$/,"") + extra + ".";
-      return this.commit(fixed);
+      plan.push({
+        device: "speaker",
+        volume: 10,
+        preset: "calm"
+      });
+
+      plan.push({
+        device: "climate",
+        temperature: 21
+      });
+
+      reasoning.push("Подготовка ко сну");
     }
 
-    return this.commit(cmd);
+    // WORK
+    else if (intent === "work") {
+
+      plan.push({
+        device: "light",
+        brightness: 80,
+        temp: "cold"
+      });
+
+      plan.push({
+        device: "speaker",
+        volume: 15,
+        preset: "focus"
+      });
+
+      reasoning.push("Рабочий режим");
+    }
+
+    // AUTO
+    else {
+
+      plan.push({
+        device: "light",
+        brightness: pref.preferredBrightness,
+        temp: context.night ? "warm" : "neutral"
+      });
+
+      reasoning.push("Автоматический комфортный режим");
+    }
+
+    return {
+      intent,
+      context: {
+        night: context.night
+      },
+      plan,
+      reasoning,
+      confidence: 0.87
+    };
   },
 
-  commit(command){
-    AURA.dispatch({ type:"SET_LAST_COMMAND", payload: command });
-    AURA.dispatch({ type:"ADD_HISTORY", payload: command });
-    AURA.dispatch({ type:"LOG", payload: command });
-    return command;
+  /* ========================
+     GENERATE ENTRY
+  ======================== */
+  generate(text) {
+
+    const decision = this.buildPlan(text);
+
+    AURA.dispatch({
+      type: "SET_PLAN",
+      payload: decision
+    });
+
+    return decision;
   }
+
 };
 
 window.AI = AI;
 
-console.log("AURA X AI ready");
+console.log("AURA X Decision Engine ready");
