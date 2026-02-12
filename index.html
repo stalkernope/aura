@@ -1,33 +1,273 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>AURA X</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>AURA X</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap">
 
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root{
+      --bg0:#070A12;
+      --bg1:#0B0F1A;
+      --cardA: rgba(255,255,255,.07);
+      --cardB: rgba(255,255,255,.05);
+      --line: rgba(255,255,255,.10);
+      --txt:#EAF0FF;
+      --muted: rgba(234,240,255,.62);
+      --a1:#7A2BFF;
+      --a2:#2B7CFF;
+      --glow: rgba(122,43,255,.35);
+      --glow2: rgba(43,124,255,.25);
+      --ok:#37D67A;
+      --bad:#FF5C7A;
+      --radius:18px;
+      --shadow: 0 18px 55px rgba(0,0,0,.55);
+      --tap:.985;
+    }
 
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap">
+    body{
+      margin:0;
+      font-family: Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+      color:var(--txt);
+      background:
+        radial-gradient(1200px 800px at 50% -10%, rgba(122,43,255,.24), transparent 60%),
+        radial-gradient(900px 700px at 85% 20%, rgba(43,124,255,.16), transparent 55%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      overflow:hidden;
+    }
 
-<style>
-body{
-  margin:0;
-  font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
-  background:#0b0f1a;
-  color:#EAF0FF;
-}
-#app{
-  min-height:100vh;
-}
-</style>
+    .app{ height:100vh; display:flex; flex-direction:column; }
+    .topbar{
+      padding: 14px 14px 10px;
+      padding-top: calc(14px + env(safe-area-inset-top));
+      position:sticky; top:0; z-index:20;
+      backdrop-filter: blur(14px);
+      background: linear-gradient(180deg, rgba(0,0,0,.24), transparent);
+    }
+    .row{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+
+    .brand{ display:flex; align-items:center; gap:10px; min-width:0; }
+    .logo{
+      width:36px;height:36px;border-radius:14px;
+      background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.35), transparent 55%),
+                  linear-gradient(135deg, var(--a1), var(--a2));
+      box-shadow: 0 0 22px var(--glow);
+      display:flex; align-items:center; justify-content:center;
+      flex:0 0 auto;
+    }
+    .logo svg{ width:22px;height:22px; }
+    .titleWrap{ min-width:0; }
+    .title{ font-weight:800; letter-spacing:.08em; font-size:14px; }
+    .subtitle{ font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:62vw; }
+
+    .iconBtn{
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, var(--cardA), var(--cardB));
+      color:var(--txt);
+      border-radius:14px;
+      padding:10px 12px;
+      display:flex; align-items:center; gap:8px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.12);
+      transition: transform .12s ease;
+      user-select:none;
+    }
+    .iconBtn:active{ transform: scale(var(--tap)); }
+    .pill{ font-size:12px; padding:4px 8px; border-radius:999px; border:1px solid var(--line); background: rgba(255,255,255,.04); color:var(--muted); }
+
+    .content{
+      flex:1;
+      overflow:auto;
+      padding: 6px 14px 98px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .view{ opacity:0; transform: translateY(8px); transition: opacity .22s ease, transform .22s ease; }
+    .view.show{ opacity:1; transform: translateY(0); }
+
+    .card{
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, var(--cardA), var(--cardB));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:14px;
+    }
+    .glowBorder{ position:relative; overflow:hidden; }
+    .glowBorder:before{
+      content:""; position:absolute; inset:-1px;
+      border-radius: calc(var(--radius) + 1px);
+      background:
+        radial-gradient(700px 220px at 50% 0%, rgba(122,43,255,.35), transparent 55%),
+        radial-gradient(700px 220px at 85% 55%, rgba(43,124,255,.20), transparent 55%);
+      opacity:.8; pointer-events:none; filter: blur(10px);
+    }
+    .glowBorder > *{ position:relative; z-index:1; }
+
+    .h1{ font-size:16px; margin:0 0 10px; letter-spacing:.02em; }
+    .muted{ color:var(--muted); font-size:13px; line-height:1.35; }
+
+    .input{
+      width:100%;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.18);
+      color:var(--txt);
+      padding:14px 14px;
+      font-size:15px;
+      outline:none;
+      box-shadow: 0 0 18px rgba(122,43,255,.14);
+      transition: box-shadow .18s ease, transform .12s ease;
+    }
+    .input:focus{ box-shadow: 0 0 26px var(--glow); transform: translateY(-1px); }
+
+    .btn{
+      width:100%;
+      border:none;
+      border-radius:18px;
+      padding:14px 14px;
+      font-size:15px;
+      color:white;
+      background: linear-gradient(90deg, var(--a1), var(--a2));
+      box-shadow: 0 0 26px var(--glow);
+      transition: transform .12s ease;
+      user-select:none;
+    }
+    .btn:active{ transform: scale(var(--tap)); }
+
+    .btn.secondary{
+      background: rgba(255,255,255,.06);
+      color:var(--txt);
+      border:1px solid var(--line);
+      box-shadow:none;
+    }
+
+    .kbar{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+    .kbtn{
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.05);
+      color:var(--txt);
+      user-select:none;
+      transition: transform .12s ease;
+      font-size:13px;
+    }
+    .kbtn:active{ transform: scale(var(--tap)); }
+
+    .resultBox{
+      margin-top:12px;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.18);
+      padding:12px;
+      line-height:1.45;
+      white-space:pre-wrap;
+    }
+
+    .actions{ display:flex; gap:10px; margin-top:10px; }
+    .actions .btn{ flex:1; padding:12px; border-radius:16px; font-size:14px; }
+
+    .grid2{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    .chip{
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.05);
+      color:var(--txt);
+      border-radius:16px;
+      padding:12px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .chip small{ color:var(--muted); display:block; margin-top:2px; }
+
+    .badge{
+      display:inline-flex; align-items:center; gap:7px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.05);
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:12px; color:var(--muted);
+    }
+    .dot{ width:8px;height:8px;border-radius:99px;background: var(--bad); }
+    .dot.ok{ background: var(--ok); }
+
+    .nav{
+      position:fixed; left:0; right:0; bottom:0;
+      padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+      backdrop-filter: blur(14px);
+      background: linear-gradient(180deg, transparent, rgba(0,0,0,.35));
+      z-index:50;
+    }
+    .navBar{
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      border-radius:22px;
+      display:flex;
+      overflow:hidden;
+      box-shadow: var(--shadow);
+    }
+    .tab{
+      flex:1;
+      padding:10px 8px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:4px;
+      color:var(--muted);
+      user-select:none;
+      transition: background .18s ease, color .18s ease, transform .12s ease;
+    }
+    .tab:active{ transform: scale(var(--tap)); }
+    .tab strong{ font-size:11px; font-weight:700; letter-spacing:.02em; }
+    .tab.active{
+      color:var(--txt);
+      background:
+        radial-gradient(180px 90px at 50% 0%, rgba(122,43,255,.18), transparent 60%),
+        radial-gradient(180px 90px at 60% 60%, rgba(43,124,255,.14), transparent 60%),
+        rgba(255,255,255,.05);
+    }
+
+    .sp12{ height:12px; }
+  </style>
 </head>
+
 <body>
+  <div class="app" id="appRoot">
+    <div class="topbar">
+      <div class="row">
+        <div class="brand">
+          <div class="logo">
+            <svg viewBox="0 0 100 100" aria-hidden="true">
+              <defs>
+                <linearGradient id="gA" x1="0" x2="1">
+                  <stop offset="0%" stop-color="#7A2BFF"/>
+                  <stop offset="100%" stop-color="#2B7CFF"/>
+                </linearGradient>
+              </defs>
+              <polygon points="50,10 90,90 75,90 65,70 35,70 25,90 10,90" fill="url(#gA)"/>
+            </svg>
+          </div>
+          <div class="titleWrap">
+            <div class="title">AURA X</div>
+            <div class="subtitle" id="subtitle">Smart Home Center</div>
+          </div>
+        </div>
+        <div class="iconBtn" id="helpBtn">?</div>
+      </div>
+    </div>
 
-<div id="app"></div>
+    <div class="content">
+      <div class="view" id="app"></div>
+    </div>
 
-<script src="core.js"></script>
-<script src="ai.js"></script>
-<script src="ui.js"></script>
+    <div class="nav">
+      <div class="navBar" id="tabs"></div>
+    </div>
+  </div>
 
+  <script src="core.js"></script>
+  <script src="ai.js"></script>
+  <script src="ui.js"></script>
 </body>
 </html>
