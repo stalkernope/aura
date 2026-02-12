@@ -1,148 +1,95 @@
-/* =========================
-   AURA X — AI ENGINE PRO
-========================= */
-
 console.log("AURA X AI initializing...");
 
 const AI = {
-
-  /* =========================
-     INTENT DETECTION
-  ========================= */
-  detectIntent(text) {
-    const t = text.toLowerCase();
-
-    if (t.includes("кино") || t.includes("фильм"))
-      return "cinema";
-
-    if (t.includes("сон") || t.includes("спать"))
-      return "sleep";
-
-    if (t.includes("работ"))
-      return "work";
-
-    if (t.includes("гост"))
-      return "guests";
-
-    if (t.includes("уборк") || t.includes("пылесос"))
-      return "cleaning";
-
-    if (t.includes("свет"))
-      return "light";
-
-    if (t.includes("музык"))
-      return "music";
-
+  detectIntent(text){
+    const t = (text||"").toLowerCase();
+    if(t.includes("кино") || t.includes("фильм") || t.includes("сериал")) return "cinema";
+    if(t.includes("сон") || t.includes("спать") || t.includes("ноч")) return "sleep";
+    if(t.includes("работ")) return "work";
+    if(t.includes("гост")) return "guests";
+    if(t.includes("уборк") || t.includes("пылесос")) return "cleaning";
+    if(t.includes("свет") || t.includes("ярк")) return "light";
+    if(t.includes("музык") || t.includes("лоф") || t.includes("джаз")) return "music";
     return "auto";
   },
 
-  /* =========================
-     NUMBER PARSER
-  ========================= */
-  extractNumbers(text) {
-    const numbers = text.match(/\d+/g);
-    return numbers ? numbers.map(n => parseInt(n)) : [];
+  extractNumber(text){
+    const m = String(text||"").match(/(\d{1,3})/);
+    if(!m) return null;
+    const n = parseInt(m[1],10);
+    if(Number.isNaN(n)) return null;
+    return Math.max(0, Math.min(100, n));
   },
 
-  /* =========================
-     CONTEXT ENGINE
-  ========================= */
-  getContext() {
-    const hour = new Date().getHours();
-    const night = (hour >= 22 || hour <= 6);
-
-    return {
-      night,
-      devices: AURA.state.devices
-    };
+  isNight(){
+    const h = new Date().getHours();
+    return (h >= 22 || h <= 6);
   },
 
-  /* =========================
-     BUILD COMMAND
-  ========================= */
-  buildCommand(text) {
-
+  buildCommand(text){
     const intent = this.detectIntent(text);
-    const numbers = this.extractNumbers(text);
-    const context = this.getContext();
-    const d = context.devices;
+    const n = this.extractNumber(text);
+    const night = this.isNight();
+    const d = AURA.state.devices;
 
-    let parts = [];
+    const parts = [];
 
-    if (intent === "cinema") {
+    if(intent === "cinema"){
       parts.push("Алиса, включи режим кино:");
-      parts.push("приглуши свет до 20%.");
-      if (d.speaker.playing)
-        parts.push("выключи музыку.");
-    }
-
-    else if (intent === "sleep") {
+      parts.push(`приглуши свет до ${night ? 15 : 20}%.`);
+      if(d.speaker.playing) parts.push("выключи музыку.");
+      parts.push("подготовь атмосферу для просмотра.");
+    } else if(intent === "sleep"){
       parts.push("Алиса, режим сон:");
       parts.push("сделай тёплый свет 20%.");
+      parts.push("включи спокойную музыку тихо.");
       parts.push("поставь таймер 45 минут.");
-    }
-
-    else if (intent === "work") {
+    } else if(intent === "work"){
       parts.push("Алиса, режим работа:");
-      parts.push("включи яркий свет 80%.");
-      parts.push("включи фоновую музыку тихо.");
-    }
-
-    else if (intent === "guests") {
+      parts.push("сделай холодный яркий свет 80%.");
+      parts.push("включи фоновую музыку очень тихо.");
+    } else if(intent === "guests"){
       parts.push("Алиса, режим гости:");
-      parts.push("сделай тёплый свет 40%.");
+      parts.push("сделай тёплый свет 45%.");
       parts.push("включи музыку.");
-    }
-
-    else if (intent === "cleaning") {
+    } else if(intent === "cleaning"){
       parts.push("Алиса, режим уборка:");
-      parts.push("включи яркий свет 100%.");
-      parts.push("запусти пылесос.");
+      parts.push("яркий свет 90%.");
+      parts.push("запусти уборку.");
+      parts.push("таймер 30 минут.");
+    } else if(intent === "light"){
+      const br = (n ?? 50);
+      parts.push(`Алиса, установи яркость ${br}%.`);
+    } else if(intent === "music"){
+      parts.push("Алиса, включи фоновую музыку.");
+    } else {
+      parts.push("Алиса, создай комфортную атмосферу:");
+      parts.push(`сделай тёплый свет ${night ? 25 : 45}%.`);
+      parts.push(night ? "музыку тише." : "музыку комфортнее.");
     }
 
-    else if (intent === "light") {
-      let brightness = numbers[0] || 50;
-      parts.push(`Алиса, установи яркость ${brightness}%.`);
-    }
-
-    else if (intent === "music") {
-      parts.push("Алиса, включи музыку.");
-    }
-
-    else {
-      parts.push("Алиса, создай комфортную атмосферу.");
-    }
-
-    let command = parts.join(" ");
-
-    /* =========================
-       ANTI-REPEAT
-    ========================= */
-    if (AURA.state.lastCommand === command)
-      command += " Немного измени атмосферу.";
-
-    return command;
+    let cmd = parts.join(" ").replace(/\s+/g," ").trim();
+    if(!/[.!?]$/.test(cmd)) cmd += ".";
+    return cmd;
   },
 
-  /* =========================
-     GENERATE ENTRY POINT
-  ========================= */
-  generate(text) {
+  generate(text){
+    const cmd = this.buildCommand(text);
 
-    const command = this.buildCommand(text);
+    // anti-repeat
+    if((AURA.state.lastCommand || "") === cmd){
+      const extra = this.isNight() ? " Сделай чуть тише." : " Сделай чуть ярче.";
+      const fixed = cmd.replace(/\.\s*$/,"") + extra + ".";
+      return this.commit(fixed);
+    }
 
-    AURA.state.lastCommand = command;
+    return this.commit(cmd);
+  },
 
-    AURA.dispatch({
-      type: "ADD_HISTORY",
-      payload: command
-    });
-
-    AURA.dispatch({
-      type: "LOG",
-      payload: command
-    });
-
+  commit(command){
+    AURA.dispatch({ type:"SET_LAST_COMMAND", payload: command });
+    AURA.dispatch({ type:"ADD_HISTORY", payload: command });
+    AURA.dispatch({ type:"LOG", payload: command });
     return command;
   }
 };
