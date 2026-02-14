@@ -44,25 +44,28 @@
     }
     .topHero{
       position:relative;
-      height: 300px;
+      height: 420px;
       width:100%;
-      background: #10121b;
+      overflow:hidden;
     }
     .topHero .img{
-      position:absolute; inset:0;
-      background-image: url("./assets/hero.jpg");
-      background-size: cover;
-      background-position: center;
-      transform: scale(1.04);
-      filter: blur(0px);
-    }
+    position:absolute;
+    inset:0;
+    background-image: url("./assets/hero.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transform: scale(1.05);
+}
     .topHero .veil{
-      position:absolute; inset:0;
-      background:
-        radial-gradient(1200px 260px at 50% 92%, rgba(11,12,18,1) 10%, rgba(11,12,18,.75) 55%, rgba(11,12,18,.15) 100%),
-        linear-gradient(180deg, rgba(11,12,18,.06) 0%, rgba(11,12,18,.42) 45%, rgba(11,12,18,1) 100%);
-    }
-
+    position:absolute;
+    inset:0;
+    background:
+        linear-gradient(to bottom,
+            rgba(8,10,18,0.2) 0%,
+            rgba(8,10,18,0.6) 60%,
+            rgba(8,10,18,1) 100%);
+}
     .content{
       position:relative;
       padding: 10px 16px calc(120px + var(--safeB)) 16px;
