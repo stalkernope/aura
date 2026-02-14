@@ -1,348 +1,306 @@
-/* core.js — AURA X core (navigation + sheets + local state) */
-
-(() => {
-  const { qs, qsa, setHTML, icons } = window.UI;
-
-  const state = {
-    tab: "home",
-    notifications: 8,
-    houseName: "Мой дом",
-    devicesCount: 0,
-    status: "Всё спокойно",
-    lastAI: "",
-  };
-
-  const persistKey = "AURA_X_STATE_V1";
-
-  function load() {
-    try {
-      const raw = localStorage.getItem(persistKey);
-      if (!raw) return;
-      const obj = JSON.parse(raw);
-      Object.assign(state, obj || {});
-    } catch {}
-  }
-  function save() {
-    try { localStorage.setItem(persistKey, JSON.stringify(state)); } catch {}
-  }
-
-  function setTab(tab) {
-    state.tab = tab;
-    save();
-    render();
-  }
-
-  // ===== sheet =====
-  const sheetBackdrop = () => qs("#sheetBackdrop");
-  const sheet = () => qs("#sheet");
-  const openSheet = (title = "Добавить") => {
-    qs("#sheetTitle").textContent = title;
-    sheetBackdrop().classList.add("show");
-    sheet().classList.add("show");
-  };
-  const closeSheet = () => {
-    sheetBackdrop().classList.remove("show");
-    sheet().classList.remove("show");
-  };
-
-  function bind() {
-    // header icons
-    setHTML(qs("#settingsBtn"), icons.gear);
-    setHTML(qs("#addBtn"), icons.plus);
-
-    qs("#settingsBtn").addEventListener("click", () => openSheet("Настройки"));
-    qs("#addBtn").addEventListener("click", () => openSheet("Добавить"));
-
-    // quick row
-    qs("#quickRow").addEventListener("click", (e) => {
-      const btn = e.target.closest("[data-quick]");
-      if (!btn) return;
-      const t = btn.getAttribute("data-quick");
-      if (t === "new") openSheet("Что нового");
-      if (t === "bell") openSheet("Уведомления");
-      if (t === "alarm") openSheet("Будильники");
-    });
-
-    // tiles
-    qs("#tileAlice").addEventListener("click", () => openSheet("Устройства с Алисой"));
-    qs("#tileSmart").addEventListener("click", () => openSheet("Устройства умного дома"));
-
-    // bottom nav
-    qs("#bottomNav").addEventListener("click", (e) => {
-      const item = e.target.closest(".navItem");
-      if (!item) return;
-      const tab = item.getAttribute("data-tab");
-      if (tab) setTab(tab);
-    });
-
-    // fab
-    setHTML(qs("#fabBtn"), icons.aura);
-    qs("#fabBtn").addEventListener("click", () => {
-      openSheet("Добавить");
-    });
-
-    // sheet close
-    setHTML(qs("#sheetClose"), `<div style="width:18px;height:18px;position:relative">
-      <span style="position:absolute;left:50%;top:50%;width:18px;height:2px;background:rgba(255,255,255,.70);transform:translate(-50%,-50%) rotate(45deg);border-radius:2px"></span>
-      <span style="position:absolute;left:50%;top:50%;width:18px;height:2px;background:rgba(255,255,255,.70);transform:translate(-50%,-50%) rotate(-45deg);border-radius:2px"></span>
-    </div>`);
-    qs("#sheetClose").addEventListener("click", closeSheet);
-    sheetBackdrop().addEventListener("click", closeSheet);
-
-    // prevent scroll bounce weird
-    document.addEventListener("touchmove", (e) => {
-      if (sheet().classList.contains("show")) return;
-    }, { passive: true });
-  }
-
-  function renderQuickRow() {
-    const row = qs("#quickRow");
-    row.innerHTML = "";
-
-    // Featured "Новое"
-    const featured = document.createElement("div");
-    featured.className = "qbtn featured";
-    featured.setAttribute("data-quick", "new");
-    featured.innerHTML = `<div class="label">Новое</div>` + `<div class="badge">${state.notifications}</div>`;
-    row.appendChild(featured);
-
-    const bell = document.createElement("div");
-    bell.className = "qbtn";
-    bell.setAttribute("data-quick", "bell");
-    bell.innerHTML = icons.bell;
-    row.appendChild(bell);
-
-    const alarm = document.createElement("div");
-    alarm.className = "qbtn";
-    alarm.setAttribute("data-quick", "alarm");
-    alarm.innerHTML = icons.alarm;
-    row.appendChild(alarm);
-  }
-
-  function renderTilesPics(){
-    setHTML(qs("#tileAlicePic"), icons.devicePack("alice"));
-    setHTML(qs("#tileSmartPic"), icons.devicePack("smart"));
-  }
-
-  function renderBottomNav(){
-    setHTML(qs("#navHomeIco"), icons.home);
-    setHTML(qs("#navScenesIco"), icons.scenes);
-    setHTML(qs("#navCatalogIco"), icons.catalog);
-    setHTML(qs("#navTipsIco"), icons.tips);
-
-    qsa(".navItem").forEach(el => {
-      const tab = el.getAttribute("data-tab");
-      el.classList.toggle("active", tab === state.tab);
-      el.classList.toggle("pos", tab === "home");
-      // “pill” только у активного — как в фотке (слева подсветка)
-      const pill = el.querySelector(".pill");
-      if (pill) pill.style.display = (tab === state.tab) ? "block" : "none";
-    });
-  }
-
-  function renderHeader() {
-    qs("#homeTitle").textContent = state.houseName;
-    qs("#homeSub").textContent = state.devicesCount ? `Устройств: ${state.devicesCount}` : "Пока нет устройств";
-    qs("#statusText").textContent = state.status;
-  }
-
-  function sheetContentFor(title){
-    const list = qs("#sheetList");
-
-    const mkRow = (icoHtml, title, sub, action) => {
-      const row = document.createElement("div");
-      row.className = "row";
-      row.innerHTML = `
-        <div class="rIco">${icoHtml}</div>
-        <div class="rText">
-          <div class="rTitle">${title}</div>
-          <div class="rSub">${sub}</div>
-        </div>
-        <div class="chev" aria-hidden="true">›</div>
-      `;
-      row.addEventListener("click", () => {
-        closeSheet();
-        action && action();
-      });
-      return row;
-    };
-
-    list.innerHTML = "";
-
-    if (title === "Добавить") {
-      list.appendChild(mkRow(icons.aura, "Устройство с Алисой", "Подключение через аккаунт Яндекса (позже)", () => {
-        state.status = "Режим: подключение (демо)";
-        save(); render();
-      }));
-      list.appendChild(mkRow(icons.catalog, "Устройство умного дома", "Свет, розетки, пылесос, ТВ и другое", () => {
-        state.status = "Открыт каталог устройств (демо)";
-        save(); render();
-      }));
-      list.appendChild(mkRow(icons.scenes, "Сценарий", "Создать новый сценарий", () => setTab("scenes")));
-      list.appendChild(mkRow(icons.home, "Дом", "Переименовать, комнаты, гости", () => {
-        const n = prompt("Название дома", state.houseName);
-        if (n && n.trim().length > 0) state.houseName = n.trim();
-        save(); render();
-      }));
-      list.appendChild(mkRow(icons.tips, "Людей", "Owner / Guest (демо)", () => {
-        state.status = "Профили: Owner/Guest (демо)";
-        save(); render();
-      }));
-      list.appendChild(mkRow(icons.bell, "История", "События дома и устройств (демо)", () => setTab("tips")));
-    }
-    else if (title === "Настройки") {
-      list.appendChild(mkRow(icons.gear, "Интерфейс", "Скоро: темы, акценты, шрифты", () => {}));
-      list.appendChild(mkRow(icons.home, "Дом", "Название, комнаты, устройства", () => {}));
-      list.appendChild(mkRow(icons.bell, "Уведомления", "Предупреждения и важные события", () => {}));
-    }
-    else if (title === "Уведомления") {
-      list.appendChild(mkRow(icons.bell, "Пока пусто", "Здесь будут события и алерты", () => {}));
-    }
-    else if (title === "Будильники") {
-      list.appendChild(mkRow(icons.alarm, "Голосовая команда", "«Алиса, буди меня по будням в 8 утра»", () => {}));
-      list.appendChild(mkRow(icons.alarm, "Поставь Мо́ю волну", "«Поставь Мою волну на будильник»", () => {}));
-      list.appendChild(mkRow(icons.alarm, "Громкость", "«Сделай громкость будильника на 10»", () => {}));
-    }
-    else if (title === "Что нового") {
-      list.appendChild(mkRow(icons.tips, "Интересные сценарии", "Каталог идей под твой дом", () => setTab("scenes")));
-      list.appendChild(mkRow(icons.catalog, "Каталог устройств", "Что купить и как подключить", () => setTab("catalog")));
-    }
-    else if (title === "Устройства с Алисой") {
-      list.appendChild(mkRow(icons.aura, "Подключить Яндекс", "OAuth позже. Сейчас демо-режим.", () => {
-        state.status = "Алиса: не подключена (демо)";
-        save(); render();
-      }));
-      list.appendChild(mkRow(icons.catalog, "Список брендов", "Xiaomi, Aqara, Samsung… (демо)", () => {}));
-    }
-    else if (title === "Устройства умного дома") {
-      list.appendChild(mkRow(icons.catalog, "Поиск Zigbee", "Скоро (демо)", () => {}));
-      list.appendChild(mkRow(icons.catalog, "Поиск Matter", "Скоро (демо)", () => {}));
-      list.appendChild(mkRow(icons.catalog, "Настроить вручную", "Добавить устройство без поиска", () => {}));
-    }
-    else {
-      list.appendChild(mkRow(icons.tips, "Раздел в разработке", "Сделаем 1-в-1 + ИИ-фишки", () => {}));
-    }
-  }
-
-  function renderBodyByTab(){
-    // сейчас оставляем “главную” как на фото,
-    // остальные вкладки — короткий демо-режим через состояние (позже сделаем отдельные экраны)
-    const emptyTitle = qs("#emptyTitle");
-    const emptySub = qs("#emptySub");
-    const aiBar = qs("#aiBar");
-
-    if (state.tab === "home") {
-      emptyTitle.textContent = state.devicesCount ? `Устройств: ${state.devicesCount}` : "Пока нет устройств";
-      emptySub.textContent = "Добавьте устройство и управляйте им из приложения";
-      aiBar.classList.remove("hidden");
-      return;
-    }
-    if (state.tab === "scenes") {
-      emptyTitle.textContent = "Сценарии";
-      emptySub.textContent = "Каталог идей + ваши сценарии (добавим 1-в-1)";
-      aiBar.classList.add("hidden");
-      return;
-    }
-    if (state.tab === "catalog") {
-      emptyTitle.textContent = "Каталог";
-      emptySub.textContent = "Устройства, бренды, совместимость (добавим 1-в-1)";
-      aiBar.classList.add("hidden");
-      return;
-    }
-    if (state.tab === "tips") {
-      emptyTitle.textContent = "Советы";
-      emptySub.textContent = "Рекомендации и события (добавим 1-в-1)";
-      aiBar.classList.add("hidden");
-      return;
-    }
-  }
-
-  function render() {
-    renderHeader();
-    renderQuickRow();
-    renderTilesPics();
-    renderBottomNav();
-    renderBodyByTab();
-  }
-
-  // Hook sheet title changes to build content
-  const _openSheet = (t) => {
-    // title already set inside openSheet, but build content here
-    sheetContentFor(t);
-  };
-
-  // Patch openSheet to also render content
-  const oldOpenSheet = window.openSheet;
-  window.openSheet = (title) => { (oldOpenSheet ? oldOpenSheet(title) : null); _openSheet(title); };
-
-  // expose openSheet/closeSheet for other scripts (ai.js)
-  window.AURA = {
-    state,
-    setTab,
-    openSheet(title){
-      qs("#sheetTitle").textContent = title;
-      sheetContentFor(title);
-      sheetBackdrop().classList.add("show");
-      sheet().classList.add("show");
-    },
-    closeSheet
-  };
-
-  // init
-  load();
-  bind();
-
-  // connect openSheet calls in this module
-  // (we used local functions, so also wire them)
-  function sheetBackdrop(){ return qs("#sheetBackdrop"); }
-  function sheet(){ return qs("#sheet"); }
-  function closeSheet(){
-    sheetBackdrop().classList.remove("show");
-    sheet().classList.remove("show");
-  }
-  function openSheet(title="Добавить"){
-    qs("#sheetTitle").textContent = title;
-    sheetContentFor(title);
-    sheetBackdrop().classList.add("show");
-    sheet().classList.add("show");
-  }
-
-  // rebind buttons to local openSheet
-  qs("#settingsBtn").onclick = () => openSheet("Настройки");
-  qs("#addBtn").onclick = () => openSheet("Добавить");
-  qs("#fabBtn").onclick = () => openSheet("Добавить");
-
-  qs("#sheetClose").onclick = closeSheet;
-  qs("#sheetBackdrop").onclick = closeSheet;
-
-  // quickRow clicks
-  qs("#quickRow").onclick = (e) => {
-    const btn = e.target.closest("[data-quick]");
-    if (!btn) return;
-    const t = btn.getAttribute("data-quick");
-    if (t === "new") openSheet("Что нового");
-    if (t === "bell") openSheet("Уведомления");
-    if (t === "alarm") openSheet("Будильники");
-  };
-
-  // tiles
-  qs("#tileAlice").onclick = () => openSheet("Устройства с Алисой");
-  qs("#tileSmart").onclick = () => openSheet("Устройства умного дома");
-
-  // bottom nav
-  qs("#bottomNav").onclick = (e) => {
-    const item = e.target.closest(".navItem");
-    if (!item) return;
-    const tab = item.getAttribute("data-tab");
-    if (tab) setTab(tab);
-  };
-
-  // initial sheet content not needed
-  render();
-
-  // small UX: close sheet on ESC
-  window.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") closeSheet();
-  });
-
-})();
+const APP_HTML = [
+"<!doctype html>",
+"<html lang=\"ru\">",
+"<head>",
+"  <meta charset=\"utf-8\" />",
+"  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\" />",
+"  <meta name=\"theme-color\" content=\"#0b0f16\" />",
+"  <title>AURA X</title>",
+"  <style>",
+"    :root{",
+"      --bg:#0b0f16;",
+"      --card:#111826cc;",
+"      --card2:#0f1623cc;",
+"      --stroke:rgba(255,255,255,.08);",
+"      --text:rgba(255,255,255,.92);",
+"      --muted:rgba(255,255,255,.62);",
+"      --muted2:rgba(255,255,255,.45);",
+"      --violet:#7c5cff;",
+"      --violet2:#a58bff;",
+"      --green:#1ed760;",
+"      --shadow:0 18px 60px rgba(0,0,0,.55);",
+"      --r16:16px;",
+"      --r20:20px;",
+"      --r24:24px;",
+"      --safeTop: env(safe-area-inset-top);",
+"      --safeBot: env(safe-area-inset-bottom);",
+"    }",
+"    *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}",
+"    html,body{height:100%; margin:0; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,\"SF Pro Display\",\"SF Pro Text\",Inter,system-ui,Segoe UI,Roboto,Arial;}",
+"    a{color:inherit; text-decoration:none;}",
+"    .app{min-height:100%; display:flex; flex-direction:column; overflow:hidden;}",
+"",
+"    /* ===== HERO ===== */",
+"    .topHero{position:relative; height:320px; width:100%; background:#0b0f16;}",
+"    .topHero .img{position:absolute; inset:0; background-image:url(\"./assets/hero.jpg\"); background-size:cover; background-position:center; transform:scale(1.06);}",
+"    .topHero .veil{position:absolute; inset:0; background:",
+"      radial-gradient(1200px 420px at 20% 0%, rgba(124,92,255,.20), rgba(0,0,0,0) 60%),",
+"      linear-gradient(to bottom, rgba(11,15,22,.05), rgba(11,15,22,.65) 55%, rgba(11,15,22,.92) 82%, rgba(11,15,22,1));",
+"      backdrop-filter: blur(0px);",
+"    }",
+"",
+"    /* ===== CONTENT SHEET ===== */",
+"    .sheet{position:relative; margin-top:-96px; padding:0 16px calc(110px + var(--safeBot));}",
+"    .headerRow{display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin-bottom:14px;}",
+"    .titleBlock{display:flex; flex-direction:column; gap:6px;}",
+"    .h1{font-size:44px; line-height:1.0; letter-spacing:-.02em; font-weight:860;}",
+"    .sub{font-size:15px; color:var(--muted2); font-weight:650;}",
+"",
+"    .rightRow{display:flex; align-items:center; gap:10px;}",
+"    .pill{display:inline-flex; align-items:center; gap:10px; padding:10px 14px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid var(--stroke); box-shadow:0 10px 35px rgba(0,0,0,.25); backdrop-filter: blur(10px);}",
+"    .dot{width:10px; height:10px; border-radius:50%; background:var(--green); box-shadow:0 0 0 6px rgba(30,215,96,.12);}",
+"    .pill span{font-size:14px; color:rgba(255,255,255,.78); font-weight:700;}",
+"",
+"    .iconBtn{width:46px; height:46px; border-radius:16px; background:rgba(255,255,255,.06); border:1px solid var(--stroke); display:grid; place-items:center; box-shadow:0 16px 40px rgba(0,0,0,.35); backdrop-filter: blur(10px);}",
+"    .iconBtn:active{transform:translateY(1px);}",
+"",
+"    /* ===== ICONS (SVG as background) ===== */",
+"    .ico{width:22px; height:22px; background-size:contain; background-repeat:no-repeat; background-position:center; opacity:.92;}",
+"    .ico.gear{background-image:url(\"./assets/icons/gear.svg\");}",
+"    .ico.plus{background-image:url(\"./assets/icons/plus.svg\");}",
+"    .ico.search{background-image:url(\"./assets/icons/search.svg\");}",
+"    .ico.more{background-image:url(\"./assets/icons/more.svg\");}",
+"",
+"    /* ===== MAIN CARD ===== */",
+"    .card{background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03)); border:1px solid var(--stroke); border-radius:24px; box-shadow:var(--shadow); backdrop-filter: blur(14px);}",
+"    .mainCard{padding:18px;}",
+"    .centerTitle{font-size:22px; font-weight:860; letter-spacing:-.01em; text-align:center;}",
+"    .centerText{margin-top:8px; color:var(--muted); font-size:14px; text-align:center; line-height:1.35;}",
+"",
+"    .grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px;}",
+"    .miniCard{position:relative; padding:14px; border-radius:18px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); overflow:hidden; min-height:136px;}",
+"    .miniCard:active{transform:translateY(1px);}",
+"    .miniTop{display:flex; align-items:center; justify-content:space-between;}",
+"    .miniImg{width:64px; height:64px; border-radius:16px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10); overflow:hidden; display:grid; place-items:center;}",
+"    .miniImg img{width:100%; height:100%; object-fit:cover; display:block; opacity:.95;}",
+"    .miniH{margin-top:10px; font-size:18px; font-weight:900; letter-spacing:-.01em; line-height:1.1;}",
+"    .miniP{margin-top:8px; font-size:12.8px; color:var(--muted); line-height:1.25;}",
+"",
+"    /* subtle glow */",
+"    .miniCard::before{content:\"\"; position:absolute; inset:auto -60px -60px auto; width:160px; height:160px; background:radial-gradient(circle at 30% 30%, rgba(124,92,255,.35), rgba(124,92,255,0) 70%); filter:blur(6px);}",
+"",
+"    /* ===== AI COMMAND ===== */",
+"    .aiBox{margin-top:14px; padding:14px; border-radius:20px; background:rgba(0,0,0,.18); border:1px solid rgba(255,255,255,.08);}",
+"    .aiTitle{font-size:16px; font-weight:900; letter-spacing:-.01em; margin-bottom:10px;}",
+"    .aiRow{display:flex; gap:10px; align-items:center;}",
+"    .aiInput{flex:1; height:44px; border-radius:14px; padding:0 14px; border:1px solid rgba(255,255,255,.10); background:rgba(255,255,255,.05); color:var(--text); outline:none; font-size:14px;}",
+"    .aiInput::placeholder{color:rgba(255,255,255,.45);}",
+"    .aiBtn{height:44px; padding:0 14px; border-radius:14px; border:0; color:white; font-weight:900; letter-spacing:-.01em; background:linear-gradient(90deg, rgba(124,92,255,1), rgba(84,140,255,1)); box-shadow:0 18px 50px rgba(124,92,255,.25);}",
+"    .aiBtn:active{transform:translateY(1px);}",
+"",
+"    /* ===== FLOAT AI BUTTON (center orb like in screenshots) ===== */",
+"    .fab{position:fixed; left:50%; transform:translateX(-50%); bottom:calc(26px + var(--safeBot)); width:72px; height:72px; border-radius:50%; background:radial-gradient(circle at 30% 30%, rgba(184,150,255,1), rgba(124,92,255,1) 55%, rgba(84,140,255,1)); box-shadow:0 22px 70px rgba(124,92,255,.40); border:1px solid rgba(255,255,255,.18); display:grid; place-items:center; z-index:50;}",
+"    .fab:active{transform:translateX(-50%) translateY(1px);}",
+"    .fabInner{width:44px; height:44px; border-radius:14px; background:rgba(0,0,0,.15); border:1px solid rgba(255,255,255,.14); display:grid; place-items:center;}",
+"    .fabBrain{width:22px; height:22px; border-radius:7px; background:rgba(255,255,255,.10); box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);}",
+"",
+"    /* ===== BOTTOM NAV ===== */",
+"    .nav{position:fixed; left:0; right:0; bottom:0; padding:10px 14px calc(10px + var(--safeBot)); background:linear-gradient(to top, rgba(11,15,22,.96), rgba(11,15,22,.60)); backdrop-filter: blur(16px); border-top:1px solid rgba(255,255,255,.06); z-index:40;}",
+"    .navRow{display:flex; justify-content:space-between; align-items:flex-end; gap:10px;}",
+"    .navItem{width:88px; display:flex; flex-direction:column; align-items:center; gap:7px; padding:10px 8px; border-radius:18px; color:rgba(255,255,255,.55); font-weight:800; font-size:12.5px;}",
+"    .navItem.active{color:rgba(255,255,255,.92); background:rgba(124,92,255,.16); border:1px solid rgba(124,92,255,.20);}",
+"    .navIcon{width:22px; height:22px; background-size:contain; background-repeat:no-repeat; background-position:center; opacity:.90;}",
+"    .navIcon.home{background-image:url(\"./assets/icons/home.svg\");}",
+"    .navIcon.scenes{background-image:url(\"./assets/icons/scenes.svg\");}",
+"    .navIcon.catalog{background-image:url(\"./assets/icons/catalog.svg\");}",
+"    .navIcon.tips{background-image:url(\"./assets/icons/tips.svg\");}",
+"    .navItem:active{transform:translateY(1px);}",
+"",
+"    /* ===== SIMPLE VIEW SWITCH ===== */",
+"    .view{display:none;}",
+"    .view.active{display:block;}",
+"    .mutedBlock{padding:18px; margin-top:14px; color:rgba(255,255,255,.55); font-size:14px; line-height:1.35;}",
+"",
+"  </style>",
+"</head>",
+"<body>",
+"  <div class=\"app\">",
+"    <div class=\"topHero\">",
+"      <div class=\"img\"></div>",
+"      <div class=\"veil\"></div>",
+"    </div>",
+"",
+"    <div class=\"sheet\">",
+"      <div class=\"headerRow\">",
+"        <div class=\"titleBlock\">",
+"          <div class=\"h1\">Мой<br/>дом</div>",
+"          <div class=\"sub\">Пока нет устройств</div>",
+"        </div>",
+"        <div class=\"rightRow\">",
+"          <div class=\"pill\" id=\"statusPill\">",
+"            <div class=\"dot\"></div>",
+"            <span>Всё спокойно</span>",
+"          </div>",
+"          <button class=\"iconBtn\" id=\"btnSettings\" aria-label=\"Настройки\">",
+"            <div class=\"ico gear\"></div>",
+"          </button>",
+"          <button class=\"iconBtn\" id=\"btnAdd\" aria-label=\"Добавить\">",
+"            <div class=\"ico plus\"></div>",
+"          </button>",
+"        </div>",
+"      </div>",
+"",
+"      <div class=\"card mainCard view active\" id=\"viewHome\">",
+"        <div class=\"centerTitle\">Пока нет устройств</div>",
+"        <div class=\"centerText\">Добавьте устройство и управляйте им из приложения</div>",
+"",
+"        <div class=\"grid2\">",
+"          <div class=\"miniCard\" id=\"cardAlice\">",
+"            <div class=\"miniTop\">",
+"              <div class=\"miniImg\"><img alt=\"\" src=\"./assets/hero.jpg\" style=\"filter:saturate(1.15) contrast(1.05);\"/></div>",
+"            </div>",
+"            <div class=\"miniH\">Устройства с<br/>Алисой</div>",
+"            <div class=\"miniP\">Яндекс, Xiaomi, JBL, LG, Elari, Irbis, Dexp, Prestigio</div>",
+"          </div>",
+"          <div class=\"miniCard\" id=\"cardSmart\">",
+"            <div class=\"miniTop\">",
+"              <div class=\"miniImg\"><img alt=\"\" src=\"./assets/hero.jpg\" style=\"filter:hue-rotate(30deg) saturate(1.35) contrast(1.05);\"/></div>",
+"            </div>",
+"            <div class=\"miniH\">Устройства<br/>умного дома</div>",
+"            <div class=\"miniP\">Свет, розетки, пылесос, телевизор и другие</div>",
+"          </div>",
+"        </div>",
+"",
+"        <div class=\"aiBox\">",
+"          <div class=\"aiTitle\">ИИ-команда для Алисы</div>",
+"          <div class=\"aiRow\">",
+"            <input class=\"aiInput\" id=\"aiText\" placeholder=\"Например: включи свет в гостиной на 30%\" />",
+"            <button class=\"aiBtn\" id=\"aiGo\">Собрать</button>",
+"          </div>",
+"          <div class=\"mutedBlock\" id=\"aiResult\" style=\"padding:12px 2px 0 2px; margin:0;\">",
+"            ",
+"          </div>",
+"        </div>",
+"      </div>",
+"",
+"      <div class=\"view\" id=\"viewScenes\">",
+"        <div class=\"card mutedBlock\">",
+"          <div style=\"font-weight:900; font-size:18px; margin-bottom:8px;\">Сценарии</div>",
+"          <div style=\"color:rgba(255,255,255,.60)\">Тут будут твои сценарии и рекомендованные. Пока заглушка.</div>",
+"        </div>",
+"      </div>",
+"",
+"      <div class=\"view\" id=\"viewCatalog\">",
+"        <div class=\"card mutedBlock\">",
+"          <div style=\"font-weight:900; font-size:18px; margin-bottom:8px;\">Каталог</div>",
+"          <div style=\"color:rgba(255,255,255,.60)\">Каталог устройств/сценариев. Пока заглушка.</div>",
+"        </div>",
+"      </div>",
+"",
+"      <div class=\"view\" id=\"viewTips\">",
+"        <div class=\"card mutedBlock\">",
+"          <div style=\"font-weight:900; font-size:18px; margin-bottom:8px;\">Советы</div>",
+"          <div style=\"color:rgba(255,255,255,.60)\">Лента рекомендаций и подсказок. Пока заглушка.</div>",
+"        </div>",
+"      </div>",
+"",
+"    </div>",
+"  </div>",
+"",
+"  <button class=\"fab\" id=\"fabAi\" aria-label=\"AI\">",
+"    <div class=\"fabInner\"><div class=\"fabBrain\"></div></div>",
+"  </button>",
+"",
+"  <div class=\"nav\">",
+"    <div class=\"navRow\">",
+"      <div class=\"navItem active\" data-tab=\"home\">",
+"        <div class=\"navIcon home\"></div>",
+"        <div>Мой дом</div>",
+"      </div>",
+"      <div class=\"navItem\" data-tab=\"scenes\">",
+"        <div class=\"navIcon scenes\"></div>",
+"        <div>Сценарии</div>",
+"      </div>",
+"      <div style=\"width:88px;\"></div>",
+"      <div class=\"navItem\" data-tab=\"catalog\">",
+"        <div class=\"navIcon catalog\"></div>",
+"        <div>Каталог</div>",
+"      </div>",
+"      <div class=\"navItem\" data-tab=\"tips\">",
+"        <div class=\"navIcon tips\"></div>",
+"        <div>Советы</div>",
+"      </div>",
+"    </div>",
+"  </div>",
+"",
+"  <script>",
+"    // ===== UI TAB SWITCH (simple, no deps) =====",
+"    const views = {",
+"      home: document.getElementById('viewHome'),",
+"      scenes: document.getElementById('viewScenes'),",
+"      catalog: document.getElementById('viewCatalog'),",
+"      tips: document.getElementById('viewTips'),",
+"    };",
+"",
+"    function setTab(name){",
+"      Object.keys(views).forEach(k=>{",
+"        views[k].classList.toggle('active', k===name);",
+"      });",
+"      document.querySelectorAll('.navItem').forEach(el=>{",
+"        el.classList.toggle('active', el.getAttribute('data-tab')===name);",
+"      });",
+"      window.scrollTo({top:0, behavior:'smooth'});",
+"    }",
+"",
+"    document.querySelectorAll('.navItem').forEach(el=>{",
+"      el.addEventListener('click', ()=> setTab(el.getAttribute('data-tab')));",
+"    });",
+"",
+"    // ===== AI button focuses input =====",
+"    const aiText = document.getElementById('aiText');",
+"    const aiResult = document.getElementById('aiResult');",
+"    document.getElementById('fabAi').addEventListener('click', ()=>{",
+"      setTab('home');",
+"      setTimeout(()=> aiText?.focus(), 80);",
+"    });",
+"",
+"    // ===== simple local \"AI\" (placeholder) =====",
+"    function buildLocalCommand(text){",
+"      const t = (text||'').trim().toLowerCase();",
+"      if(!t) return '';",
+"      // very simple rules (you can swap to real AI later)",
+"      if(t.includes('свет')){",
+"        const m = t.match(/(\\d{1,3})\\s*%/);",
+"        const p = m ? Math.max(0, Math.min(100, parseInt(m[1],10))) : null;",
+"        return p===null ? 'Алиса, включи свет' : ('Алиса, включи свет на ' + p + '%');",
+"      }",
+"      if(t.includes('музык') || t.includes('колонк') || t.includes('громк')){",
+"        const m = t.match(/(\\d{1,3})/);",
+"        const v = m ? Math.max(0, Math.min(100, parseInt(m[1],10))) : null;",
+"        return v===null ? 'Алиса, включи музыку' : ('Алиса, установи громкость на ' + v);",
+"      }",
+"      if(t.includes('темпера') || t.includes('климат')){",
+"        const m = t.match(/(\\d{1,2})/);",
+"        const c = m ? Math.max(16, Math.min(30, parseInt(m[1],10))) : null;",
+"        return c===null ? 'Алиса, включи климат' : ('Алиса, поставь температуру ' + c + ' градусов');",
+"      }",
+"      return 'Алиса, ' + text;",
+"    }",
+"",
+"    document.getElementById('aiGo').addEventListener('click', ()=>{",
+"      const cmd = buildLocalCommand(aiText.value);",
+"      aiResult.textContent = cmd ? ('Команда: ' + cmd) : '';",
+"    });",
+"",
+"    // ===== top buttons demo =====",
+"    document.getElementById('btnSettings').addEventListener('click', ()=>{",
+"      alert('Настройки (заглушка)');",
+"    });",
+"    document.getElementById('btnAdd').addEventListener('click', ()=>{",
+"      alert('Добавить устройство (заглушка)');",
+"    });",
+"    document.getElementById('cardAlice').addEventListener('click', ()=>{",
+"      alert('Устройства с Алисой (заглушка)');",
+"    });",
+"    document.getElementById('cardSmart').addEventListener('click', ()=>{",
+"      alert('Устройства умного дома (заглушка)');",
+"    });",
+"  </script>",
+"",
+"  <!-- твои файлы логики (если они нужны) -->",
+"  <script src=\"./core.js\"></script>",
+"  <script src=\"./ai.js\"></script>",
+"  <script src=\"./ui.js\"></script>",
+"</body>",
+"</html>",
+];",
