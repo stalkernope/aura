@@ -1,210 +1,239 @@
-// =====================
-// AURA UI BOOT DIAGNOSTIC + SELF-HEAL
-// Replace WHOLE ui.js with this
-// =====================
+console.log("AURA X PRO UI loaded");
 
-(function () {
-  // --- tiny visual proof that ui.js executed ---
-  function badge(text) {
-    try {
-      let b = document.getElementById("auraBootBadge");
-      if (!b) {
-        b = document.createElement("div");
-        b.id = "auraBootBadge";
-        b.style.cssText =
-          "position:fixed;top:10px;right:10px;z-index:99999;" +
-          "background:rgba(0,0,0,.65);border:1px solid rgba(255,255,255,.18);" +
-          "color:#fff;padding:8px 10px;border-radius:12px;" +
-          "font:12px/1.2 -apple-system,BlinkMacSystemFont,system-ui;" +
-          "backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)";
-        document.body.appendChild(b);
-      }
-      b.textContent = text;
-    } catch {}
-  }
+const UI = {
 
-  function showErr(text) {
-    try {
-      let box = document.getElementById("auraErrBox");
-      if (!box) {
-        box = document.createElement("div");
-        box.id = "auraErrBox";
-        box.style.cssText =
-          "position:fixed;inset:12px;z-index:99998;background:rgba(10,12,18,.92);" +
-          "border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:14px;" +
-          "color:#fff;font:13px/1.35 -apple-system,BlinkMacSystemFont,system-ui;white-space:pre-wrap;" +
-          "overflow:auto;box-shadow:0 30px 80px rgba(0,0,0,.6)";
-        document.body.appendChild(box);
-      }
-      box.textContent = "AURA UI ERROR:\n" + text;
-    } catch {}
-  }
+  tab: "home",
 
-  window.addEventListener("error", (e) => {
-    const msg = (e?.message || "Unknown error");
-    const src = (e?.filename || "");
-    const line = (e?.lineno || "");
-    showErr(`${msg}\n${src}:${line}`);
-  });
-  window.addEventListener("unhandledrejection", (e) => {
-    const msg = (e?.reason?.message || String(e?.reason || "Promise rejection"));
-    showErr(msg);
-  });
+  render() {
+    const root = document.getElementById("app");
+    root.innerHTML = this.renderHome();
+    this.bind();
+  },
 
-  function ensureBaseNodes() {
-    // If your index.html already has these — we reuse them.
-    // If not — we create them so UI can render.
-    const body = document.body;
+  renderHome() {
+    const d = AURA.state.devices;
 
-    let app = document.getElementById("app");
-    let tabs = document.getElementById("tabs");
-    let fab = document.getElementById("aiFab");
+    return `
+      <div style="padding:16px 16px 120px;">
 
-    if (!app) {
-      app = document.createElement("div");
-      app.id = "app";
-      app.style.cssText = "padding:14px 14px 110px; min-height:60vh;";
-      body.appendChild(app);
-    }
-
-    if (!tabs) {
-      tabs = document.createElement("div");
-      tabs.id = "tabs";
-      tabs.style.cssText =
-        "position:fixed;left:12px;right:12px;bottom:12px;z-index:40;" +
-        "display:flex;gap:8px;padding:8px;border-radius:18px;" +
-        "background:rgba(28,32,45,.72);border:1px solid rgba(255,255,255,.10);" +
-        "backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);";
-      body.appendChild(tabs);
-    }
-
-    if (!fab) {
-      fab = document.createElement("button");
-      fab.id = "aiFab";
-      fab.textContent = "🧠";
-      fab.style.cssText =
-        "position:fixed;right:18px;bottom:88px;z-index:50;" +
-        "width:54px;height:54px;border-radius:999px;border:none;" +
-        "background:linear-gradient(90deg,#7B61FF,#5E8BFF);" +
-        "color:#fff;font-size:22px;box-shadow:0 18px 40px rgba(94,139,255,.28);";
-      body.appendChild(fab);
-    }
-
-    // minimal app background if page is empty
-    body.style.background = "#0F1115";
-    body.style.color = "#F2F4F8";
-    body.style.fontFamily = "-apple-system,BlinkMacSystemFont,system-ui";
-  }
-
-  function ensureAURA() {
-    if (!window.AURA) window.AURA = {};
-    if (!window.AURA.state) window.AURA.state = {};
-    if (!window.AURA.state.devices) {
-      window.AURA.state.devices = {
-        light: { power: false, brightness: 50, temp: "warm" },
-        speaker: { playing: false, volume: 30, preset: "lofi" },
-        climate: { power: false, temperature: 23, mode: "auto" }
-      };
-    }
-    if (!window.AURA.state.user) window.AURA.state.user = { name: "Гость", telegramId: null, role: "owner" };
-    if (!window.AURA.state.executionLog) window.AURA.state.executionLog = [];
-    if (!window.AURA.dispatch) window.AURA.dispatch = () => {};
-  }
-
-  function renderSimpleUI() {
-    const app = document.getElementById("app");
-    const tabs = document.getElementById("tabs");
-    const fab = document.getElementById("aiFab");
-    if (!app || !tabs || !fab) return;
-
-    const d = window.AURA.state.devices;
-
-    tabs.innerHTML = `
-      <div class="t active" data-t="home">Дом</div>
-      <div class="t" data-t="scenes">Сценарии</div>
-      <div class="t" data-t="history">История</div>
-      <div class="t" data-t="profile">Профиль</div>
-      <style>
-        #tabs .t{flex:1;text-align:center;padding:12px 10px;border-radius:14px;
-          color:rgba(255,255,255,.75);font-weight:700;font-size:13px;}
-        #tabs .t.active{background:rgba(123,97,255,.25);color:#fff;border:1px solid rgba(123,97,255,.25)}
-      </style>
-    `;
-
-    function home() {
-      app.innerHTML = `
-        <div style="opacity:.85;margin-bottom:10px">AURA X • BOOT OK</div>
-
-        <div style="display:grid;gap:12px">
-          ${card("Свет", d.light.power ? "ON" : "OFF", `Яркость: ${d.light.brightness}%`)}
-          ${card("Колонка", d.speaker.playing ? "ON" : "OFF", `Громкость: ${d.speaker.volume}%`)}
-          ${card("Климат", d.climate.power ? "ON" : "OFF", `Темп: ${d.climate.temperature}°`)}
+        <div style="font-size:22px;font-weight:800;">Мой дом</div>
+        <div style="color:#9AA3B2;margin-top:4px;">
+          ${this.statusText()}
         </div>
-      `;
-    }
 
-    function card(title, st, meta) {
-      const on = st === "ON";
-      return `
-        <div style="
-          background:#1B1F2A;border:1px solid rgba(255,255,255,.08);
-          border-radius:18px;padding:14px;box-shadow:0 20px 50px rgba(0,0,0,.35);
+        ${this.roomCard("Гостиная", [
+          ["Свет", d.light.power ? "Вкл" : "Выкл"],
+          ["Музыка", d.speaker.playing ? "Играет" : "Остановлена"]
+        ])}
+
+        ${this.roomCard("Спальня", [
+          ["Климат", d.climate.power ? d.climate.temperature + "°" : "Выкл"]
+        ])}
+
+        <div style="margin-top:24px;font-size:15px;color:#9AA3B2;">Устройства</div>
+
+        ${this.deviceCard("light","Свет", d.light.power, d.light.brightness+"%")}
+        ${this.deviceCard("speaker","Колонка", d.speaker.playing, d.speaker.volume+"%")}
+        ${this.deviceCard("climate","Климат", d.climate.power, d.climate.temperature+"°")}
+
+      </div>
+
+      <button id="aiBtn"
+        style="
+        position:fixed;
+        bottom:100px;
+        right:20px;
+        width:60px;
+        height:60px;
+        border-radius:50%;
+        background:linear-gradient(135deg,#7B61FF,#5E8BFF);
+        border:none;
+        color:white;
+        font-size:24px;
+        box-shadow:0 15px 40px rgba(94,139,255,.4);
         ">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div style="font-weight:800">${title}</div>
-            <div style="font-weight:800;color:${on ? "#34C759" : "rgba(255,255,255,.45)"}">${st}</div>
+        🧠
+      </button>
+    `;
+  },
+
+  statusText() {
+    const d = AURA.state.devices;
+    if(d.light.power || d.speaker.playing || d.climate.power)
+      return "Активные устройства";
+    return "Всё спокойно";
+  },
+
+  roomCard(title, items) {
+    return `
+      <div style="
+        margin-top:18px;
+        background:#1B1F2A;
+        border-radius:20px;
+        padding:16px;
+        box-shadow:0 20px 60px rgba(0,0,0,.5);
+        border:1px solid rgba(255,255,255,.05);
+      ">
+        <div style="font-weight:700;">${title}</div>
+        ${items.map(i=>`
+          <div style="display:flex;justify-content:space-between;margin-top:8px;color:#9AA3B2;">
+            <span>${i[0]}</span>
+            <span style="color:${i[1]!=="Выкл"?"#34C759":"#9AA3B2"}">${i[1]}</span>
           </div>
-          <div style="margin-top:6px;color:rgba(255,255,255,.65);font-size:13px">${meta}</div>
+        `).join("")}
+      </div>
+    `;
+  },
+
+  deviceCard(key,title,on,value) {
+    return `
+      <div data-device="${key}"
+        style="
+        margin-top:12px;
+        background:${on?"rgba(94,139,255,.12)":"#1B1F2A"};
+        border-radius:20px;
+        padding:16px;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        border:1px solid rgba(255,255,255,.05);
+      ">
+        <div>
+          <div style="font-weight:700;">${title}</div>
+          <div style="color:#9AA3B2;font-size:13px;margin-top:4px;">${value}</div>
         </div>
-      `;
-    }
+        <div style="
+          width:48px;
+          height:28px;
+          border-radius:14px;
+          background:${on?"#5E8BFF":"rgba(255,255,255,.15)"};
+          position:relative;
+        ">
+          <div style="
+            width:22px;
+            height:22px;
+            background:white;
+            border-radius:50%;
+            position:absolute;
+            top:3px;
+            left:${on?"23px":"3px"};
+            transition:.2s;
+          "></div>
+        </div>
+      </div>
+    `;
+  },
 
-    home();
+  bind() {
 
-    tabs.querySelectorAll("[data-t]").forEach(x => {
-      x.onclick = () => {
-        tabs.querySelectorAll(".t").forEach(t => t.classList.remove("active"));
-        x.classList.add("active");
-        const k = x.dataset.t;
-        if (k === "home") home();
-        if (k === "scenes") app.innerHTML = `<div style="opacity:.75">Сценарии скоро ✨</div>`;
-        if (k === "history") app.innerHTML = `<div style="opacity:.75">История скоро ✨</div>`;
-        if (k === "profile") app.innerHTML = `<div style="opacity:.75">Профиль скоро ✨</div>`;
-      };
+    document.querySelectorAll("[data-device]").forEach(el=>{
+      el.onclick=()=>{
+        const device = el.dataset.device;
+        AURA.dispatch({type:"TOGGLE", device});
+      }
     });
 
-    fab.onclick = () => {
-      alert("AI sheet дальше подключим — сейчас проверяем, что ui.js реально запускается ✅");
+    const aiBtn = document.getElementById("aiBtn");
+    if(aiBtn) {
+      aiBtn.onclick=()=>this.openAI();
+    }
+  },
+
+  openAI() {
+
+    const overlay = document.createElement("div");
+    overlay.style="
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.6);
+      backdrop-filter:blur(8px);
+    ";
+
+    overlay.innerHTML = `
+      <div style="
+        position:absolute;
+        bottom:0;
+        left:0;
+        right:0;
+        background:#1B1F2A;
+        border-top-left-radius:24px;
+        border-top-right-radius:24px;
+        padding:20px;
+      ">
+        <div style="font-weight:700;">AI Центр</div>
+        <input id="aiInput"
+          placeholder="Например: кино / сон / гости"
+          style="
+            margin-top:12px;
+            width:100%;
+            padding:14px;
+            border-radius:14px;
+            border:none;
+            background:#242938;
+            color:white;
+          ">
+        <button id="aiRun"
+          style="
+            margin-top:12px;
+            width:100%;
+            padding:14px;
+            border-radius:14px;
+            border:none;
+            background:linear-gradient(135deg,#7B61FF,#5E8BFF);
+            color:white;
+            font-weight:700;
+          ">
+          Сформировать
+        </button>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    overlay.onclick=(e)=>{
+      if(e.target===overlay) overlay.remove();
     };
+
+    document.getElementById("aiRun").onclick=()=>{
+      const text = document.getElementById("aiInput").value.toLowerCase();
+      const plan = this.generatePlan(text);
+      AURA.dispatch({
+        type:"EXECUTE_PLAN",
+        plan:plan,
+        intent:text
+      });
+      overlay.remove();
+    };
+  },
+
+  generatePlan(text) {
+
+    if(text.includes("кино"))
+      return [
+        {device:"light",brightness:20},
+        {device:"speaker",volume:25},
+        {device:"climate",temperature:22}
+      ];
+
+    if(text.includes("сон"))
+      return [
+        {device:"light",brightness:5},
+        {device:"climate",temperature:21}
+      ];
+
+    if(text.includes("гост"))
+      return [
+        {device:"light",brightness:60},
+        {device:"speaker",volume:40}
+      ];
+
+    return [
+      {device:"light",brightness:40},
+      {device:"speaker",volume:25}
+    ];
   }
 
-  function boot() {
-    ensureBaseNodes();
-    ensureAURA();
-    badge("UI LOADED ✅");
+};
 
-    // render minimal UI immediately
-    renderSimpleUI();
-
-    // if your real core loads later, we can refresh view
-    let tries = 0;
-    const timer = setInterval(() => {
-      tries++;
-      if (window.AURA?.state?.devices) {
-        badge("UI LOADED ✅ core ok");
-        renderSimpleUI();
-        clearInterval(timer);
-      }
-      if (tries > 40) { // ~8 seconds
-        badge("UI LOADED ✅ (core late)");
-        clearInterval(timer);
-      }
-    }, 200);
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", boot, { once: true });
-  } else {
-    boot();
-  }
-})();
+window.UI = UI;
+UI.render();
