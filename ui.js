@@ -1,434 +1,90 @@
-/* AURA X PRO — UI (premium B, stable) */
-(function(){
-  const app = document.getElementById("app");
-  const hudErr = document.getElementById("hudErr");
+/* ui.js — AURA X icons (clean, consistent, “like photos”) */
 
-  function showErr(msg){
-    if(!hudErr) return;
-    hudErr.style.display = "block";
-    hudErr.textContent = msg;
-  }
+const UI = (() => {
+  const svg = (paths, viewBox="0 0 24 24") =>
+    `<svg viewBox="${viewBox}" aria-hidden="true" focusable="false" style="width:22px;height:22px;display:block;color:rgba(255,255,255,.92)">${paths}</svg>`;
 
-  // Global crash guard (чтобы не было “чёрного экрана”)
-  window.addEventListener("error", (e)=>{
-    showErr("JS ERROR:\n" + (e?.message || "unknown"));
-  });
-  window.addEventListener("unhandledrejection", (e)=>{
-    showErr("PROMISE ERROR:\n" + (e?.reason?.message || String(e?.reason || "unknown")));
-  });
+  const icons = {
+    gear: svg(`
+      <path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4z" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M19.3 12a7.6 7.6 0 0 0-.1-1l2-1.4-2-3.4-2.3.8a7.7 7.7 0 0 0-1.7-1l-.3-2.4H9.1L8.8 6a7.7 7.7 0 0 0-1.7 1L4.8 6.2l-2 3.4 2 1.4a7.6 7.6 0 0 0 0 2l-2 1.4 2 3.4 2.3-.8c.5.4 1.1.7 1.7 1l.3 2.4h5.8l.3-2.4c.6-.3 1.2-.6 1.7-1l2.3.8 2-3.4-2-1.4c.1-.3.1-.7.1-1z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" opacity=".95"/>
+    `),
 
-  function esc(s){ return String(s).replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m])); }
-  function fmtTime(iso){
-    try{
-      const d = new Date(iso);
-      const hh = String(d.getHours()).padStart(2,"0");
-      const mm = String(d.getMinutes()).padStart(2,"0");
-      return `${hh}:${mm}`;
-    }catch(e){ return ""; }
-  }
+    plus: svg(`<path d="M12 5.5v13M5.5 12h13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>`),
 
-  function statusPillText(){
-    const d = AURA.state.devices;
-    const active = (d.light.power?1:0) + (d.speaker.power?1:0) + (d.climate.power?1:0);
-    return active ? `Активно: ${active}` : "Всё спокойно";
-  }
+    bell: svg(`
+      <path d="M12 20.5a2.2 2.2 0 0 0 2.2-2.2H9.8A2.2 2.2 0 0 0 12 20.5z" fill="currentColor" opacity=".9"/>
+      <path d="M18.2 17.2H5.8c1.2-1.2 1.6-2.3 1.6-4.2v-2.3a4.6 4.6 0 0 1 9.2 0V13c0 1.9.4 3 1.6 4.2z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+    `),
 
-  function roomSummary(room){
-    const d = AURA.state.devices;
-    const lines = [];
-    room.devices.forEach(id=>{
-      const dv = d[id];
-      if(!dv) return;
-      if(dv.type==="light"){
-        lines.push(["Свет", dv.power ? "Вкл" : "Выкл"]);
-      }
-      if(dv.type==="speaker"){
-        lines.push(["Музыка", dv.power ? (dv.playing ? "Играет" : "Пауза") : "Остановлена"]);
-      }
-      if(dv.type==="climate"){
-        lines.push(["Климат", dv.power ? (dv.temperature + "°") : "Выкл"]);
-      }
-    });
-    return lines;
-  }
+    alarm: svg(`
+      <path d="M12 20.2a7.1 7.1 0 1 0 0-14.2 7.1 7.1 0 0 0 0 14.2z" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M12 10v3.6l2.2 1.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M6.2 4.8 4.8 3.4M17.8 4.8l1.4-1.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    `),
 
-  function navHTML(active){
-    const btn = (id, ico, label)=>`
-      <div class="navBtn ${active===id?"active":""}" data-tab="${id}">
-        <div class="ico">${ico}</div>
-        <div>${label}</div>
-      </div>
-    `;
-    return `
-      <div class="nav">
-        ${btn("home","🏠","Дом")}
-        ${btn("scenes","✨","Сценарии")}
-        ${btn("history","🧾","История")}
-        ${btn("profile","👤","Профиль")}
-      </div>
-    `;
-  }
+    home: svg(`
+      <path d="M4 10.8 12 4l8 6.8v8.7a1.7 1.7 0 0 1-1.7 1.7H5.7A1.7 1.7 0 0 1 4 19.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+      <path d="M9.2 21v-6.2c0-.6.5-1.1 1.1-1.1h3.4c.6 0 1.1.5 1.1 1.1V21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    `),
 
-  function topHTML(title, subtitle){
-    return `
-      <div class="top">
-        <div class="row">
-          <div class="brand">
-            <div class="logo"></div>
-            <div>
-              <div class="title">${esc(title)}</div>
-              <div class="sub">${esc(subtitle)}</div>
-            </div>
-          </div>
+    scenes: svg(`
+      <path d="M7 6.2h10M7 12h10M7 17.8h10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M5.2 6.2h.01M5.2 12h.01M5.2 17.8h.01" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+    `),
 
-          <div class="row" style="justify-content:flex-end">
-            <div class="pill"><span class="dot"></span> ${esc(statusPillText())}</div>
-            <div class="btnIcon" id="btnHelp">?</div>
-          </div>
-        </div>
-      </div>
-    `;
-  }
+    catalog: svg(`
+      <path d="M7.2 9.2V8.4A4.8 4.8 0 0 1 12 3.6a4.8 4.8 0 0 1 4.8 4.8v.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M6 9.2h12.5c.9 0 1.6.7 1.6 1.6l-1 8.2a1.9 1.9 0 0 1-1.9 1.7H7.8A1.9 1.9 0 0 1 5.9 19l-1-8.2c0-.9.7-1.6 1.6-1.6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+    `),
 
-  function deviceCard(id){
-    const d = AURA.state.devices[id];
-    if(!d) return "";
+    tips: svg(`
+      <path d="M12 3.8c-3.5 0-6.2 2.7-6.2 6.1 0 2.2 1.1 3.6 2.4 4.7.8.6 1.3 1.4 1.5 2.4h4.6c.2-1 .7-1.8 1.5-2.4 1.3-1.1 2.4-2.5 2.4-4.7 0-3.4-2.7-6.1-6.2-6.1z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+      <path d="M9.2 20.2h5.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M10 17h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    `),
 
-    let sub = "";
-    let slider = "";
-    if(d.type==="light"){
-      sub = `Яркость: ${d.brightness}%`;
-      slider = sliderHTML(id, 0, 100, d.brightness, "Яркость");
-    }
-    if(d.type==="speaker"){
-      sub = `Громкость: ${d.volume}%`;
-      slider = sliderHTML(id, 0, 100, d.volume, "Громкость");
-    }
-    if(d.type==="climate"){
-      sub = `Темп.: ${d.temperature}°`;
-      slider = sliderHTML(id, 16, 30, d.temperature, "Температура");
-    }
+    aura: svg(`
+      <path d="M12 3.5c3.9 0 7 3.1 7 7 0 4.6-3.7 10-7 10S5 15.1 5 10.5c0-3.9 3.1-7 7-7z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+      <path d="M9.5 11.2c1.8-1.2 3.2-1.2 5 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" opacity=".9"/>
+    `),
 
-    return `
-      <div class="device" data-toggle="${esc(id)}">
-        <div class="devLeft">
-          <div class="devName">${esc(d.name)}</div>
-          <div class="devSub">${esc(sub)}</div>
-          ${slider}
-        </div>
-
-        <div class="devRight">
-          <div class="toggle ${d.power?"on":""}" data-toggleonly="${esc(id)}">
-            <div class="knob"></div>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  function sliderHTML(id, min, max, value, label){
-    return `
-      <div class="sliderWrap" data-sliderwrap="${esc(id)}">
-        <div class="sliderRow">
-          <span>${esc(label)}</span>
-          <span>${esc(String(value))}</span>
-        </div>
-        <input type="range" min="${min}" max="${max}" value="${value}" data-slider="${esc(id)}" />
-      </div>
-    `;
-  }
-
-  function homeHTML(){
-    const st = AURA.state;
-    const rooms = st.home.rooms;
-
-    return `
-      ${topHTML("AURA X", st.home.name)}
-      <div class="section">
-        <div class="h">Комнаты</div>
-        <div class="grid2">
-          ${rooms.map(r=>{
-            const lines = roomSummary(r);
-            const activeCount = lines.filter(x=>x[1] !== "Выкл" && x[1] !== "Остановлена").length;
-            return `
-              <div class="card room" data-room="${esc(r.id)}">
-                <div class="roomName">${esc(r.name)}</div>
-                <div class="roomMeta">${activeCount} устройства активны</div>
-                <div class="kvs">
-                  ${lines.map(([k,v])=>`
-                    <div class="kv"><span>${esc(k)}</span><b>${esc(v)}</b></div>
-                  `).join("")}
-                </div>
-              </div>
-            `;
-          }).join("")}
-        </div>
-
-        <div class="h">Устройства</div>
-        ${deviceCard("light")}
-        ${deviceCard("speaker")}
-        ${deviceCard("climate")}
-      </div>
-
-      <div class="aiFab" id="aiFab">🧠</div>
-      ${navHTML("home")}
-    `;
-  }
-
-  function scenesHTML(){
-    const sc = AURA.state.scenes;
-    const ui = AURA.state.ui || {};
-    const mode = ui.scMode || "my";
-
-    const tabs = `
-      <div class="card" style="padding:8px; display:flex; gap:8px;">
-        <div class="navBtn ${mode==="my"?"active":""}" style="height:52px" data-scmode="my">
-          <div style="font-weight:900">Мои</div>
-        </div>
-        <div class="navBtn ${mode==="rec"?"active":""}" style="height:52px" data-scmode="rec">
-          <div style="font-weight:900">Рекомендуемые</div>
-        </div>
-      </div>
-    `;
-
-    const list = (mode==="my" ? sc.my : sc.recommended).map(x=>`
-      <div class="item" data-runscene="${esc(x.intent)}">
-        <div class="itemT">${esc(x.icon)} ${esc(x.name)}</div>
-        <div class="itemS">${esc(x.planHint)}</div>
-      </div>
-    `).join("");
-
-    return `
-      ${topHTML("Сценарии", "AI подбирает план под твою привычку")}
-      <div class="section">
-        ${tabs}
-        <div class="list">${list}</div>
-      </div>
-
-      <div class="aiFab" id="aiFab">🧠</div>
-      ${navHTML("scenes")}
-    `;
-  }
-
-  function historyHTML(){
-    const hist = AURA.state.history || [];
-    const list = hist.length ? hist.map(h=>`
-      <div class="item">
-        <div class="itemT">${esc(h.title)} <span style="color:#96a0b5;font-weight:700">• ${esc(fmtTime(h.time))}</span></div>
-        <div class="itemS">${esc(h.detail || h.type)}</div>
-      </div>
-    `).join("") : `
-      <div class="item">
-        <div class="itemT">Пока пусто</div>
-        <div class="itemS">Сделай действие или запусти AI — появится история.</div>
-      </div>
-    `;
-
-    return `
-      ${topHTML("История", "Лог действий и AI-выполнений")}
-      <div class="section">
-        <div class="list">${list}</div>
-      </div>
-
-      <div class="aiFab" id="aiFab">🧠</div>
-      ${navHTML("history")}
-    `;
-  }
-
-  function profileHTML(){
-    const u = AURA.state.user;
-
-    return `
-      ${topHTML("Профиль", "Telegram + роль доступа")}
-      <div class="section">
-
-        <div class="card" style="padding:14px">
-          <div style="font-weight:900;font-size:16px">${esc(u.name)}</div>
-          <div style="color:#96a0b5;font-size:12px;margin-top:6px">
-            ID: ${esc(String(u.telegramId || 0))}${u.username ? ` • @${esc(u.username)}` : ""}
-          </div>
-
-          <div class="h" style="margin-top:14px">Роль</div>
-          <div style="display:flex;gap:10px">
-            <div class="chip" data-role="owner" style="${u.role==="owner"?"border-color:rgba(123,97,255,.35);background:rgba(123,97,255,.16);":""}">Owner</div>
-            <div class="chip" data-role="guest" style="${u.role==="guest"?"border-color:rgba(123,97,255,.35);background:rgba(123,97,255,.16);":""}">Guest</div>
-          </div>
-
-          <div class="h" style="margin-top:14px">Сервис</div>
-          <div class="chip" id="btnReset" style="background:rgba(255,255,255,.05)">Сбросить демо-дом</div>
-        </div>
-
-      </div>
-
-      <div class="aiFab" id="aiFab">🧠</div>
-      ${navHTML("profile")}
-    `;
-  }
-
-  function openAI(){
-    const overlay = document.createElement("div");
-    overlay.className = "overlay";
-    overlay.innerHTML = `
-      <div class="sheet" role="dialog" aria-modal="true">
-        <div class="grab"></div>
-        <div class="sheetTitle">AI-центр AURA</div>
-        <div class="sheetSub">Опиши намерение — AURA построит план и применит его к дому.</div>
-
-        <input class="input" id="aiInput" placeholder="Например: кино, свет 20, температура 22" />
-
-        <button class="primary" id="aiGo">Сформировать и выполнить</button>
-
-        <div class="chips">
-          <div class="chip" data-chip="кино">🎬 Кино</div>
-          <div class="chip" data-chip="сон">💤 Сон</div>
-          <div class="chip" data-chip="гости">🎉 Гости</div>
-          <div class="chip" data-chip="работа">💻 Работа</div>
-          <div class="chip" data-chip="уборка">🧹 Уборка</div>
-        </div>
-      </div>
-    `;
-
-    overlay.addEventListener("click", (e)=>{
-      if(e.target === overlay) overlay.remove();
-    });
-
-    document.body.appendChild(overlay);
-
-    const aiInput = overlay.querySelector("#aiInput");
-    const aiGo = overlay.querySelector("#aiGo");
-
-    overlay.querySelectorAll("[data-chip]").forEach(el=>{
-      el.addEventListener("click", ()=>{
-        aiInput.value = el.getAttribute("data-chip") || "";
-        aiInput.focus();
-      });
-    });
-
-    function run(){
-      const text = (aiInput.value || "").trim();
-      if(!text) return;
-      AURA.dispatch({ type:"RUN_AI", intent: text });
-      overlay.remove();
-    }
-
-    aiGo.addEventListener("click", run);
-    aiInput.addEventListener("keydown", (e)=>{ if(e.key === "Enter") run(); });
-
-    setTimeout(()=>aiInput.focus(), 50);
-  }
-
-  function bindCommon(){
-    // Bottom nav
-    document.querySelectorAll("[data-tab]").forEach(el=>{
-      el.addEventListener("click", ()=>{
-        const tab = el.getAttribute("data-tab");
-        UI.setTab(tab);
-      });
-    });
-
-    // AI button
-    const aiFab = document.getElementById("aiFab");
-    if(aiFab) aiFab.addEventListener("click", openAI);
-
-    // help
-    const help = document.getElementById("btnHelp");
-    if(help){
-      help.addEventListener("click", ()=>{
-        openAI();
-      });
-    }
-
-    // toggle power click
-    document.querySelectorAll("[data-toggleonly]").forEach(el=>{
-      el.addEventListener("click", (e)=>{
-        e.stopPropagation();
-        const id = el.getAttribute("data-toggleonly");
-        AURA.dispatch({ type:"TOGGLE_POWER", id });
-      });
-    });
-
-    // sliders
-    document.querySelectorAll("[data-slider]").forEach(el=>{
-      el.addEventListener("input", ()=>{
-        const id = el.getAttribute("data-slider");
-        const v = parseInt(el.value, 10);
-        AURA.dispatch({ type:"SET_RANGE", id, value: v });
-      });
-    });
-
-    // scenes mode
-    document.querySelectorAll("[data-scmode]").forEach(el=>{
-      el.addEventListener("click", ()=>{
-        const mode = el.getAttribute("data-scmode");
-        const st = AURA.state;
-        st.ui = st.ui || {};
-        st.ui.scMode = mode === "rec" ? "rec" : "my";
-        localStorage.setItem("aura_x_pro_state_v2", JSON.stringify(st));
-        UI.render();
-      });
-    });
-
-    // run scene
-    document.querySelectorAll("[data-runscene]").forEach(el=>{
-      el.addEventListener("click", ()=>{
-        const intent = el.getAttribute("data-runscene") || "";
-        AURA.dispatch({ type:"RUN_AI", intent });
-      });
-    });
-
-    // role
-    document.querySelectorAll("[data-role]").forEach(el=>{
-      el.addEventListener("click", ()=>{
-        const r = el.getAttribute("data-role");
-        AURA.dispatch({ type:"SET_ROLE", role: r });
-      });
-    });
-
-    // reset
-    const reset = document.getElementById("btnReset");
-    if(reset){
-      reset.addEventListener("click", ()=>{
-        AURA.dispatch({ type:"RESET" });
-      });
-    }
-  }
-
-  const UI = {
-    tab: "home",
-
-    setTab(tab){
-      UI.tab = tab || "home";
-      UI.render();
-    },
-
-    render(){
-      try{
-        if(!app){
-          document.body.innerHTML = "NO APP ROOT";
-          return;
-        }
-        if(hudErr) hudErr.style.display = "none";
-
-        if(UI.tab === "home") app.innerHTML = homeHTML();
-        else if(UI.tab === "scenes") app.innerHTML = scenesHTML();
-        else if(UI.tab === "history") app.innerHTML = historyHTML();
-        else if(UI.tab === "profile") app.innerHTML = profileHTML();
-        else app.innerHTML = homeHTML();
-
-        bindCommon();
-      }catch(e){
-        console.error(e);
-        showErr("RENDER ERROR:\n" + (e?.message || String(e)));
-      }
+    devicePack: (kind) => {
+      // маленькие “картинки” для плиток (не 1 в 1, но по стилю)
+      if (kind === "alice") return `
+        <svg viewBox="0 0 96 72" aria-hidden="true" style="width:78px;height:56px;display:block">
+          <defs>
+            <linearGradient id="g1" x1="0" x2="1">
+              <stop offset="0" stop-color="rgba(122,92,255,.65)"/>
+              <stop offset="1" stop-color="rgba(186,146,255,.35)"/>
+            </linearGradient>
+          </defs>
+          <rect x="6" y="10" width="52" height="36" rx="10" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.10)"/>
+          <rect x="16" y="18" width="32" height="20" rx="8" fill="url(#g1)" opacity=".85"/>
+          <circle cx="72" cy="40" r="14" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.10)"/>
+          <circle cx="72" cy="40" r="5" fill="rgba(255,255,255,.35)"/>
+        </svg>`;
+      return `
+        <svg viewBox="0 0 96 72" aria-hidden="true" style="width:78px;height:56px;display:block">
+          <defs>
+            <linearGradient id="g2" x1="0" x2="1">
+              <stop offset="0" stop-color="rgba(186,146,255,.45)"/>
+              <stop offset="1" stop-color="rgba(122,92,255,.75)"/>
+            </linearGradient>
+          </defs>
+          <circle cx="28" cy="36" r="16" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.10)"/>
+          <path d="M28 24c6 5 6 19 0 24" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="3" stroke-linecap="round"/>
+          <rect x="52" y="22" width="28" height="28" rx="10" fill="url(#g2)" opacity=".85"/>
+          <rect x="58" y="28" width="16" height="16" rx="6" fill="rgba(255,255,255,.20)"/>
+        </svg>`;
     }
   };
 
-  window.UI = UI;
+  const qs = (s, root=document) => root.querySelector(s);
+  const qsa = (s, root=document) => Array.from(root.querySelectorAll(s));
+  const setHTML = (node, html) => { node.innerHTML = html; };
 
-  // Boot
-  try{
-    UI.render();
-  }catch(e){
-    showErr("BOOT ERROR:\n" + (e?.message || String(e)));
-  }
+  return { icons, qs, qsa, setHTML };
 })();
+
+window.UI = UI;
