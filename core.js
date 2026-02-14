@@ -1,273 +1,348 @@
-/* AURA X PRO — CORE (stable) */
-(function(){
-  const tg = window.Telegram?.WebApp || null;
+/* core.js — AURA X core (navigation + sheets + local state) */
 
-  function safe(fn){ try { return fn(); } catch(e){ return null; } }
-  function nowISO(){ return new Date().toISOString(); }
+(() => {
+  const { qs, qsa, setHTML, icons } = window.UI;
 
-  const STORAGE_KEY = "aura_x_pro_state_v2";
-
-  const DEFAULT_STATE = {
-    app: { version: "2.0", theme: "dark" },
-    user: {
-      name: safe(()=>tg.initDataUnsafe.user.first_name) || "Гость",
-      username: safe(()=>tg.initDataUnsafe.user.username) || "",
-      telegramId: safe(()=>tg.initDataUnsafe.user.id) || 0,
-      role: "owner"
-    },
-
-    home: {
-      name: "Мой дом",
-      rooms: [
-        { id:"living", name:"Гостиная", devices:["light","speaker"] },
-        { id:"bedroom", name:"Спальня", devices:["climate"] }
-      ]
-    },
-
-    devices: {
-      light:   { id:"light",   name:"Свет",    type:"light",   power:false, brightness:50 },
-      speaker: { id:"speaker", name:"Колонка", type:"speaker", power:false, volume:30, playing:false },
-      climate: { id:"climate", name:"Климат",  type:"climate", power:false, temperature:23 }
-    },
-
-    scenes: {
-      my: [
-        { id:"sc_sleep", name:"Сон",      icon:"💤", intent:"сон",   planHint:"приглушить свет, комфортная температура" },
-        { id:"sc_movie", name:"Кино",     icon:"🎬", intent:"кино",  planHint:"свет 20%, тихая громкость" }
-      ],
-      recommended: [
-        { id:"sc_guests", name:"Гости",   icon:"🎉", intent:"гости", planHint:"свет ярче, музыка громче" },
-        { id:"sc_work",   name:"Работа",  icon:"💻", intent:"работа",planHint:"свет 70%, нейтральный климат" },
-        { id:"sc_clean",  name:"Уборка",  icon:"🧹", intent:"уборка",planHint:"свет 100%, музыка бодрее" }
-      ]
-    },
-
-    history: [] // {time, type, title, detail}
+  const state = {
+    tab: "home",
+    notifications: 8,
+    houseName: "Мой дом",
+    devicesCount: 0,
+    status: "Всё спокойно",
+    lastAI: "",
   };
 
-  function loadState(){
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(!raw) return structuredClone(DEFAULT_STATE);
-    try{
-      const parsed = JSON.parse(raw);
-      // mild merge to avoid missing keys
-      return {
-        ...structuredClone(DEFAULT_STATE),
-        ...parsed,
-        user: { ...structuredClone(DEFAULT_STATE.user), ...(parsed.user||{}) },
-        home: { ...structuredClone(DEFAULT_STATE.home), ...(parsed.home||{}) },
-        devices: { ...structuredClone(DEFAULT_STATE.devices), ...(parsed.devices||{}) },
-        scenes: { ...structuredClone(DEFAULT_STATE.scenes), ...(parsed.scenes||{}) },
-        history: Array.isArray(parsed.history) ? parsed.history : []
-      };
-    }catch(e){
-      return structuredClone(DEFAULT_STATE);
-    }
+  const persistKey = "AURA_X_STATE_V1";
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(persistKey);
+      if (!raw) return;
+      const obj = JSON.parse(raw);
+      Object.assign(state, obj || {});
+    } catch {}
+  }
+  function save() {
+    try { localStorage.setItem(persistKey, JSON.stringify(state)); } catch {}
   }
 
-  function saveState(){
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  function setTab(tab) {
+    state.tab = tab;
+    save();
+    render();
   }
 
-  function log(type, title, detail){
-    state.history.unshift({ time: nowISO(), type, title, detail: detail||"" });
-    if(state.history.length > 120) state.history.length = 120;
+  // ===== sheet =====
+  const sheetBackdrop = () => qs("#sheetBackdrop");
+  const sheet = () => qs("#sheet");
+  const openSheet = (title = "Добавить") => {
+    qs("#sheetTitle").textContent = title;
+    sheetBackdrop().classList.add("show");
+    sheet().classList.add("show");
+  };
+  const closeSheet = () => {
+    sheetBackdrop().classList.remove("show");
+    sheet().classList.remove("show");
+  };
+
+  function bind() {
+    // header icons
+    setHTML(qs("#settingsBtn"), icons.gear);
+    setHTML(qs("#addBtn"), icons.plus);
+
+    qs("#settingsBtn").addEventListener("click", () => openSheet("Настройки"));
+    qs("#addBtn").addEventListener("click", () => openSheet("Добавить"));
+
+    // quick row
+    qs("#quickRow").addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-quick]");
+      if (!btn) return;
+      const t = btn.getAttribute("data-quick");
+      if (t === "new") openSheet("Что нового");
+      if (t === "bell") openSheet("Уведомления");
+      if (t === "alarm") openSheet("Будильники");
+    });
+
+    // tiles
+    qs("#tileAlice").addEventListener("click", () => openSheet("Устройства с Алисой"));
+    qs("#tileSmart").addEventListener("click", () => openSheet("Устройства умного дома"));
+
+    // bottom nav
+    qs("#bottomNav").addEventListener("click", (e) => {
+      const item = e.target.closest(".navItem");
+      if (!item) return;
+      const tab = item.getAttribute("data-tab");
+      if (tab) setTab(tab);
+    });
+
+    // fab
+    setHTML(qs("#fabBtn"), icons.aura);
+    qs("#fabBtn").addEventListener("click", () => {
+      openSheet("Добавить");
+    });
+
+    // sheet close
+    setHTML(qs("#sheetClose"), `<div style="width:18px;height:18px;position:relative">
+      <span style="position:absolute;left:50%;top:50%;width:18px;height:2px;background:rgba(255,255,255,.70);transform:translate(-50%,-50%) rotate(45deg);border-radius:2px"></span>
+      <span style="position:absolute;left:50%;top:50%;width:18px;height:2px;background:rgba(255,255,255,.70);transform:translate(-50%,-50%) rotate(-45deg);border-radius:2px"></span>
+    </div>`);
+    qs("#sheetClose").addEventListener("click", closeSheet);
+    sheetBackdrop().addEventListener("click", closeSheet);
+
+    // prevent scroll bounce weird
+    document.addEventListener("touchmove", (e) => {
+      if (sheet().classList.contains("show")) return;
+    }, { passive: true });
   }
 
-  // AI: rule-based (offline) but looks smart
-  function generatePlan(intentText){
-    const t = (intentText||"").toLowerCase().trim();
+  function renderQuickRow() {
+    const row = qs("#quickRow");
+    row.innerHTML = "";
 
-    const want = {
-      light: { use: false, power: null, brightness: null },
-      speaker:{ use:false, power:null, volume:null, playing:null },
-      climate:{ use:false, power:null, temperature:null }
+    // Featured "Новое"
+    const featured = document.createElement("div");
+    featured.className = "qbtn featured";
+    featured.setAttribute("data-quick", "new");
+    featured.innerHTML = `<div class="label">Новое</div>` + `<div class="badge">${state.notifications}</div>`;
+    row.appendChild(featured);
+
+    const bell = document.createElement("div");
+    bell.className = "qbtn";
+    bell.setAttribute("data-quick", "bell");
+    bell.innerHTML = icons.bell;
+    row.appendChild(bell);
+
+    const alarm = document.createElement("div");
+    alarm.className = "qbtn";
+    alarm.setAttribute("data-quick", "alarm");
+    alarm.innerHTML = icons.alarm;
+    row.appendChild(alarm);
+  }
+
+  function renderTilesPics(){
+    setHTML(qs("#tileAlicePic"), icons.devicePack("alice"));
+    setHTML(qs("#tileSmartPic"), icons.devicePack("smart"));
+  }
+
+  function renderBottomNav(){
+    setHTML(qs("#navHomeIco"), icons.home);
+    setHTML(qs("#navScenesIco"), icons.scenes);
+    setHTML(qs("#navCatalogIco"), icons.catalog);
+    setHTML(qs("#navTipsIco"), icons.tips);
+
+    qsa(".navItem").forEach(el => {
+      const tab = el.getAttribute("data-tab");
+      el.classList.toggle("active", tab === state.tab);
+      el.classList.toggle("pos", tab === "home");
+      // “pill” только у активного — как в фотке (слева подсветка)
+      const pill = el.querySelector(".pill");
+      if (pill) pill.style.display = (tab === state.tab) ? "block" : "none";
+    });
+  }
+
+  function renderHeader() {
+    qs("#homeTitle").textContent = state.houseName;
+    qs("#homeSub").textContent = state.devicesCount ? `Устройств: ${state.devicesCount}` : "Пока нет устройств";
+    qs("#statusText").textContent = state.status;
+  }
+
+  function sheetContentFor(title){
+    const list = qs("#sheetList");
+
+    const mkRow = (icoHtml, title, sub, action) => {
+      const row = document.createElement("div");
+      row.className = "row";
+      row.innerHTML = `
+        <div class="rIco">${icoHtml}</div>
+        <div class="rText">
+          <div class="rTitle">${title}</div>
+          <div class="rSub">${sub}</div>
+        </div>
+        <div class="chev" aria-hidden="true">›</div>
+      `;
+      row.addEventListener("click", () => {
+        closeSheet();
+        action && action();
+      });
+      return row;
     };
 
-    // helpers
-    const has = (w)=> t.includes(w);
+    list.innerHTML = "";
 
-    // numbers parsing (simple)
-    const num = (label)=>{
-      // find digits after word or any digits
-      const m = t.match(/(\d{1,3})/);
-      return m ? parseInt(m[1],10) : null;
-    };
-
-    if(has("кино")){
-      want.light.use=true;  want.light.power=true; want.light.brightness=20;
-      want.speaker.use=true;want.speaker.power=true;want.speaker.playing=true;want.speaker.volume=25;
-      want.climate.use=true;want.climate.power=true;want.climate.temperature=22;
-    } else if(has("сон") || has("спать")){
-      want.light.use=true;  want.light.power=true; want.light.brightness=5;
-      want.speaker.use=true;want.speaker.power=false; want.speaker.playing=false;
-      want.climate.use=true;want.climate.power=true; want.climate.temperature=21;
-    } else if(has("гост")){
-      want.light.use=true;  want.light.power=true; want.light.brightness=65;
-      want.speaker.use=true;want.speaker.power=true; want.speaker.playing=true; want.speaker.volume=40;
-      want.climate.use=true;want.climate.power=true; want.climate.temperature=22;
-    } else if(has("работ")){
-      want.light.use=true;  want.light.power=true; want.light.brightness=75;
-      want.speaker.use=true;want.speaker.power=false; want.speaker.playing=false;
-      want.climate.use=true;want.climate.power=true; want.climate.temperature=23;
-    } else if(has("уборк") || has("чист")){
-      want.light.use=true;  want.light.power=true; want.light.brightness=100;
-      want.speaker.use=true;want.speaker.power=true; want.speaker.playing=true; want.speaker.volume=35;
-    } else {
-      // generic “comfort”
-      want.light.use=true; want.light.power=true; want.light.brightness=45;
-      want.climate.use=true; want.climate.power=true; want.climate.temperature=23;
+    if (title === "Добавить") {
+      list.appendChild(mkRow(icons.aura, "Устройство с Алисой", "Подключение через аккаунт Яндекса (позже)", () => {
+        state.status = "Режим: подключение (демо)";
+        save(); render();
+      }));
+      list.appendChild(mkRow(icons.catalog, "Устройство умного дома", "Свет, розетки, пылесос, ТВ и другое", () => {
+        state.status = "Открыт каталог устройств (демо)";
+        save(); render();
+      }));
+      list.appendChild(mkRow(icons.scenes, "Сценарий", "Создать новый сценарий", () => setTab("scenes")));
+      list.appendChild(mkRow(icons.home, "Дом", "Переименовать, комнаты, гости", () => {
+        const n = prompt("Название дома", state.houseName);
+        if (n && n.trim().length > 0) state.houseName = n.trim();
+        save(); render();
+      }));
+      list.appendChild(mkRow(icons.tips, "Людей", "Owner / Guest (демо)", () => {
+        state.status = "Профили: Owner/Guest (демо)";
+        save(); render();
+      }));
+      list.appendChild(mkRow(icons.bell, "История", "События дома и устройств (демо)", () => setTab("tips")));
     }
-
-    // explicit overrides:
-    if(has("свет")){
-      want.light.use=true;
-      if(has("выкл")) want.light.power=false;
-      if(has("вкл")) want.light.power=true;
-      const v = num("свет");
-      if(v!==null) want.light.brightness = Math.max(0, Math.min(100, v));
+    else if (title === "Настройки") {
+      list.appendChild(mkRow(icons.gear, "Интерфейс", "Скоро: темы, акценты, шрифты", () => {}));
+      list.appendChild(mkRow(icons.home, "Дом", "Название, комнаты, устройства", () => {}));
+      list.appendChild(mkRow(icons.bell, "Уведомления", "Предупреждения и важные события", () => {}));
     }
-    if(has("громк") || has("музык") || has("колон")){
-      want.speaker.use=true;
-      if(has("выкл")) { want.speaker.power=false; want.speaker.playing=false; }
-      if(has("вкл"))  { want.speaker.power=true; want.speaker.playing=true; }
-      const v = num("громкость");
-      if(v!==null) want.speaker.volume = Math.max(0, Math.min(100, v));
+    else if (title === "Уведомления") {
+      list.appendChild(mkRow(icons.bell, "Пока пусто", "Здесь будут события и алерты", () => {}));
     }
-    if(has("темп") || has("климат")){
-      want.climate.use=true;
-      if(has("выкл")) want.climate.power=false;
-      if(has("вкл")) want.climate.power=true;
-      const v = num("температура");
-      if(v!==null) want.climate.temperature = Math.max(16, Math.min(30, v));
+    else if (title === "Будильники") {
+      list.appendChild(mkRow(icons.alarm, "Голосовая команда", "«Алиса, буди меня по будням в 8 утра»", () => {}));
+      list.appendChild(mkRow(icons.alarm, "Поставь Мо́ю волну", "«Поставь Мою волну на будильник»", () => {}));
+      list.appendChild(mkRow(icons.alarm, "Громкость", "«Сделай громкость будильника на 10»", () => {}));
     }
-
-    const steps = [];
-    if(want.light.use){
-      steps.push({ device:"light", ...want.light });
+    else if (title === "Что нового") {
+      list.appendChild(mkRow(icons.tips, "Интересные сценарии", "Каталог идей под твой дом", () => setTab("scenes")));
+      list.appendChild(mkRow(icons.catalog, "Каталог устройств", "Что купить и как подключить", () => setTab("catalog")));
     }
-    if(want.speaker.use){
-      steps.push({ device:"speaker", ...want.speaker });
+    else if (title === "Устройства с Алисой") {
+      list.appendChild(mkRow(icons.aura, "Подключить Яндекс", "OAuth позже. Сейчас демо-режим.", () => {
+        state.status = "Алиса: не подключена (демо)";
+        save(); render();
+      }));
+      list.appendChild(mkRow(icons.catalog, "Список брендов", "Xiaomi, Aqara, Samsung… (демо)", () => {}));
     }
-    if(want.climate.use){
-      steps.push({ device:"climate", ...want.climate });
+    else if (title === "Устройства умного дома") {
+      list.appendChild(mkRow(icons.catalog, "Поиск Zigbee", "Скоро (демо)", () => {}));
+      list.appendChild(mkRow(icons.catalog, "Поиск Matter", "Скоро (демо)", () => {}));
+      list.appendChild(mkRow(icons.catalog, "Настроить вручную", "Добавить устройство без поиска", () => {}));
     }
-
-    return steps;
-  }
-
-  // reducer/dispatch
-  let state = loadState();
-
-  function setDevice(id, patch){
-    state.devices[id] = { ...state.devices[id], ...patch };
-    saveState();
-  }
-
-  function dispatch(action){
-    try{
-      switch(action.type){
-
-        case "BOOT":
-          // noop, for future
-          break;
-
-        case "SET_TAB":
-          state.ui = state.ui || {};
-          state.ui.tab = action.tab;
-          saveState();
-          break;
-
-        case "TOGGLE_POWER": {
-          const d = state.devices[action.id];
-          if(!d) break;
-          const next = !d.power;
-          setDevice(action.id, { power: next, ...(d.type==="speaker" ? { playing: next } : {}) });
-          log("device", `${d.name}: ${next ? "Вкл" : "Выкл"}`, "");
-          break;
-        }
-
-        case "SET_RANGE": {
-          const d = state.devices[action.id];
-          if(!d) break;
-          const value = action.value;
-          if(d.type==="light")  setDevice(d.id, { brightness:value, power:true });
-          if(d.type==="speaker")setDevice(d.id, { volume:value, power:true, playing:true });
-          if(d.type==="climate")setDevice(d.id, { temperature:value, power:true });
-          log("device", `${d.name}: параметр`, `${value}`);
-          break;
-        }
-
-        case "RUN_AI": {
-          const intent = action.intent || "";
-          const plan = generatePlan(intent);
-
-          log("ai", "Intent", intent);
-
-          // Apply plan
-          plan.forEach(step=>{
-            if(step.device==="light"){
-              const patch = {};
-              if(step.power!==null) patch.power = step.power;
-              if(step.brightness!==null) patch.brightness = step.brightness;
-              if(patch.power===true || patch.brightness!==null) patch.power = patch.power ?? true;
-              setDevice("light", patch);
-            }
-            if(step.device==="speaker"){
-              const patch = {};
-              if(step.power!==null) patch.power = step.power;
-              if(step.volume!==null) patch.volume = step.volume;
-              if(step.playing!==null) patch.playing = step.playing;
-              if(patch.power===true) patch.playing = patch.playing ?? true;
-              setDevice("speaker", patch);
-            }
-            if(step.device==="climate"){
-              const patch = {};
-              if(step.power!==null) patch.power = step.power;
-              if(step.temperature!==null) patch.temperature = step.temperature;
-              if(patch.power===true || patch.temperature!==null) patch.power = patch.power ?? true;
-              setDevice("climate", patch);
-            }
-          });
-
-          log("ai", "Execute", `Шагов: ${plan.length}`);
-          break;
-        }
-
-        case "SET_ROLE":
-          state.user.role = action.role;
-          saveState();
-          log("profile", "Роль", action.role);
-          break;
-
-        case "RESET":
-          state = structuredClone(DEFAULT_STATE);
-          saveState();
-          log("system","Reset","ok");
-          break;
-      }
-
-      window.UI && window.UI.render && window.UI.render();
-    }catch(e){
-      window.__AURA_FATAL__ = e;
-      console.error(e);
-      throw e;
+    else {
+      list.appendChild(mkRow(icons.tips, "Раздел в разработке", "Сделаем 1-в-1 + ИИ-фишки", () => {}));
     }
   }
 
-  // Telegram init
-  try{
-    if(tg){
-      tg.ready();
-      tg.expand();
-    }
-  }catch(e){}
+  function renderBodyByTab(){
+    // сейчас оставляем “главную” как на фото,
+    // остальные вкладки — короткий демо-режим через состояние (позже сделаем отдельные экраны)
+    const emptyTitle = qs("#emptyTitle");
+    const emptySub = qs("#emptySub");
+    const aiBar = qs("#aiBar");
 
+    if (state.tab === "home") {
+      emptyTitle.textContent = state.devicesCount ? `Устройств: ${state.devicesCount}` : "Пока нет устройств";
+      emptySub.textContent = "Добавьте устройство и управляйте им из приложения";
+      aiBar.classList.remove("hidden");
+      return;
+    }
+    if (state.tab === "scenes") {
+      emptyTitle.textContent = "Сценарии";
+      emptySub.textContent = "Каталог идей + ваши сценарии (добавим 1-в-1)";
+      aiBar.classList.add("hidden");
+      return;
+    }
+    if (state.tab === "catalog") {
+      emptyTitle.textContent = "Каталог";
+      emptySub.textContent = "Устройства, бренды, совместимость (добавим 1-в-1)";
+      aiBar.classList.add("hidden");
+      return;
+    }
+    if (state.tab === "tips") {
+      emptyTitle.textContent = "Советы";
+      emptySub.textContent = "Рекомендации и события (добавим 1-в-1)";
+      aiBar.classList.add("hidden");
+      return;
+    }
+  }
+
+  function render() {
+    renderHeader();
+    renderQuickRow();
+    renderTilesPics();
+    renderBottomNav();
+    renderBodyByTab();
+  }
+
+  // Hook sheet title changes to build content
+  const _openSheet = (t) => {
+    // title already set inside openSheet, but build content here
+    sheetContentFor(t);
+  };
+
+  // Patch openSheet to also render content
+  const oldOpenSheet = window.openSheet;
+  window.openSheet = (title) => { (oldOpenSheet ? oldOpenSheet(title) : null); _openSheet(title); };
+
+  // expose openSheet/closeSheet for other scripts (ai.js)
   window.AURA = {
-    get state(){ return state; },
-    dispatch,
-    generatePlan
+    state,
+    setTab,
+    openSheet(title){
+      qs("#sheetTitle").textContent = title;
+      sheetContentFor(title);
+      sheetBackdrop().classList.add("show");
+      sheet().classList.add("show");
+    },
+    closeSheet
   };
 
-  dispatch({type:"BOOT"});
+  // init
+  load();
+  bind();
+
+  // connect openSheet calls in this module
+  // (we used local functions, so also wire them)
+  function sheetBackdrop(){ return qs("#sheetBackdrop"); }
+  function sheet(){ return qs("#sheet"); }
+  function closeSheet(){
+    sheetBackdrop().classList.remove("show");
+    sheet().classList.remove("show");
+  }
+  function openSheet(title="Добавить"){
+    qs("#sheetTitle").textContent = title;
+    sheetContentFor(title);
+    sheetBackdrop().classList.add("show");
+    sheet().classList.add("show");
+  }
+
+  // rebind buttons to local openSheet
+  qs("#settingsBtn").onclick = () => openSheet("Настройки");
+  qs("#addBtn").onclick = () => openSheet("Добавить");
+  qs("#fabBtn").onclick = () => openSheet("Добавить");
+
+  qs("#sheetClose").onclick = closeSheet;
+  qs("#sheetBackdrop").onclick = closeSheet;
+
+  // quickRow clicks
+  qs("#quickRow").onclick = (e) => {
+    const btn = e.target.closest("[data-quick]");
+    if (!btn) return;
+    const t = btn.getAttribute("data-quick");
+    if (t === "new") openSheet("Что нового");
+    if (t === "bell") openSheet("Уведомления");
+    if (t === "alarm") openSheet("Будильники");
+  };
+
+  // tiles
+  qs("#tileAlice").onclick = () => openSheet("Устройства с Алисой");
+  qs("#tileSmart").onclick = () => openSheet("Устройства умного дома");
+
+  // bottom nav
+  qs("#bottomNav").onclick = (e) => {
+    const item = e.target.closest(".navItem");
+    if (!item) return;
+    const tab = item.getAttribute("data-tab");
+    if (tab) setTab(tab);
+  };
+
+  // initial sheet content not needed
+  render();
+
+  // small UX: close sheet on ESC
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeSheet();
+  });
+
 })();
