@@ -1,3 +1,52 @@
+// ==== AURA UI SAFETY BOOT (paste at TOP of ui.js) ====
+(function () {
+  // 1) On-screen error (so you see crash reason on iPhone)
+  const showErr = (text) => {
+    try {
+      let box = document.getElementById("auraErrBox");
+      if (!box) {
+        box = document.createElement("div");
+        box.id = "auraErrBox";
+        box.style.cssText =
+          "position:fixed;inset:12px;z-index:99999;background:rgba(10,12,18,.92);" +
+          "border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:14px;" +
+          "color:#fff;font:13px/1.35 -apple-system,BlinkMacSystemFont,system-ui;white-space:pre-wrap;" +
+          "overflow:auto;box-shadow:0 30px 80px rgba(0,0,0,.6)";
+        document.body.appendChild(box);
+      }
+      box.textContent = "AURA UI ERROR:\n" + text;
+    } catch {}
+  };
+
+  window.addEventListener("error", (e) => {
+    const msg = (e?.message || "Unknown error");
+    const src = (e?.filename || "");
+    const line = (e?.lineno || "");
+    showErr(`${msg}\n${src}:${line}`);
+  });
+
+  window.addEventListener("unhandledrejection", (e) => {
+    const msg = (e?.reason?.message || String(e?.reason || "Promise rejection"));
+    showErr(msg);
+  });
+
+  // 2) Fallback AURA core (prevents crash if core not ready)
+  if (!window.AURA) window.AURA = {};
+  if (!window.AURA.state) window.AURA.state = {};
+  if (!window.AURA.state.devices) {
+    window.AURA.state.devices = {
+      light: { power: false, brightness: 50, temp: "warm" },
+      speaker: { playing: false, volume: 30, preset: "lofi" },
+      climate: { power: false, temperature: 23, mode: "auto" }
+    };
+  }
+  if (!window.AURA.state.user) window.AURA.state.user = { name: "Гость", telegramId: null, role: "owner" };
+  if (!window.AURA.state.executionLog) window.AURA.state.executionLog = [];
+  if (!window.AURA.dispatch) window.AURA.dispatch = () => {};
+
+  // 3) If core comes later, UI can re-render safely
+  window.__AURA_BOOT_OK__ = true;
+})();
 console.log("AURA X Premium UI v2 loaded");
 
 const tg = window.Telegram?.WebApp;
