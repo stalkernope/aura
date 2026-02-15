@@ -21,17 +21,20 @@ html,body{
 /* фикс док бара */
 .bottomNav{
   position:fixed;
-  bottom:0;
   left:0;
-  width:100%;
-  padding-bottom:env(safe-area-inset-bottom);
-  backdrop-filter:blur(20px);
-  background:rgba(20,24,40,.6);
-  border-top:1px solid rgba(255,255,255,.08);
+  right:0;
+  bottom:0;
+  
   display:flex;
   justify-content:space-around;
-  padding-top:12px;
-  padding-bottom:12px;
+  align-items:center;
+
+  padding:14px 0 calc(14px + env(safe-area-inset-bottom));
+  
+  backdrop-filter:blur(25px);
+  background:rgba(18,22,38,.75);
+  border-top:1px solid rgba(255,255,255,.08);
+
   z-index:1000;
 }
 
