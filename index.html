@@ -6,204 +6,223 @@
 <title>AURA</title>
 
 <style>
-body{
+*{
   margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-  background:#0b1220;
-  color:#fff;
-  -webkit-font-smoothing:antialiased;
+  padding:0;
+  box-sizing:border-box;
+  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
 }
 
-.app{
-  min-height:100vh;
-  display:flex;
-  flex-direction:column;
+body{
+  background:#070b14;
+  color:white;
+  overflow-x:hidden;
 }
 
-/* HERO */
+/* ================= HERO ================= */
 
-.topHero{
+.hero{
   position:relative;
-  height:260px;
-  overflow:hidden;
-}
-
-.topHero img{
-  position:absolute;
-  inset:0;
+  height:340px;
   width:100%;
-  height:100%;
-  object-fit:cover;
-  transform:scale(1.05);
-  filter:brightness(.85);
+  background:url("./assets/IMG_1348.jpeg") center/cover no-repeat;
 }
 
-.topHero::after{
+.hero::after{
   content:"";
   position:absolute;
   inset:0;
-  background:linear-gradient(to bottom,rgba(8,12,22,.3),rgba(8,12,22,.95));
+  background:linear-gradient(to bottom,
+    rgba(7,11,20,0) 0%,
+    rgba(7,11,20,0.8) 70%,
+    #070b14 100%);
 }
 
-/* CONTENT */
+/* ================= CONTENT ================= */
 
 .content{
-  padding:24px;
-  margin-top:-80px;
+  padding:20px;
+  margin-top:-120px;
+  position:relative;
+  z-index:2;
 }
 
 h1{
-  font-size:38px;
-  margin:0 0 6px 0;
+  font-size:36px;
+  font-weight:700;
 }
 
 .subtitle{
-  opacity:.6;
-  margin-bottom:20px;
+  opacity:0.6;
+  margin-top:6px;
 }
 
-/* STATUS */
+/* ================= STATUS ================= */
 
 .status{
+  margin-top:16px;
   display:inline-flex;
   align-items:center;
   gap:10px;
-  padding:12px 18px;
+  padding:10px 16px;
   border-radius:30px;
   backdrop-filter:blur(20px);
-  background:rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.1);
 }
 
 .dot{
   width:10px;
   height:10px;
-  background:#2bff88;
+  background:#00ff88;
   border-radius:50%;
-  box-shadow:0 0 15px #2bff88;
+  box-shadow:0 0 12px #00ff88;
 }
 
-/* CARDS */
+/* ================= CARDS ================= */
 
 .cards{
-  margin-top:30px;
-  display:grid;
-  grid-template-columns:1fr 1fr;
+  display:flex;
   gap:16px;
+  margin-top:24px;
 }
 
 .card{
-  padding:22px;
-  border-radius:22px;
-  backdrop-filter:blur(25px);
-  background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.08);
-  transition:.3s;
+  flex:1;
+  padding:20px;
+  border-radius:24px;
+  backdrop-filter:blur(30px);
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
+  transition:0.3s;
 }
 
 .card:hover{
-  transform:translateY(-4px);
+  transform:translateY(-6px);
 }
 
-.iconWrap{
-  width:60px;
-  height:60px;
-  border-radius:18px;
-  background:rgba(255,255,255,.08);
+.iconBox{
+  width:70px;
+  height:70px;
+  border-radius:20px;
   display:flex;
   align-items:center;
   justify-content:center;
   margin-bottom:14px;
-  box-shadow:0 0 25px rgba(122,92,255,.4);
+  backdrop-filter:blur(20px);
+  background:rgba(255,255,255,0.08);
+  box-shadow:0 0 25px rgba(140,90,255,0.4);
 }
 
-.iconWrap img{
+.iconBox img{
   width:28px;
+  opacity:0.9;
 }
 
-/* AI BLOCK */
+.card h3{
+  font-size:18px;
+  margin-bottom:6px;
+}
 
-.aiBlock{
+.card p{
+  font-size:13px;
+  opacity:0.6;
+}
+
+/* ================= AI BLOCK ================= */
+
+.ai{
   margin-top:28px;
   padding:22px;
-  border-radius:22px;
-  backdrop-filter:blur(25px);
-  background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.08);
+  border-radius:24px;
+  backdrop-filter:blur(30px);
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
 }
 
-.aiInput{
-  width:100%;
+.input{
+  margin-top:14px;
   padding:14px;
-  border-radius:14px;
-  border:none;
-  background:rgba(255,255,255,.08);
-  color:#fff;
-  margin-bottom:16px;
+  border-radius:18px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.1);
+  color:white;
+  width:100%;
+  outline:none;
 }
 
-.aiBtn{
+.button{
+  margin-top:18px;
   width:100%;
   padding:16px;
-  border-radius:16px;
   border:none;
-  font-weight:600;
+  border-radius:30px;
   font-size:16px;
-  color:#fff;
-  background:linear-gradient(90deg,#6f5bff,#b47dff);
-  box-shadow:0 10px 40px rgba(122,92,255,.6);
-  transition:.3s;
+  font-weight:600;
+  color:white;
+  background:linear-gradient(90deg,#6c4dff,#b07cff);
+  box-shadow:0 0 40px rgba(150,100,255,0.7);
+  cursor:pointer;
+  transition:0.3s;
 }
 
-.aiBtn:active{
-  transform:scale(.97);
-  box-shadow:0 0 60px rgba(122,92,255,1);
+.button:hover{
+  transform:scale(1.04);
+  box-shadow:0 0 60px rgba(150,100,255,1);
 }
 
-/* BOTTOM NAV */
+.button:active{
+  transform:scale(0.96);
+}
 
-.bottomNav{
+/* ================= TABBAR ================= */
+
+.tabbar{
   position:fixed;
   bottom:20px;
-  left:20px;
-  right:20px;
+  left:50%;
+  transform:translateX(-50%);
+  width:92%;
   height:70px;
-  border-radius:30px;
-  backdrop-filter:blur(25px);
-  background:rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.1);
+  border-radius:40px;
+  backdrop-filter:blur(30px);
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.1);
   display:flex;
   justify-content:space-around;
   align-items:center;
 }
 
-.navItem{
+.tab{
   display:flex;
   flex-direction:column;
   align-items:center;
   font-size:12px;
-  opacity:.6;
+  opacity:0.6;
 }
 
-.navItem img{
+.tab img{
   width:24px;
   margin-bottom:4px;
 }
 
-.navItem.active{
+.tab.active{
   opacity:1;
+  color:#c8a6ff;
+}
+
+.tab.active img{
+  filter:drop-shadow(0 0 10px #9f6bff);
 }
 </style>
 </head>
 
 <body>
-<div class="app">
 
-<div class="topHero">
-<img src="assets/IMG_1348.jpeg">
-</div>
+<div class="hero"></div>
 
 <div class="content">
+
 <h1>Мой дом</h1>
 <div class="subtitle">Пока нет устройств</div>
 
@@ -215,57 +234,54 @@ h1{
 <div class="cards">
 
 <div class="card">
-<div class="iconWrap">
-<img src="assets/icons/home.svg">
+<div class="iconBox">
+<img src="./assets/icons/home.svg">
 </div>
 <h3>Устройства с Алисой</h3>
-<div style="opacity:.6;font-size:14px;">
-Яндекс, Xiaomi, JBL и другие
-</div>
+<p>Яндекс, Xiaomi, JBL и другие</p>
 </div>
 
 <div class="card">
-<div class="iconWrap">
-<img src="assets/icons/catalog.svg">
+<div class="iconBox">
+<img src="./assets/icons/catalog.svg">
 </div>
 <h3>Устройства умного дома</h3>
-<div style="opacity:.6;font-size:14px;">
-Свет, розетки, телевизор
-</div>
+<p>Свет, розетки, телевизор</p>
 </div>
 
 </div>
 
-<div class="aiBlock">
+<div class="ai">
 <h3>ИИ-команда для Алисы</h3>
-<input class="aiInput" placeholder="Например: включи свет в гостиной на 30%">
-<button class="aiBtn">Сформировать команду</button>
+<input class="input" placeholder="Например: включи свет в гостиной на 30%">
+<button class="button">Сформировать команду</button>
 </div>
 
 </div>
 
-<div class="bottomNav">
-<div class="navItem active">
-<img src="assets/icons/home.svg">
+<div class="tabbar">
+
+<div class="tab active">
+<img src="./assets/icons/home.svg">
 Мой дом
 </div>
 
-<div class="navItem">
-<img src="assets/icons/scenes.svg">
+<div class="tab">
+<img src="./assets/icons/scenes.svg">
 Сценарии
 </div>
 
-<div class="navItem">
-<img src="assets/icons/catalog.svg">
+<div class="tab">
+<img src="./assets/icons/catalog.svg">
 Каталог
 </div>
 
-<div class="navItem">
-<img src="assets/icons/tips.svg">
+<div class="tab">
+<img src="./assets/icons/tips.svg">
 Советы
-</div>
 </div>
 
 </div>
+
 </body>
 </html>
