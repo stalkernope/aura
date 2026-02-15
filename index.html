@@ -1,194 +1,483 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
+  <meta charset="utf-8" />
+  <!-- ВАЖНО: отключаем зум -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <title>AURA</title>
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <style>
+    :root{
+      --bg:#0b1220;
+      --card:rgba(18,22,36,.78);
+      --card2:rgba(20,26,44,.72);
+      --stroke:rgba(255,255,255,.08);
+      --text:#eef2ff;
+      --muted:rgba(255,255,255,.62);
+      --muted2:rgba(255,255,255,.42);
+      --purple1:#7c5cff;
+      --purple2:#b28dff;
+      --green:#32d083;
 
-<title>AURA</title>
+      /* Telegram-ish bottom bar sizes */
+      --nav-h: 74px;
+      --nav-pad: 14px;
+      --nav-radius: 22px;
+    }
 
-<style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  -webkit-tap-highlight-color:transparent;
-}
+    *{ box-sizing:border-box; margin:0; padding:0; }
+    html,body{ height:100%; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; }
+    a{ color:inherit; text-decoration:none; }
+    button{ font:inherit; }
 
-html,body{
-  height:100%;
-  background:#0b1220;
-  color:white;
-  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
-  overflow-x:hidden;
-  touch-action:manipulation;
-}
+    /* Контент прокрутка */
+    .page{
+      min-height:100%;
+      position:relative;
+      overflow-x:hidden;
+      background:var(--bg);
+    }
 
-/* HERO */
-.hero{
-  position:relative;
-  height:340px;
-  width:100%;
-  background:url("./assets/IMG_1348.jpeg") center/cover no-repeat;
-}
+    /* Чтобы низ не прятался под док-баром */
+    .content{
+      padding-bottom: calc(var(--nav-h) + var(--nav-pad) + env(safe-area-inset-bottom) + 18px);
+    }
 
-.hero::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:linear-gradient(to bottom,rgba(0,0,0,0.2),#0b1220 85%);
-}
+    /* HERO */
+    .hero{
+      position:relative;
+      height: 330px;
+      width:100%;
+      overflow:hidden;
+      background:#10131d;
+    }
+    .hero__img{
+      position:absolute; inset:0;
+      background-image:url("./assets/IMG_1348.jpeg");
+      background-size:cover;
+      background-position:center;
+      transform:scale(1.06);
+      filter:saturate(1.05) contrast(1.05);
+    }
+    .hero__veil{
+      position:absolute; inset:0;
+      background:
+        radial-gradient(1200px 320px at 50% 78%, rgba(10,12,18,.00) 0%, rgba(10,12,18,.55) 55%, rgba(10,12,18,.88) 100%),
+        linear-gradient(180deg, rgba(8,10,14,.10) 0%, rgba(8,10,14,.65) 55%, rgba(8,10,14,.92) 100%);
+    }
 
-/* контент */
-.content{
-  padding:24px;
-  padding-bottom:140px;
-}
+    /* Верхняя зона заголовка */
+    .top{
+      position:relative;
+      margin-top:-118px; /* “наезжаем” на хиро как в рефе */
+      padding: 0 18px;
+    }
 
-/* статус */
-.status{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:10px 18px;
-  border-radius:30px;
-  background:rgba(255,255,255,0.08);
-  backdrop-filter:blur(15px);
-  margin-top:16px;
-}
+    .titleRow{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+    }
+    .titleBlock h1{
+      font-size:48px;
+      line-height:0.95;
+      letter-spacing:-0.03em;
+      font-weight:800;
+      text-shadow: 0 8px 30px rgba(0,0,0,.45);
+      margin-bottom:10px;
+    }
+    .titleBlock .sub{
+      font-size:16px;
+      color:var(--muted);
+      margin-bottom:14px;
+    }
 
-.status-dot{
-  width:10px;
-  height:10px;
-  background:#00ff88;
-  border-radius:50%;
-  box-shadow:0 0 12px #00ff88;
-}
+    /* “Всё спокойно” */
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(16,18,28,.55);
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: 0 14px 38px rgba(0,0,0,.28);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      color: rgba(255,255,255,.86);
+      width: fit-content;
+    }
+    .dot{
+      width:10px; height:10px; border-radius:50%;
+      background: var(--green);
+      box-shadow: 0 0 0 4px rgba(50,208,131,.12), 0 0 18px rgba(50,208,131,.55);
+    }
 
-/* карточки */
-.cards{
-  display:flex;
-  gap:16px;
-  margin-top:24px;
-}
+    /* Карточки */
+    .cardsWrap{
+      margin-top:16px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:14px;
+    }
+    .card{
+      border-radius:26px;
+      background: var(--card);
+      border: 1px solid var(--stroke);
+      box-shadow: 0 22px 60px rgba(0,0,0,.35);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      padding: 18px;
+      min-height: 186px;
+      position:relative;
+      overflow:hidden;
+    }
+    .card::before{
+      content:"";
+      position:absolute; inset:-2px;
+      background: radial-gradient(280px 160px at 30% 20%, rgba(124,92,255,.18), transparent 60%),
+                  radial-gradient(240px 160px at 70% 0%, rgba(178,141,255,.12), transparent 55%);
+      pointer-events:none;
+    }
 
-.card{
-  flex:1;
-  background:rgba(255,255,255,0.05);
-  backdrop-filter:blur(20px);
-  border-radius:24px;
-  padding:20px;
-  border:1px solid rgba(255,255,255,0.08);
-}
+    .iconTile{
+      width:64px; height:64px;
+      border-radius:18px;
+      display:grid;
+      place-items:center;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: 0 14px 40px rgba(0,0,0,.28);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      margin-bottom:14px;
+      position:relative;
+    }
+    /* “стекло + glow” как просил */
+    .iconTile::after{
+      content:"";
+      position:absolute; inset:-10px;
+      background: radial-gradient(60px 60px at 50% 60%, rgba(124,92,255,.32), transparent 70%);
+      filter: blur(10px);
+      opacity:.95;
+      pointer-events:none;
+    }
 
-.card-icon{
-  width:70px;
-  height:70px;
-  margin-bottom:16px;
-  border-radius:20px;
-  background:rgba(255,255,255,0.08);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  box-shadow:0 0 40px rgba(140,100,255,.4);
-}
+    .card h3{
+      font-size:20px;
+      font-weight:800;
+      letter-spacing:-0.01em;
+      margin-bottom:8px;
+      position:relative;
+    }
+    .card p{
+      font-size:14px;
+      line-height:1.35;
+      color: var(--muted2);
+      position:relative;
+    }
 
-/* кнопка */
-.button{
-  width:100%;
-  padding:18px;
-  border:none;
-  border-radius:20px;
-  font-size:18px;
-  font-weight:600;
-  color:white;
-  background:linear-gradient(90deg,#7c5cff,#b28dff);
-  margin-top:16px;
-  transition:.2s;
-}
+    /* ИИ блок */
+    .ai{
+      margin:14px 18px 0;
+      border-radius:26px;
+      background: var(--card2);
+      border: 1px solid var(--stroke);
+      box-shadow: 0 22px 60px rgba(0,0,0,.35);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      padding: 18px;
+      position:relative;
+      overflow:hidden;
+    }
+    .ai::before{
+      content:"";
+      position:absolute; inset:-2px;
+      background: radial-gradient(560px 220px at 50% 110%, rgba(124,92,255,.35), transparent 55%);
+      pointer-events:none;
+    }
+    .ai h2{
+      font-size:22px;
+      font-weight:900;
+      letter-spacing:-0.02em;
+      margin-bottom:14px;
+      position:relative;
+    }
+    .aiInput{
+      width:100%;
+      height:54px;
+      border-radius:16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.06);
+      padding: 0 16px;
+      color: rgba(255,255,255,.88);
+      outline:none;
+      position:relative;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .aiInput::placeholder{ color: rgba(255,255,255,.40); }
 
-.button:active{
-  transform:scale(.97);
-  box-shadow:0 0 40px rgba(150,120,255,.8);
-}
+    .primaryBtn{
+      margin-top:14px;
+      width:100%;
+      height:60px;
+      border:0;
+      border-radius:18px;
+      color:white;
+      font-weight:900;
+      font-size:20px;
+      letter-spacing:-0.01em;
+      background: linear-gradient(90deg, var(--purple1), var(--purple2));
+      box-shadow: 0 18px 60px rgba(124,92,255,.35);
+      position:relative;
+      overflow:hidden;
+      transform: translateZ(0);
+    }
+    .primaryBtn::after{
+      content:"";
+      position:absolute; inset:-2px;
+      background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,.22) 30%, transparent 55%);
+      transform: translateX(-60%);
+      opacity:.9;
+    }
+    /* активная анимация как просил */
+    .primaryBtn:active{
+      transform: scale(.985);
+      box-shadow: 0 14px 40px rgba(124,92,255,.28);
+    }
+    .primaryBtn:active::after{
+      transform: translateX(35%);
+      transition: transform .18s ease;
+    }
+    .primaryBtn:not(:active)::after{
+      transition: transform .65s ease;
+    }
 
-/* нижний док бар */
-.bottomNav{
-  position:fixed;
-  left:0;
-  right:0;
-  bottom:0;
+    /* Иконки SVG как картинки */
+    .svgIcon{
+      width:26px;
+      height:26px;
+      opacity:.95;
+      filter: drop-shadow(0 6px 14px rgba(0,0,0,.45));
+    }
 
-  display:flex;
-  justify-content:space-around;
-  align-items:center;
+    /* ============ Telegram-style bottom bar ============ */
+    .bottomNavWrap{
+      position:fixed;
+      left:0; right:0;
+      bottom: calc(env(safe-area-inset-bottom) + 10px);
+      z-index: 9999;
+      pointer-events:none; /* чтобы не ловило клики вне бара */
+      display:flex;
+      justify-content:center;
+    }
 
-  padding:14px 0 calc(20px + env(safe-area-inset-bottom));
+    .bottomNav{
+      pointer-events:auto;
+      width: min(520px, calc(100% - 22px));
+      height: var(--nav-h);
+      border-radius: var(--nav-radius);
+      background: rgba(20,24,36,.58);
+      border: 1px solid rgba(255,255,255,.10);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      box-shadow: 0 22px 60px rgba(0,0,0,.45);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 10px 12px;
+      position:relative;
+    }
 
-  background:rgba(18,22,38,.75);
-  backdrop-filter:blur(25px);
-  border-top:1px solid rgba(255,255,255,.08);
+    .navItem{
+      width: 84px;
+      height: 54px;
+      border-radius: 18px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:5px;
+      color: rgba(255,255,255,.70);
+      user-select:none;
+      -webkit-user-select:none;
+      transition: transform .15s ease, background .15s ease, color .15s ease, box-shadow .15s ease;
+    }
+    .navItem img{
+      width:24px; height:24px;
+      opacity:.90;
+      filter: drop-shadow(0 8px 16px rgba(0,0,0,.35));
+    }
+    .navItem span{
+      font-size:11px;
+      letter-spacing:-0.01em;
+      opacity:.85;
+    }
 
-  z-index:1000;
-}
+    .navItem:active{ transform: scale(.97); }
 
-.bottomNav div{
-  text-align:center;
-  font-size:12px;
-  opacity:.7;
-}
-.bottomNav .active{
-  opacity:1;
-  color:#b28dff;
-}
-</style>
+    .navItem.active{
+      color: rgba(255,255,255,.95);
+      background: rgba(124,92,255,.14);
+      box-shadow: inset 0 0 0 1px rgba(124,92,255,.18);
+    }
 
+    /* Центральная “кнопка” как в Телеге/рефе (с glow) */
+    .navCenter{
+      width: 66px;
+      height: 66px;
+      border-radius: 24px;
+      display:grid;
+      place-items:center;
+      background: radial-gradient(120px 80px at 50% 30%, rgba(255,255,255,.22), rgba(255,255,255,.06));
+      border: 1px solid rgba(255,255,255,.16);
+      box-shadow:
+        0 18px 60px rgba(124,92,255,.35),
+        inset 0 1px 0 rgba(255,255,255,.20);
+      transform: translateY(-14px);
+      position:relative;
+      overflow:hidden;
+    }
+    .navCenter::before{
+      content:"";
+      position:absolute; inset:-18px;
+      background: radial-gradient(80px 80px at 50% 60%, rgba(124,92,255,.55), transparent 70%);
+      filter: blur(10px);
+      opacity: .95;
+      pointer-events:none;
+    }
+    .navCenter img{ width:28px; height:28px; opacity:.96; }
+
+    .navCenter:active{ transform: translateY(-14px) scale(.98); }
+
+    /* Мелкая компенсация: чтобы верх не “лип” */
+    .spacer{ height: 10px; }
+
+  </style>
 </head>
+
 <body>
+  <div class="page">
+    <div class="content">
+      <div class="hero">
+        <div class="hero__img"></div>
+        <div class="hero__veil"></div>
+      </div>
 
-<div class="hero"></div>
+      <div class="top">
+        <div class="titleRow">
+          <div class="titleBlock">
+            <h1>Мой дом</h1>
+            <div class="sub">Пока нет устройств</div>
+            <div class="pill">
+              <span class="dot"></span>
+              <span>Всё спокойно</span>
+            </div>
+          </div>
+        </div>
 
-<div class="content">
+        <div class="cardsWrap">
+          <div class="card">
+            <div class="iconTile">
+              <!-- сюда кладёшь любую иконку (пример: home.svg) -->
+              <img class="svgIcon" src="./assets/icons/home.svg" alt="home">
+            </div>
+            <h3>Устройства с Алисой</h3>
+            <p>Яндекс, Xiaomi, JBL и другие</p>
+          </div>
 
-<h1 style="font-size:34px;">Мой дом</h1>
-<p style="opacity:.6;margin-top:6px;">Пока нет устройств</p>
+          <div class="card">
+            <div class="iconTile">
+              <img class="svgIcon" src="./assets/icons/catalog.svg" alt="devices">
+            </div>
+            <h3>Устройства умного дома</h3>
+            <p>Свет, розетки, телевизор</p>
+          </div>
+        </div>
+      </div>
 
-<div class="status">
-<div class="status-dot"></div>
-Всё спокойно
-</div>
+      <div class="ai">
+        <h2>ИИ-команда для Алисы</h2>
+        <input class="aiInput" placeholder="Например: включи свет в гостиной на 30%" />
+        <button class="primaryBtn" type="button">Сформировать команду</button>
+      </div>
 
-<div class="cards">
+      <div class="spacer"></div>
+    </div>
 
-<div class="card">
-<div class="card-icon">🏠</div>
-<h3>Устройства с Алисой</h3>
-<p style="opacity:.6;margin-top:6px;">Яндекс, Xiaomi, JBL и другие</p>
-</div>
+    <!-- Bottom Nav (Telegram style) -->
+    <div class="bottomNavWrap">
+      <nav class="bottomNav" role="navigation" aria-label="Bottom navigation">
+        <div class="navItem active" data-tab="home">
+          <img src="./assets/icons/home.svg" alt="">
+          <span>Мой дом</span>
+        </div>
 
-<div class="card">
-<div class="card-icon">📦</div>
-<h3>Устройства умного дома</h3>
-<p style="opacity:.6;margin-top:6px;">Свет, розетки, телевизор</p>
-</div>
+        <div class="navItem" data-tab="scenes">
+          <img src="./assets/icons/scenes.svg" alt="">
+          <span>Сценарии</span>
+        </div>
 
-</div>
+        <div class="navCenter" data-tab="plus" aria-label="Центр">
+          <img src="./assets/icons/plus.svg" alt="">
+        </div>
 
-<div style="margin-top:30px;">
-<h3>ИИ-команда для Алисы</h3>
-<input placeholder="Например: включи свет в гостиной на 30%" 
-style="width:100%;margin-top:12px;padding:14px;border-radius:18px;border:none;background:rgba(255,255,255,0.07);color:white;outline:none;">
-<button class="button">Сформировать команду</button>
-</div>
+        <div class="navItem" data-tab="catalog">
+          <img src="./assets/icons/catalog.svg" alt="">
+          <span>Каталог</span>
+        </div>
 
-</div>
+        <div class="navItem" data-tab="tips">
+          <img src="./assets/icons/tips.svg" alt="">
+          <span>Советы</span>
+        </div>
+      </nav>
+    </div>
+  </div>
 
-<div class="bottomNav">
-<div class="active">🏠<br>Мой дом</div>
-<div>⚙️<br>Сценарии</div>
-<div>📂<br>Каталог</div>
-<div>ℹ️<br>Советы</div>
-</div>
+  <script>
+    // 1) Отключаем iOS pinch-zoom жесты
+    document.addEventListener('gesturestart', e => e.preventDefault(), {passive:false});
+    document.addEventListener('gesturechange', e => e.preventDefault(), {passive:false});
+    document.addEventListener('gestureend', e => e.preventDefault(), {passive:false});
 
+    // Доп. защита: двойной тап зум (Safari iOS)
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', function (e) {
+      const now = Date.now();
+      if (now - lastTouchEnd <= 300) e.preventDefault();
+      lastTouchEnd = now;
+    }, { passive: false });
+
+    // 2) Переключение активной вкладки (анимация + подсветка)
+    const nav = document.querySelector('.bottomNav');
+    nav.addEventListener('click', (e) => {
+      const item = e.target.closest('[data-tab]');
+      if(!item) return;
+
+      const tab = item.getAttribute('data-tab');
+      if(tab === 'plus'){
+        // пример действия
+        item.animate([
+          { transform: 'translateY(-14px) scale(1)' },
+          { transform: 'translateY(-14px) scale(0.96)' },
+          { transform: 'translateY(-14px) scale(1)' }
+        ], { duration: 180, easing: 'ease-out' });
+        return;
+      }
+
+      nav.querySelectorAll('.navItem').forEach(x => x.classList.remove('active'));
+      if(item.classList.contains('navItem')) item.classList.add('active');
+
+      // лёгкий тап-эффект
+      item.animate([
+        { transform: 'scale(1)' },
+        { transform: 'scale(0.97)' },
+        { transform: 'scale(1)' }
+      ], { duration: 160, easing: 'ease-out' });
+    });
+  </script>
 </body>
 </html>
