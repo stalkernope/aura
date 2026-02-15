@@ -1,74 +1,10 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 
-<style>
-
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-}
-
-html,body{
-  height:100%;
-  overflow-x:hidden;
-  background:#0b1220;
-  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
-}
-
-/* фикс док бара */
-.bottomNav{
-  position:fixed;
-  left:0;
-  right:0;
-  bottom:0;
-  
-  display:flex;
-  justify-content:space-around;
-  align-items:center;
-
-  padding:14px 0 calc(14px + env(safe-area-inset-bottom));
-  
-  backdrop-filter:blur(25px);
-  background:rgba(18,22,38,.75);
-  border-top:1px solid rgba(255,255,255,.08);
-
-  z-index:1000;
-}
-
-/* чтобы контент не резался */
-.content{
-  padding-bottom:160px;
-}
-
-/* glow эффект */
-.glow{
-  box-shadow:0 0 40px rgba(140,100,255,.4);
-}
-
-/* кнопка анимация */
-.button{
-  background:linear-gradient(90deg,#7c5cff,#b28dff);
-  border:none;
-  border-radius:18px;
-  padding:18px;
-  color:#fff;
-  font-weight:600;
-  font-size:18px;
-  width:100%;
-  transition:.2s;
-}
-
-.button:active{
-  transform:scale(.97);
-  box-shadow:0 0 30px rgba(150,120,255,.8);
-}
-
-</style>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
 <title>AURA</title>
 
 <style>
@@ -76,17 +12,19 @@ html,body{
   margin:0;
   padding:0;
   box-sizing:border-box;
-  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+  -webkit-tap-highlight-color:transparent;
 }
 
-body{
-  background:#070b14;
+html,body{
+  height:100%;
+  background:#0b1220;
   color:white;
+  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
   overflow-x:hidden;
+  touch-action:manipulation;
 }
 
-/* ================= HERO ================= */
-
+/* HERO */
 .hero{
   position:relative;
   height:340px;
@@ -98,46 +36,28 @@ body{
   content:"";
   position:absolute;
   inset:0;
-  background:linear-gradient(to bottom,
-    rgba(7,11,20,0) 0%,
-    rgba(7,11,20,0.8) 70%,
-    #070b14 100%);
+  background:linear-gradient(to bottom,rgba(0,0,0,0.2),#0b1220 85%);
 }
 
-/* ================= CONTENT ================= */
-
+/* контент */
 .content{
-  padding:20px;
-  margin-top:-120px;
-  position:relative;
-  z-index:2;
+  padding:24px;
+  padding-bottom:140px;
 }
 
-h1{
-  font-size:36px;
-  font-weight:700;
-}
-
-.subtitle{
-  opacity:0.6;
-  margin-top:6px;
-}
-
-/* ================= STATUS ================= */
-
+/* статус */
 .status{
-  margin-top:16px;
   display:inline-flex;
   align-items:center;
-  gap:10px;
-  padding:10px 16px;
+  gap:8px;
+  padding:10px 18px;
   border-radius:30px;
-  backdrop-filter:blur(20px);
-  background:rgba(255,255,255,0.06);
-  border:1px solid rgba(255,255,255,0.1);
+  background:rgba(255,255,255,0.08);
+  backdrop-filter:blur(15px);
+  margin-top:16px;
 }
 
-.dot{
+.status-dot{
   width:10px;
   height:10px;
   background:#00ff88;
@@ -145,8 +65,7 @@ h1{
   box-shadow:0 0 12px #00ff88;
 }
 
-/* ================= CARDS ================= */
-
+/* карточки */
 .cards{
   display:flex;
   gap:16px;
@@ -155,198 +74,120 @@ h1{
 
 .card{
   flex:1;
-  padding:20px;
-  border-radius:24px;
-  backdrop-filter:blur(30px);
   background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(20px);
+  border-radius:24px;
+  padding:20px;
   border:1px solid rgba(255,255,255,0.08);
-  transition:0.3s;
 }
 
-.card:hover{
-  transform:translateY(-6px);
-}
-
-.iconBox{
+.card-icon{
   width:70px;
   height:70px;
+  margin-bottom:16px;
   border-radius:20px;
+  background:rgba(255,255,255,0.08);
   display:flex;
   align-items:center;
   justify-content:center;
-  margin-bottom:14px;
-  backdrop-filter:blur(20px);
-  background:rgba(255,255,255,0.08);
-  box-shadow:0 0 25px rgba(140,90,255,0.4);
+  box-shadow:0 0 40px rgba(140,100,255,.4);
 }
 
-.iconBox img{
-  width:28px;
-  opacity:0.9;
-}
-
-.card h3{
-  font-size:18px;
-  margin-bottom:6px;
-}
-
-.card p{
-  font-size:13px;
-  opacity:0.6;
-}
-
-/* ================= AI BLOCK ================= */
-
-.ai{
-  margin-top:28px;
-  padding:22px;
-  border-radius:24px;
-  backdrop-filter:blur(30px);
-  background:rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.08);
-}
-
-.input{
-  margin-top:14px;
-  padding:14px;
-  border-radius:18px;
-  background:rgba(255,255,255,0.06);
-  border:1px solid rgba(255,255,255,0.1);
-  color:white;
-  width:100%;
-  outline:none;
-}
-
+/* кнопка */
 .button{
-  margin-top:18px;
   width:100%;
-  padding:16px;
+  padding:18px;
   border:none;
-  border-radius:30px;
-  font-size:16px;
+  border-radius:20px;
+  font-size:18px;
   font-weight:600;
   color:white;
-  background:linear-gradient(90deg,#6c4dff,#b07cff);
-  box-shadow:0 0 40px rgba(150,100,255,0.7);
-  cursor:pointer;
-  transition:0.3s;
-}
-
-.button:hover{
-  transform:scale(1.04);
-  box-shadow:0 0 60px rgba(150,100,255,1);
+  background:linear-gradient(90deg,#7c5cff,#b28dff);
+  margin-top:16px;
+  transition:.2s;
 }
 
 .button:active{
-  transform:scale(0.96);
+  transform:scale(.97);
+  box-shadow:0 0 40px rgba(150,120,255,.8);
 }
 
-/* ================= TABBAR ================= */
-
-.tabbar{
+/* нижний док бар */
+.bottomNav{
   position:fixed;
-  bottom:20px;
-  left:50%;
-  transform:translateX(-50%);
-  width:92%;
-  height:70px;
-  border-radius:40px;
-  backdrop-filter:blur(30px);
-  background:rgba(255,255,255,0.08);
-  border:1px solid rgba(255,255,255,0.1);
+  left:0;
+  right:0;
+  bottom:0;
+
   display:flex;
   justify-content:space-around;
   align-items:center;
+
+  padding:14px 0 calc(20px + env(safe-area-inset-bottom));
+
+  background:rgba(18,22,38,.75);
+  backdrop-filter:blur(25px);
+  border-top:1px solid rgba(255,255,255,.08);
+
+  z-index:1000;
 }
 
-.tab{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
+.bottomNav div{
+  text-align:center;
   font-size:12px;
-  opacity:0.6;
+  opacity:.7;
 }
-
-.tab img{
-  width:24px;
-  margin-bottom:4px;
-}
-
-.tab.active{
+.bottomNav .active{
   opacity:1;
-  color:#c8a6ff;
-}
-
-.tab.active img{
-  filter:drop-shadow(0 0 10px #9f6bff);
+  color:#b28dff;
 }
 </style>
-</head>
 
+</head>
 <body>
 
 <div class="hero"></div>
 
 <div class="content">
 
-<h1>Мой дом</h1>
-<div class="subtitle">Пока нет устройств</div>
+<h1 style="font-size:34px;">Мой дом</h1>
+<p style="opacity:.6;margin-top:6px;">Пока нет устройств</p>
 
 <div class="status">
-<div class="dot"></div>
+<div class="status-dot"></div>
 Всё спокойно
 </div>
 
 <div class="cards">
 
 <div class="card">
-<div class="iconBox">
-<img src="./assets/icons/home.svg">
-</div>
+<div class="card-icon">🏠</div>
 <h3>Устройства с Алисой</h3>
-<p>Яндекс, Xiaomi, JBL и другие</p>
+<p style="opacity:.6;margin-top:6px;">Яндекс, Xiaomi, JBL и другие</p>
 </div>
 
 <div class="card">
-<div class="iconBox">
-<img src="./assets/icons/catalog.svg">
-</div>
+<div class="card-icon">📦</div>
 <h3>Устройства умного дома</h3>
-<p>Свет, розетки, телевизор</p>
+<p style="opacity:.6;margin-top:6px;">Свет, розетки, телевизор</p>
 </div>
 
 </div>
 
-<div class="ai">
+<div style="margin-top:30px;">
 <h3>ИИ-команда для Алисы</h3>
-<input class="input" placeholder="Например: включи свет в гостиной на 30%">
+<input placeholder="Например: включи свет в гостиной на 30%" 
+style="width:100%;margin-top:12px;padding:14px;border-radius:18px;border:none;background:rgba(255,255,255,0.07);color:white;outline:none;">
 <button class="button">Сформировать команду</button>
 </div>
 
 </div>
 
-<div class="tabbar">
-
-<div class="tab active">
-<img src="./assets/icons/home.svg">
-Мой дом
-</div>
-
-<div class="tab">
-<img src="./assets/icons/scenes.svg">
-Сценарии
-</div>
-
-<div class="tab">
-<img src="./assets/icons/catalog.svg">
-Каталог
-</div>
-
-<div class="tab">
-<img src="./assets/icons/tips.svg">
-Советы
-</div>
-
+<div class="bottomNav">
+<div class="active">🏠<br>Мой дом</div>
+<div>⚙️<br>Сценарии</div>
+<div>📂<br>Каталог</div>
+<div>ℹ️<br>Советы</div>
 </div>
 
 </body>
