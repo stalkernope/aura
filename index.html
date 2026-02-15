@@ -1,200 +1,163 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AURA</title>
 
 <style>
-*{
+body{
   margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:#0b1220;
+  color:#fff;
+  -webkit-font-smoothing:antialiased;
 }
 
-body{
-  background:#0b0f18;
-  color:white;
-  overflow-x:hidden;
+.app{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
 }
 
 /* HERO */
 
-.hero{
+.topHero{
   position:relative;
-  height:330px;
-  width:100%;
+  height:260px;
   overflow:hidden;
 }
 
-.hero::before{
-  content:"";
+.topHero img{
   position:absolute;
   inset:0;
-  background:url("./assets/hero.jpg") center/cover no-repeat;
+  width:100%;
+  height:100%;
+  object-fit:cover;
   transform:scale(1.05);
+  filter:brightness(.85);
 }
 
-.hero::after{
+.topHero::after{
   content:"";
   position:absolute;
   inset:0;
-  background:linear-gradient(to bottom, rgba(11,15,24,0) 40%, #0b0f18 95%);
-}
-
-/* QUICK BUTTONS */
-
-.quickRow{
-  position:absolute;
-  bottom:110px;
-  left:20px;
-  display:flex;
-  gap:12px;
-}
-
-.quickBtn{
-  width:70px;
-  height:70px;
-  border-radius:20px;
-  background:rgba(255,255,255,0.05);
-  backdrop-filter:blur(12px);
-  border:1px solid rgba(255,255,255,0.1);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  transition:0.3s;
-}
-
-.quickBtn img{
-  width:28px;
-  opacity:0.9;
-}
-
-.quickBtn:hover{
-  box-shadow:0 0 25px rgba(140,92,255,0.6);
+  background:linear-gradient(to bottom,rgba(8,12,22,.3),rgba(8,12,22,.95));
 }
 
 /* CONTENT */
 
-.container{
-  padding:20px;
+.content{
+  padding:24px;
   margin-top:-80px;
 }
 
 h1{
-  font-size:36px;
-  font-weight:700;
-  margin-bottom:6px;
+  font-size:38px;
+  margin:0 0 6px 0;
 }
 
-.sub{
-  opacity:0.6;
-  margin-bottom:15px;
+.subtitle{
+  opacity:.6;
+  margin-bottom:20px;
 }
+
+/* STATUS */
 
 .status{
   display:inline-flex;
   align-items:center;
-  gap:8px;
-  padding:8px 14px;
-  border-radius:20px;
-  background:rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.1);
-  margin-bottom:25px;
+  gap:10px;
+  padding:12px 18px;
+  border-radius:30px;
+  backdrop-filter:blur(20px);
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.1);
 }
 
-.statusDot{
+.dot{
   width:10px;
   height:10px;
+  background:#2bff88;
   border-radius:50%;
-  background:#2cff8f;
-  box-shadow:0 0 10px #2cff8f;
+  box-shadow:0 0 15px #2bff88;
 }
 
 /* CARDS */
 
-.cardRow{
-  display:flex;
-  gap:15px;
+.cards{
+  margin-top:30px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
 }
 
 .card{
-  flex:1;
-  padding:20px;
-  border-radius:25px;
-  background:rgba(255,255,255,0.04);
-  border:1px solid rgba(255,255,255,0.08);
-  backdrop-filter:blur(20px);
-  transition:0.3s;
+  padding:22px;
+  border-radius:22px;
+  backdrop-filter:blur(25px);
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.08);
+  transition:.3s;
 }
 
 .card:hover{
-  box-shadow:0 0 40px rgba(140,92,255,0.4);
+  transform:translateY(-4px);
 }
 
-.cardIcon{
-  width:70px;
-  height:70px;
-  border-radius:20px;
-  background:rgba(255,255,255,0.08);
+.iconWrap{
+  width:60px;
+  height:60px;
+  border-radius:18px;
+  background:rgba(255,255,255,.08);
   display:flex;
   align-items:center;
   justify-content:center;
-  margin-bottom:15px;
+  margin-bottom:14px;
+  box-shadow:0 0 25px rgba(122,92,255,.4);
 }
 
-.cardIcon img{
-  width:32px;
-}
-
-.card h3{
-  margin-bottom:8px;
-}
-
-.card p{
-  opacity:0.6;
-  font-size:14px;
+.iconWrap img{
+  width:28px;
 }
 
 /* AI BLOCK */
 
 .aiBlock{
-  margin-top:25px;
-  padding:20px;
-  border-radius:30px;
-  background:rgba(255,255,255,0.04);
-  border:1px solid rgba(255,255,255,0.08);
-  backdrop-filter:blur(20px);
+  margin-top:28px;
+  padding:22px;
+  border-radius:22px;
+  backdrop-filter:blur(25px);
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.08);
 }
 
 .aiInput{
   width:100%;
   padding:14px;
-  border-radius:20px;
+  border-radius:14px;
   border:none;
-  outline:none;
-  background:rgba(255,255,255,0.06);
-  color:white;
-  margin:15px 0;
+  background:rgba(255,255,255,.08);
+  color:#fff;
+  margin-bottom:16px;
 }
 
 .aiBtn{
   width:100%;
   padding:16px;
-  border-radius:25px;
+  border-radius:16px;
   border:none;
-  font-size:16px;
   font-weight:600;
-  color:white;
-  cursor:pointer;
-  background:linear-gradient(135deg,#7a5cff,#b57cff);
-  transition:0.3s;
+  font-size:16px;
+  color:#fff;
+  background:linear-gradient(90deg,#6f5bff,#b47dff);
+  box-shadow:0 10px 40px rgba(122,92,255,.6);
+  transition:.3s;
 }
 
-.aiBtn:hover{
-  box-shadow:0 0 40px rgba(140,92,255,0.7);
-  transform:translateY(-2px);
+.aiBtn:active{
+  transform:scale(.97);
+  box-shadow:0 0 60px rgba(122,92,255,1);
 }
 
 /* BOTTOM NAV */
@@ -202,14 +165,13 @@ h1{
 .bottomNav{
   position:fixed;
   bottom:20px;
-  left:50%;
-  transform:translateX(-50%);
-  width:90%;
-  height:75px;
-  border-radius:35px;
-  background:rgba(255,255,255,0.06);
-  backdrop-filter:blur(20px);
-  border:1px solid rgba(255,255,255,0.1);
+  left:20px;
+  right:20px;
+  height:70px;
+  border-radius:30px;
+  backdrop-filter:blur(25px);
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.1);
   display:flex;
   justify-content:space-around;
   align-items:center;
@@ -220,7 +182,7 @@ h1{
   flex-direction:column;
   align-items:center;
   font-size:12px;
-  opacity:0.6;
+  opacity:.6;
 }
 
 .navItem img{
@@ -231,73 +193,79 @@ h1{
 .navItem.active{
   opacity:1;
 }
-
 </style>
 </head>
 
 <body>
+<div class="app">
 
-<div class="hero">
-  <div class="quickRow">
-    <div class="quickBtn"><img src="./assets/icons/home.svg"/></div>
-    <div class="quickBtn"><img src="./assets/icons/search.svg"/></div>
-    <div class="quickBtn"><img src="./assets/icons/gear.svg"/></div>
-  </div>
+<div class="topHero">
+<img src="assets/hero.jpg">
 </div>
 
-<div class="container">
-  <h1>Мой дом</h1>
-  <div class="sub">Пока нет устройств</div>
+<div class="content">
+<h1>Мой дом</h1>
+<div class="subtitle">Пока нет устройств</div>
 
-  <div class="status">
-    <div class="statusDot"></div>
-    Всё спокойно
-  </div>
+<div class="status">
+<div class="dot"></div>
+Всё спокойно
+</div>
 
-  <div class="cardRow">
-    <div class="card">
-      <div class="cardIcon">
-        <img src="./assets/icons/home.svg"/>
-      </div>
-      <h3>Устройства с Алисой</h3>
-      <p>Яндекс, Xiaomi, JBL и другие</p>
-    </div>
+<div class="cards">
 
-    <div class="card">
-      <div class="cardIcon">
-        <img src="./assets/icons/catalog.svg"/>
-      </div>
-      <h3>Устройства умного дома</h3>
-      <p>Свет, розетки, телевизор</p>
-    </div>
-  </div>
+<div class="card">
+<div class="iconWrap">
+<img src="assets/icons/home.svg">
+</div>
+<h3>Устройства с Алисой</h3>
+<div style="opacity:.6;font-size:14px;">
+Яндекс, Xiaomi, JBL и другие
+</div>
+</div>
 
-  <div class="aiBlock">
-    <h3>ИИ-команда для Алисы</h3>
-    <input class="aiInput" placeholder="Например: включи свет в гостиной на 30%"/>
-    <button class="aiBtn">Сформировать команду</button>
-  </div>
+<div class="card">
+<div class="iconWrap">
+<img src="assets/icons/catalog.svg">
+</div>
+<h3>Устройства умного дома</h3>
+<div style="opacity:.6;font-size:14px;">
+Свет, розетки, телевизор
+</div>
+</div>
+
+</div>
+
+<div class="aiBlock">
+<h3>ИИ-команда для Алисы</h3>
+<input class="aiInput" placeholder="Например: включи свет в гостиной на 30%">
+<button class="aiBtn">Сформировать команду</button>
+</div>
 
 </div>
 
 <div class="bottomNav">
-  <div class="navItem active">
-    <img src="./assets/icons/home.svg"/>
-    Мой дом
-  </div>
-  <div class="navItem">
-    <img src="./assets/icons/scenes.svg"/>
-    Сценарии
-  </div>
-  <div class="navItem">
-    <img src="./assets/icons/catalog.svg"/>
-    Каталог
-  </div>
-  <div class="navItem">
-    <img src="./assets/icons/tips.svg"/>
-    Советы
-  </div>
+<div class="navItem active">
+<img src="assets/icons/home.svg">
+Мой дом
 </div>
 
+<div class="navItem">
+<img src="assets/icons/scenes.svg">
+Сценарии
+</div>
+
+<div class="navItem">
+<img src="assets/icons/catalog.svg">
+Каталог
+</div>
+
+<div class="navItem">
+<img src="assets/icons/tips.svg">
+Советы
+</div>
+</div>
+
+</div>
 </body>
 </html>
