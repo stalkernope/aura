@@ -1,6 +1,69 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+html,body{
+  height:100%;
+  overflow-x:hidden;
+  background:#0b1220;
+  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+}
+
+/* фикс док бара */
+.bottomNav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  padding-bottom:env(safe-area-inset-bottom);
+  backdrop-filter:blur(20px);
+  background:rgba(20,24,40,.6);
+  border-top:1px solid rgba(255,255,255,.08);
+  display:flex;
+  justify-content:space-around;
+  padding-top:12px;
+  padding-bottom:12px;
+  z-index:1000;
+}
+
+/* чтобы контент не резался */
+.content{
+  padding-bottom:110px;
+}
+
+/* glow эффект */
+.glow{
+  box-shadow:0 0 40px rgba(140,100,255,.4);
+}
+
+/* кнопка анимация */
+.button{
+  background:linear-gradient(90deg,#7c5cff,#b28dff);
+  border:none;
+  border-radius:18px;
+  padding:18px;
+  color:#fff;
+  font-weight:600;
+  font-size:18px;
+  width:100%;
+  transition:.2s;
+}
+
+.button:active{
+  transform:scale(.97);
+  box-shadow:0 0 30px rgba(150,120,255,.8);
+}
+
+</style>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>AURA</title>
