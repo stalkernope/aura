@@ -2,212 +2,234 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>AURA</title>
 
 <style>
-
 *{
   margin:0;
   padding:0;
   box-sizing:border-box;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
 }
 
 body{
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
-  background:#0b0f1a;
+  background:#0b0f18;
   color:white;
   overflow-x:hidden;
 }
 
-/* ===== HERO ===== */
+/* HERO */
 
 .hero{
   position:relative;
-  height:320px;
+  height:330px;
   width:100%;
+  overflow:hidden;
+}
+
+.hero::before{
+  content:"";
+  position:absolute;
+  inset:0;
   background:url("./assets/hero.jpg") center/cover no-repeat;
+  transform:scale(1.05);
 }
 
 .hero::after{
   content:"";
   position:absolute;
   inset:0;
-  background:linear-gradient(to bottom, rgba(11,15,26,0.1), #0b0f1a 85%);
+  background:linear-gradient(to bottom, rgba(11,15,24,0) 40%, #0b0f18 95%);
 }
 
-/* ===== HEADER ===== */
+/* QUICK BUTTONS */
 
-.header{
-  padding:24px;
-  position:relative;
-  z-index:2;
+.quickRow{
+  position:absolute;
+  bottom:110px;
+  left:20px;
+  display:flex;
+  gap:12px;
 }
 
-.title{
-  font-size:40px;
-  font-weight:800;
-  line-height:1.1;
+.quickBtn{
+  width:70px;
+  height:70px;
+  border-radius:20px;
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,0.1);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:0.3s;
 }
 
-.subtitle{
-  opacity:.6;
-  margin-top:6px;
+.quickBtn img{
+  width:28px;
+  opacity:0.9;
 }
 
-/* ===== STATUS ===== */
+.quickBtn:hover{
+  box-shadow:0 0 25px rgba(140,92,255,0.6);
+}
+
+/* CONTENT */
+
+.container{
+  padding:20px;
+  margin-top:-80px;
+}
+
+h1{
+  font-size:36px;
+  font-weight:700;
+  margin-bottom:6px;
+}
+
+.sub{
+  opacity:0.6;
+  margin-bottom:15px;
+}
 
 .status{
   display:inline-flex;
   align-items:center;
   gap:8px;
-  margin-top:16px;
-  padding:10px 18px;
-  border-radius:999px;
-  backdrop-filter:blur(12px);
-  background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.1);
+  padding:8px 14px;
+  border-radius:20px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.1);
+  margin-bottom:25px;
 }
 
-.dot{
+.statusDot{
   width:10px;
   height:10px;
-  background:#2eff84;
   border-radius:50%;
-  box-shadow:0 0 12px #2eff84;
+  background:#2cff8f;
+  box-shadow:0 0 10px #2cff8f;
 }
 
-/* ===== CARDS ===== */
+/* CARDS */
 
-.section{
-  padding:0 20px;
-  margin-top:-40px;
-  position:relative;
-  z-index:2;
-}
-
-.cards{
+.cardRow{
   display:flex;
-  gap:16px;
-  margin-top:20px;
+  gap:15px;
 }
 
 .card{
   flex:1;
   padding:20px;
-  border-radius:22px;
-  backdrop-filter:blur(18px);
-  background:rgba(255,255,255,.04);
-  border:1px solid rgba(255,255,255,.08);
-  transition:.3s;
+  border-radius:25px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.08);
+  backdrop-filter:blur(20px);
+  transition:0.3s;
 }
 
 .card:hover{
-  transform:translateY(-4px);
+  box-shadow:0 0 40px rgba(140,92,255,0.4);
 }
 
-.card img{
-  width:44px;
-  height:44px;
-  padding:10px;
-  border-radius:14px;
-  background:rgba(255,255,255,.08);
-  box-shadow:0 0 20px rgba(122,92,255,.4);
-  margin-bottom:16px;
-}
-
-/* ===== AI BLOCK ===== */
-
-.ai-block{
-  margin-top:28px;
-  padding:22px;
-  border-radius:26px;
-  backdrop-filter:blur(18px);
-  background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.08);
-}
-
-.ai-input{
-  width:100%;
-  padding:14px;
-  border-radius:14px;
-  border:none;
-  margin-top:12px;
-  background:rgba(255,255,255,.07);
-  color:white;
-}
-
-.ai-btn{
-  width:100%;
-  margin-top:18px;
-  padding:18px;
-  border:none;
-  border-radius:18px;
-  font-size:18px;
-  font-weight:600;
-  color:white;
-  background:linear-gradient(135deg,#7a5cff,#b78dff);
-  box-shadow:0 0 30px rgba(122,92,255,.6);
-  transition:.25s;
-}
-
-.ai-btn:active{
-  transform:scale(.96);
-  box-shadow:0 0 60px rgba(122,92,255,.9);
-}
-
-/* ===== BOTTOM NAV ===== */
-
-.bottom{
-  position:fixed;
-  bottom:18px;
-  left:50%;
-  transform:translateX(-50%);
-  width:92%;
-  padding:12px 16px;
-  border-radius:28px;
-  backdrop-filter:blur(20px);
-  background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.1);
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-.bottom-item{
-  text-align:center;
-  font-size:12px;
-  opacity:.6;
-}
-
-.bottom-item img{
-  width:22px;
-  height:22px;
-  margin-bottom:4px;
-}
-
-.active{
-  opacity:1;
-}
-
-.center-btn{
-  position:absolute;
-  top:-26px;
-  left:50%;
-  transform:translateX(-50%);
-  width:58px;
-  height:58px;
-  border-radius:50%;
-  background:linear-gradient(135deg,#7a5cff,#b78dff);
-  box-shadow:0 0 40px rgba(122,92,255,.9);
+.cardIcon{
+  width:70px;
+  height:70px;
+  border-radius:20px;
+  background:rgba(255,255,255,0.08);
   display:flex;
   align-items:center;
   justify-content:center;
+  margin-bottom:15px;
 }
 
-.center-btn img{
-  width:26px;
-  height:26px;
+.cardIcon img{
+  width:32px;
+}
+
+.card h3{
+  margin-bottom:8px;
+}
+
+.card p{
+  opacity:0.6;
+  font-size:14px;
+}
+
+/* AI BLOCK */
+
+.aiBlock{
+  margin-top:25px;
+  padding:20px;
+  border-radius:30px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.08);
+  backdrop-filter:blur(20px);
+}
+
+.aiInput{
+  width:100%;
+  padding:14px;
+  border-radius:20px;
+  border:none;
+  outline:none;
+  background:rgba(255,255,255,0.06);
+  color:white;
+  margin:15px 0;
+}
+
+.aiBtn{
+  width:100%;
+  padding:16px;
+  border-radius:25px;
+  border:none;
+  font-size:16px;
+  font-weight:600;
+  color:white;
+  cursor:pointer;
+  background:linear-gradient(135deg,#7a5cff,#b57cff);
+  transition:0.3s;
+}
+
+.aiBtn:hover{
+  box-shadow:0 0 40px rgba(140,92,255,0.7);
+  transform:translateY(-2px);
+}
+
+/* BOTTOM NAV */
+
+.bottomNav{
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  width:90%;
+  height:75px;
+  border-radius:35px;
+  background:rgba(255,255,255,0.06);
+  backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,0.1);
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+}
+
+.navItem{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  font-size:12px;
+  opacity:0.6;
+}
+
+.navItem img{
+  width:24px;
+  margin-bottom:4px;
+}
+
+.navItem.active{
+  opacity:1;
 }
 
 </style>
@@ -215,74 +237,66 @@ body{
 
 <body>
 
-<div class="hero"></div>
+<div class="hero">
+  <div class="quickRow">
+    <div class="quickBtn"><img src="./assets/icons/home.svg"/></div>
+    <div class="quickBtn"><img src="./assets/icons/search.svg"/></div>
+    <div class="quickBtn"><img src="./assets/icons/gear.svg"/></div>
+  </div>
+</div>
 
-<div class="header">
-  <div class="title">Мой дом</div>
-  <div class="subtitle">Пока нет устройств</div>
+<div class="container">
+  <h1>Мой дом</h1>
+  <div class="sub">Пока нет устройств</div>
 
   <div class="status">
-    <div class="dot"></div>
+    <div class="statusDot"></div>
     Всё спокойно
   </div>
-</div>
 
-<div class="section">
-
-  <div class="cards">
-
+  <div class="cardRow">
     <div class="card">
-      <img src="./assets/icons/home.svg">
-      <div style="font-weight:600">Устройства с Алисой</div>
-      <div style="opacity:.6;margin-top:6px;font-size:14px">
-        Яндекс, Xiaomi, JBL и другие
+      <div class="cardIcon">
+        <img src="./assets/icons/home.svg"/>
       </div>
+      <h3>Устройства с Алисой</h3>
+      <p>Яндекс, Xiaomi, JBL и другие</p>
     </div>
 
     <div class="card">
-      <img src="./assets/icons/catalog.svg">
-      <div style="font-weight:600">Устройства умного дома</div>
-      <div style="opacity:.6;margin-top:6px;font-size:14px">
-        Свет, розетки, телевизор
+      <div class="cardIcon">
+        <img src="./assets/icons/catalog.svg"/>
       </div>
+      <h3>Устройства умного дома</h3>
+      <p>Свет, розетки, телевизор</p>
     </div>
-
   </div>
 
-  <div class="ai-block">
-    <div style="font-weight:600;font-size:18px">ИИ-команда для Алисы</div>
-    <input class="ai-input" placeholder="Например: включи свет в гостиной на 30%">
-    <button class="ai-btn">Сформировать команду</button>
+  <div class="aiBlock">
+    <h3>ИИ-команда для Алисы</h3>
+    <input class="aiInput" placeholder="Например: включи свет в гостиной на 30%"/>
+    <button class="aiBtn">Сформировать команду</button>
   </div>
 
 </div>
 
-<div class="bottom">
-
-  <div class="bottom-item active">
-    <img src="./assets/icons/home.svg">
-    <div>Мой дом</div>
+<div class="bottomNav">
+  <div class="navItem active">
+    <img src="./assets/icons/home.svg"/>
+    Мой дом
   </div>
-
-  <div class="bottom-item">
-    <img src="./assets/icons/scenes.svg">
-    <div>Сценарии</div>
+  <div class="navItem">
+    <img src="./assets/icons/scenes.svg"/>
+    Сценарии
   </div>
-
-  <div class="center-btn">
-    <img src="./assets/icons/plus.svg">
+  <div class="navItem">
+    <img src="./assets/icons/catalog.svg"/>
+    Каталог
   </div>
-
-  <div class="bottom-item">
-    <img src="./assets/icons/catalog.svg">
-    <div>Каталог</div>
+  <div class="navItem">
+    <img src="./assets/icons/tips.svg"/>
+    Советы
   </div>
-
-  <div class="bottom-item">
-    <img src="./assets/icons/tips.svg">
-    <div>Советы</div>
-  </div>
-
 </div>
 
 </body>
