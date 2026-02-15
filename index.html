@@ -6,281 +6,282 @@
 <title>AURA</title>
 
 <style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
 body{
-margin:0;
-font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-background:#0b0f18;
-color:white;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+  background:#0b0f1a;
+  color:white;
+  overflow-x:hidden;
 }
 
-.app{
-min-height:100vh;
-display:flex;
-flex-direction:column;
+/* ===== HERO ===== */
+
+.hero{
+  position:relative;
+  height:320px;
+  width:100%;
+  background:url("./assets/hero.jpg") center/cover no-repeat;
 }
 
-.topHero{
-position:relative;
-height:260px;
-overflow:hidden;
+.hero::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(to bottom, rgba(11,15,26,0.1), #0b0f1a 85%);
 }
 
-.topHero .img{
-position:absolute;
-inset:0;
-background-image:url('./assets/hero.jpg');
-background-size:cover;
-background-position:center;
-transform:scale(1.05);
+/* ===== HEADER ===== */
+
+.header{
+  padding:24px;
+  position:relative;
+  z-index:2;
 }
 
-.topHero .veil{
-position:absolute;
-inset:0;
-background:linear-gradient(180deg,rgba(11,15,24,.2) 0%,#0b0f18 85%);
+.title{
+  font-size:40px;
+  font-weight:800;
+  line-height:1.1;
 }
 
-.content{
-padding:20px;
-margin-top:-80px;
-position:relative;
-z-index:2;
+.subtitle{
+  opacity:.6;
+  margin-top:6px;
 }
 
-h1{
-font-size:36px;
-margin:0 0 6px 0;
-font-weight:800;
-}
-
-.sub{
-color:rgba(255,255,255,.6);
-margin-bottom:20px;
-}
+/* ===== STATUS ===== */
 
 .status{
-display:inline-flex;
-align-items:center;
-padding:8px 14px;
-border-radius:20px;
-background:rgba(255,255,255,.06);
-backdrop-filter:blur(10px);
-border:1px solid rgba(255,255,255,.08);
-margin-bottom:20px;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  margin-top:16px;
+  padding:10px 18px;
+  border-radius:999px;
+  backdrop-filter:blur(12px);
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.1);
 }
 
 .dot{
-width:8px;
-height:8px;
-border-radius:50%;
-background:#00ff88;
-margin-right:8px;
-box-shadow:0 0 8px #00ff88;
+  width:10px;
+  height:10px;
+  background:#2eff84;
+  border-radius:50%;
+  box-shadow:0 0 12px #2eff84;
+}
+
+/* ===== CARDS ===== */
+
+.section{
+  padding:0 20px;
+  margin-top:-40px;
+  position:relative;
+  z-index:2;
 }
 
 .cards{
-display:flex;
-gap:14px;
+  display:flex;
+  gap:16px;
+  margin-top:20px;
 }
 
 .card{
-flex:1;
-background:rgba(255,255,255,.05);
-backdrop-filter:blur(18px);
-border:1px solid rgba(255,255,255,.08);
-border-radius:22px;
-padding:20px;
-transition:.3s;
+  flex:1;
+  padding:20px;
+  border-radius:22px;
+  backdrop-filter:blur(18px);
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  transition:.3s;
 }
 
 .card:hover{
-transform:translateY(-4px);
-box-shadow:0 0 30px rgba(122,92,255,.3);
+  transform:translateY(-4px);
 }
 
-.cardIcon{
-width:60px;
-height:60px;
-border-radius:18px;
-background:rgba(255,255,255,.08);
-display:flex;
-align-items:center;
-justify-content:center;
-margin-bottom:14px;
-backdrop-filter:blur(20px);
-border:1px solid rgba(255,255,255,.1);
-box-shadow:0 0 25px rgba(122,92,255,.25);
+.card img{
+  width:44px;
+  height:44px;
+  padding:10px;
+  border-radius:14px;
+  background:rgba(255,255,255,.08);
+  box-shadow:0 0 20px rgba(122,92,255,.4);
+  margin-bottom:16px;
 }
 
-.cardIcon img{
-width:36px;
-height:36px;
-filter:drop-shadow(0 0 6px rgba(180,120,255,.6));
+/* ===== AI BLOCK ===== */
+
+.ai-block{
+  margin-top:28px;
+  padding:22px;
+  border-radius:26px;
+  backdrop-filter:blur(18px);
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.08);
 }
 
-.card h3{
-margin:0 0 6px 0;
-font-size:16px;
+.ai-input{
+  width:100%;
+  padding:14px;
+  border-radius:14px;
+  border:none;
+  margin-top:12px;
+  background:rgba(255,255,255,.07);
+  color:white;
 }
 
-.card p{
-margin:0;
-color:rgba(255,255,255,.6);
-font-size:13px;
+.ai-btn{
+  width:100%;
+  margin-top:18px;
+  padding:18px;
+  border:none;
+  border-radius:18px;
+  font-size:18px;
+  font-weight:600;
+  color:white;
+  background:linear-gradient(135deg,#7a5cff,#b78dff);
+  box-shadow:0 0 30px rgba(122,92,255,.6);
+  transition:.25s;
 }
 
-.aiBox{
-margin-top:28px;
-background:rgba(255,255,255,.05);
-border-radius:24px;
-padding:20px;
-border:1px solid rgba(255,255,255,.08);
-backdrop-filter:blur(20px);
+.ai-btn:active{
+  transform:scale(.96);
+  box-shadow:0 0 60px rgba(122,92,255,.9);
 }
 
-.aiInput{
-width:100%;
-padding:14px 16px;
-border-radius:16px;
-border:1px solid rgba(255,255,255,.1);
-background:rgba(255,255,255,.05);
-color:white;
-outline:none;
-margin-bottom:16px;
+/* ===== BOTTOM NAV ===== */
+
+.bottom{
+  position:fixed;
+  bottom:18px;
+  left:50%;
+  transform:translateX(-50%);
+  width:92%;
+  padding:12px 16px;
+  border-radius:28px;
+  backdrop-filter:blur(20px);
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.1);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
 
-.aiBtn{
-width:100%;
-padding:16px;
-border-radius:20px;
-border:none;
-background:linear-gradient(90deg,#7a5cff,#b88dff);
-color:white;
-font-size:16px;
-font-weight:700;
-cursor:pointer;
-transition:.3s;
-box-shadow:0 0 30px rgba(122,92,255,.4);
+.bottom-item{
+  text-align:center;
+  font-size:12px;
+  opacity:.6;
 }
 
-.aiBtn:active{
-transform:scale(.96);
-box-shadow:0 0 40px rgba(122,92,255,.8);
+.bottom-item img{
+  width:22px;
+  height:22px;
+  margin-bottom:4px;
 }
 
-.bottomNav{
-position:fixed;
-bottom:20px;
-left:50%;
-transform:translateX(-50%);
-background:rgba(255,255,255,.05);
-backdrop-filter:blur(20px);
-border-radius:30px;
-padding:10px 18px;
-display:flex;
-gap:30px;
-border:1px solid rgba(255,255,255,.1);
+.active{
+  opacity:1;
 }
 
-.navItem{
-display:flex;
-flex-direction:column;
-align-items:center;
-font-size:11px;
-color:rgba(255,255,255,.5);
+.center-btn{
+  position:absolute;
+  top:-26px;
+  left:50%;
+  transform:translateX(-50%);
+  width:58px;
+  height:58px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#7a5cff,#b78dff);
+  box-shadow:0 0 40px rgba(122,92,255,.9);
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 
-.navItem img{
-width:22px;
-height:22px;
-margin-bottom:4px;
-filter:drop-shadow(0 0 6px rgba(150,100,255,.5));
+.center-btn img{
+  width:26px;
+  height:26px;
 }
 
-.navItem.active{
-color:white;
-}
-
-.centerGlow{
-position:fixed;
-bottom:45px;
-left:50%;
-transform:translateX(-50%);
-width:70px;
-height:70px;
-border-radius:50%;
-background:linear-gradient(145deg,#7a5cff,#b88dff);
-box-shadow:0 0 60px rgba(122,92,255,.8);
-}
 </style>
 </head>
 
 <body>
 
-<div class="app">
+<div class="hero"></div>
 
-<div class="topHero">
-<div class="img"></div>
-<div class="veil"></div>
-</div>
+<div class="header">
+  <div class="title">Мой дом</div>
+  <div class="subtitle">Пока нет устройств</div>
 
-<div class="content">
-<h1>Мой дом</h1>
-<div class="sub">Пока нет устройств</div>
-
-<div class="status">
-<div class="dot"></div>
-Всё спокойно
+  <div class="status">
+    <div class="dot"></div>
+    Всё спокойно
+  </div>
 </div>
 
-<div class="cards">
-<div class="card">
-<div class="cardIcon">
-<img src="./assets/icons/home.svg">
-</div>
-<h3>Устройства с Алисой</h3>
-<p>Яндекс, Xiaomi, JBL и другие</p>
+<div class="section">
+
+  <div class="cards">
+
+    <div class="card">
+      <img src="./assets/icons/home.svg">
+      <div style="font-weight:600">Устройства с Алисой</div>
+      <div style="opacity:.6;margin-top:6px;font-size:14px">
+        Яндекс, Xiaomi, JBL и другие
+      </div>
+    </div>
+
+    <div class="card">
+      <img src="./assets/icons/catalog.svg">
+      <div style="font-weight:600">Устройства умного дома</div>
+      <div style="opacity:.6;margin-top:6px;font-size:14px">
+        Свет, розетки, телевизор
+      </div>
+    </div>
+
+  </div>
+
+  <div class="ai-block">
+    <div style="font-weight:600;font-size:18px">ИИ-команда для Алисы</div>
+    <input class="ai-input" placeholder="Например: включи свет в гостиной на 30%">
+    <button class="ai-btn">Сформировать команду</button>
+  </div>
+
 </div>
 
-<div class="card">
-<div class="cardIcon">
-<img src="./assets/icons/catalog.svg">
-</div>
-<h3>Устройства умного дома</h3>
-<p>Свет, розетки, телевизор</p>
-</div>
-</div>
+<div class="bottom">
 
-<div class="aiBox">
-<input class="aiInput" placeholder="Например: включи свет в гостиной на 30%">
-<button class="aiBtn">Сформировать команду</button>
-</div>
+  <div class="bottom-item active">
+    <img src="./assets/icons/home.svg">
+    <div>Мой дом</div>
+  </div>
 
-</div>
+  <div class="bottom-item">
+    <img src="./assets/icons/scenes.svg">
+    <div>Сценарии</div>
+  </div>
 
-<div class="centerGlow"></div>
+  <div class="center-btn">
+    <img src="./assets/icons/plus.svg">
+  </div>
 
-<div class="bottomNav">
-<div class="navItem active">
-<img src="./assets/icons/home.svg">
-Мой дом
-</div>
+  <div class="bottom-item">
+    <img src="./assets/icons/catalog.svg">
+    <div>Каталог</div>
+  </div>
 
-<div class="navItem">
-<img src="./assets/icons/scenes.svg">
-Сценарии
-</div>
-
-<div class="navItem">
-<img src="./assets/icons/catalog.svg">
-Каталог
-</div>
-
-<div class="navItem">
-<img src="./assets/icons/tips.svg">
-Советы
-</div>
-</div>
+  <div class="bottom-item">
+    <img src="./assets/icons/tips.svg">
+    <div>Советы</div>
+  </div>
 
 </div>
 
