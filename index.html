@@ -10,12 +10,9 @@ content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable
 :root{
   --bg:#0a1020;
   --panel: rgba(20,24,38,.55);
-  --panel2: rgba(26,30,48,.55);
   --stroke: rgba(255,255,255,.10);
-  --stroke2: rgba(255,255,255,.06);
   --text: rgba(255,255,255,.92);
   --muted: rgba(255,255,255,.62);
-  --muted2: rgba(255,255,255,.42);
 
   --accent1:#7b5cff;
   --accent2:#b58bff;
@@ -23,12 +20,6 @@ content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable
 
   --shadow: 0 16px 60px rgba(0,0,0,.55);
   --shadow2: 0 12px 30px rgba(0,0,0,.38);
-
-  --r12:12px;
-  --r16:16px;
-  --r20:20px;
-  --r24:24px;
-  --r28:28px;
 
   --blur: 28px;
 
@@ -40,10 +31,10 @@ content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",system-ui,sans-serif;overflow-x:hidden;}
 body{overscroll-behavior: none;}
-a{color:inherit;text-decoration:none;}
 img{display:block;max-width:100%;}
+::-webkit-scrollbar{width:0;height:0}
 
-/* лёгкий зернистый слой — делает “premium стекло” */
+/* зерно */
 .grain{
   pointer-events:none;
   position:fixed;inset:0;
@@ -61,7 +52,7 @@ img{display:block;max-width:100%;}
 /* HERO */
 .hero{
   position:relative;
-  height: 320px;
+  height: 360px;
   width:100%;
   background:
     radial-gradient(1200px 420px at 60% 10%, rgba(160,130,255,.18), transparent 55%),
@@ -70,20 +61,21 @@ img{display:block;max-width:100%;}
   filter:saturate(1.06) contrast(1.03);
   overflow:hidden;
 }
-.hero:after{
+.hero::after{
   content:"";
   position:absolute;inset:0;
   background:
-    linear-gradient(to bottom, rgba(10,16,32,.06) 0%, rgba(10,16,32,.28) 45%, rgba(10,16,32,.92) 100%);
+    linear-gradient(to bottom, rgba(10,16,32,.05) 0%, rgba(10,16,32,.18) 40%, rgba(10,16,32,.55) 70%, rgba(10,16,32,.92) 100%);
 }
-.hero:before{
+/* плавный “стык” как в Яндексе */
+.hero::before{
   content:"";
-  position:absolute;left:-30%;right:-30%;top:-20%;
-  height:240px;
-  background: radial-gradient(closest-side, rgba(140,110,255,.26), transparent 70%);
-  filter: blur(20px);
-  opacity:.85;
-  transform: rotate(-6deg);
+  position:absolute;
+  left:-15%; right:-15%;
+  bottom:-120px;
+  height:220px;
+  background: radial-gradient(closest-side, rgba(10,16,32,.92), rgba(10,16,32,.0) 70%);
+  filter: blur(0px);
 }
 
 /* TOP BAR */
@@ -98,17 +90,14 @@ img{display:block;max-width:100%;}
   gap:12px;
 }
 .brand{
-  font-weight:700;
-  letter-spacing:.04em;
-  opacity:.9;
-}
-.topActions{
-  display:flex; gap:10px;
+  font-weight:800;
+  letter-spacing:.05em;
+  opacity:.92;
 }
 .iconBtn{
   width:40px;height:40px;border-radius:14px;
   background: rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.10);
   backdrop-filter: blur(var(--blur)) saturate(170%);
   -webkit-backdrop-filter: blur(var(--blur)) saturate(170%);
   box-shadow: 0 10px 25px rgba(0,0,0,.28), inset 0 0 18px rgba(255,255,255,.04);
@@ -116,22 +105,20 @@ img{display:block;max-width:100%;}
   transition: transform .18s ease, background .18s ease, border-color .18s ease;
 }
 .iconBtn:active{transform:scale(.96);}
-.iconBtn svg{opacity:.92}
 
-/* CONTENT */
-.page{
-  position:relative;
-}
+/* CONTENT (ВАЖНО: убрали гигантский отступ) */
 .content{
   padding: 18px 18px 0;
-  margin-top: 206px;
+  /* вместо margin-top:206px делаем “подъезд” прямо к hero */
+  margin-top: -92px;
   padding-bottom: calc(var(--dockH) + var(--dockPadB) + 44px);
 }
 
+/* заголовки */
 .h1{
   font-size:44px;
   line-height:1.05;
-  font-weight:800;
+  font-weight:900;
   letter-spacing:-.02em;
   text-shadow: 0 16px 50px rgba(0,0,0,.55);
   margin-bottom:10px;
@@ -149,11 +136,11 @@ img{display:block;max-width:100%;}
   padding: 10px 14px;
   border-radius: 999px;
   background: rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.10);
   backdrop-filter: blur(var(--blur)) saturate(160%);
   -webkit-backdrop-filter: blur(var(--blur)) saturate(160%);
   box-shadow: var(--shadow2);
-  margin-bottom: 22px;
+  margin-bottom: 18px;
 }
 .dot{
   width:10px;height:10px;border-radius:50%;
@@ -161,13 +148,24 @@ img{display:block;max-width:100%;}
   box-shadow: 0 0 14px rgba(51,255,136,.9);
 }
 
-/* SECTION HEADER (по-яндексовски) */
+/* “плашка” под контентом чтобы он выглядел слитно с hero */
+.sheet{
+  border-radius: 30px;
+  background: rgba(10,16,32,.35);
+  border: 1px solid rgba(255,255,255,.06);
+  box-shadow: 0 25px 70px rgba(0,0,0,.45);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  padding: 16px;
+}
+
+/* section */
 .sectionTitle{
   text-align:center;
   margin: 10px 0 12px;
 }
 .sectionTitle .t1{
-  font-weight:800;
+  font-weight:900;
   font-size:30px;
   letter-spacing:-.02em;
 }
@@ -177,7 +175,7 @@ img{display:block;max-width:100%;}
   font-size:16px;
 }
 
-/* CARD GRID */
+/* cards */
 .cards{
   display:grid;
   grid-template-columns: 1fr 1fr;
@@ -189,8 +187,8 @@ img{display:block;max-width:100%;}
   position:relative;
   border-radius: 26px;
   background:
-    linear-gradient(160deg, rgba(150,120,255,.20), rgba(30,36,56,.42) 55%, rgba(18,22,34,.60));
-  border: 1px solid rgba(255,255,255,.08);
+    linear-gradient(160deg, rgba(150,120,255,.22), rgba(30,36,56,.44) 55%, rgba(18,22,34,.62));
+  border: 1px solid rgba(255,255,255,.10);
   box-shadow: var(--shadow);
   overflow:hidden;
   padding:16px;
@@ -199,22 +197,20 @@ img{display:block;max-width:100%;}
   -webkit-backdrop-filter: blur(var(--blur)) saturate(170%);
   transition: transform .22s ease, border-color .22s ease;
 }
-.card:active{ transform: scale(.985); border-color: rgba(255,255,255,.14); }
-
+.card:active{ transform: scale(.985); border-color: rgba(255,255,255,.16); }
 .cardGlow{
   position:absolute;inset:-60px;
   background:
-    radial-gradient(300px 220px at 20% 20%, rgba(170,140,255,.35), transparent 60%),
-    radial-gradient(240px 200px at 80% 30%, rgba(80,220,255,.18), transparent 60%);
+    radial-gradient(300px 220px at 20% 20%, rgba(170,140,255,.38), transparent 60%),
+    radial-gradient(240px 200px at 80% 30%, rgba(80,220,255,.20), transparent 60%);
   filter: blur(18px);
   opacity:.85;
   pointer-events:none;
 }
-
 .cardIconWrap{
   width:56px;height:56px;border-radius: 20px;
   background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.12);
   box-shadow:
     0 14px 35px rgba(0,0,0,.35),
     inset 0 0 18px rgba(255,255,255,.05);
@@ -229,23 +225,23 @@ img{display:block;max-width:100%;}
 }
 .card h3{
   font-size:20px;
-  font-weight:800;
+  font-weight:900;
   letter-spacing:-.02em;
   margin-bottom:8px;
 }
 .card p{
   font-size:14px;
-  color: var(--muted);
+  color: rgba(255,255,255,.58);
   line-height:1.25;
 }
 
-/* AI PANEL */
+/* AI */
 .ai{
   margin-top: 14px;
   border-radius: 30px;
   background:
-    linear-gradient(165deg, rgba(150,120,255,.24), rgba(20,22,40,.55) 60%, rgba(12,14,26,.65));
-  border: 1px solid rgba(255,255,255,.10);
+    linear-gradient(165deg, rgba(150,120,255,.26), rgba(20,22,40,.56) 60%, rgba(12,14,26,.66));
+  border: 1px solid rgba(255,255,255,.12);
   box-shadow: var(--shadow);
   backdrop-filter: blur(var(--blur)) saturate(170%);
   -webkit-backdrop-filter: blur(var(--blur)) saturate(170%);
@@ -254,29 +250,26 @@ img{display:block;max-width:100%;}
 .aiHead{
   padding:18px 18px 10px;
   font-size:34px;
-  font-weight:900;
+  font-weight:950;
   letter-spacing:-.03em;
   line-height:1.05;
   background:
-    radial-gradient(700px 220px at 20% 10%, rgba(170,140,255,.28), transparent 55%),
-    radial-gradient(600px 200px at 85% 15%, rgba(80,220,255,.12), transparent 55%);
+    radial-gradient(700px 220px at 20% 10%, rgba(170,140,255,.30), transparent 55%),
+    radial-gradient(600px 200px at 85% 15%, rgba(80,220,255,.14), transparent 55%);
 }
-.aiBody{
-  padding: 14px 18px 18px;
-}
+.aiBody{ padding: 14px 18px 18px; }
 .field{
   width:100%;
   border-radius: 18px;
   padding: 14px 14px;
   background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.10);
   color: rgba(255,255,255,.88);
   outline:none;
   box-shadow: inset 0 0 18px rgba(0,0,0,.22);
   font-size:16px;
 }
 .field::placeholder{color: rgba(255,255,255,.45);}
-
 .btn{
   margin-top:14px;
   width:100%;
@@ -285,7 +278,7 @@ img{display:block;max-width:100%;}
   padding: 16px 16px;
   background: linear-gradient(90deg, var(--accent1), var(--accent2));
   color:white;
-  font-weight:800;
+  font-weight:900;
   font-size:18px;
   letter-spacing:-.01em;
   box-shadow:
@@ -295,12 +288,13 @@ img{display:block;max-width:100%;}
 }
 .btn:active{transform: scale(.985); filter: brightness(1.05);}
 
-/* DOCK (Telegram vibe premium) */
+/* DOCK */
 .dock{
   position:fixed;
   left: var(--dockInset);
   right: var(--dockInset);
   bottom: var(--dockInset);
+
   height: var(--dockH);
   padding: 12px 14px;
   padding-bottom: var(--dockPadB);
@@ -311,7 +305,7 @@ img{display:block;max-width:100%;}
   gap: 8px;
 
   background: rgba(18,20,32,.56);
-  border: 1px solid rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.12);
   border-radius: 30px;
 
   backdrop-filter: blur(var(--blur)) saturate(180%);
@@ -322,15 +316,12 @@ img{display:block;max-width:100%;}
     inset 0 0 22px rgba(255,255,255,.05);
   z-index:1000;
 }
-
-/* сияющая полоска (как дорогой акцент) */
 .dock::before{
   content:"";
   position:absolute;
   left:14px;right:14px;top:10px;height:2px;
   background: linear-gradient(90deg, transparent, rgba(170,140,255,.65), rgba(80,220,255,.35), transparent);
   opacity:.55;
-  filter: blur(.2px);
   border-radius: 99px;
 }
 
@@ -352,26 +343,20 @@ img{display:block;max-width:100%;}
   user-select:none;
 }
 .nav:active{ transform: scale(.98); }
-
 .navIcon{
   width:22px;height:22px;opacity:.9;
   filter: drop-shadow(0 10px 16px rgba(0,0,0,.35));
 }
+.navEmoji{font-size:20px;line-height:1;}
 
-.navEmoji{
-  font-size:20px; line-height:1;
-}
-
-.nav.active{
-  color:#fff;
-}
+.nav.active{ color:#fff; }
 .nav.active::before{
   content:"";
   position:absolute;
   inset:4px 6px;
   border-radius: 18px;
   background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.12);
   box-shadow:
     0 10px 25px rgba(0,0,0,.35),
     inset 0 0 18px rgba(255,255,255,.05);
@@ -404,12 +389,6 @@ img{display:block;max-width:100%;}
 .navCenter:active{ transform: translateY(-18px) scale(.97); filter: brightness(1.05); }
 .navCenter img{width:24px;height:24px;opacity:.95}
 .navCenter .plusFallback{font-size:28px;font-weight:900;}
-
-/* чтобы контент не прилипал к доку */
-.spacer{height:10px;}
-
-/* скроллбар красиво/скрытно */
-::-webkit-scrollbar{width:0;height:0}
 </style>
 </head>
 
@@ -418,21 +397,19 @@ img{display:block;max-width:100%;}
 
 <div class="topbar">
   <div class="brand">AURA</div>
-  <div class="topActions">
-    <div class="iconBtn" aria-label="Ещё">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-        <circle cx="5" cy="12" r="2" fill="rgba(255,255,255,.9)"/>
-        <circle cx="12" cy="12" r="2" fill="rgba(255,255,255,.9)"/>
-        <circle cx="19" cy="12" r="2" fill="rgba(255,255,255,.9)"/>
-      </svg>
-    </div>
+  <div class="iconBtn" aria-label="Ещё">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <circle cx="5" cy="12" r="2" fill="rgba(255,255,255,.9)"/>
+      <circle cx="12" cy="12" r="2" fill="rgba(255,255,255,.9)"/>
+      <circle cx="19" cy="12" r="2" fill="rgba(255,255,255,.9)"/>
+    </svg>
   </div>
 </div>
 
-<div class="page">
-  <div class="hero"></div>
+<div class="hero"></div>
 
-  <div class="content">
+<div class="content">
+  <div class="sheet">
     <div class="h1">Мой дом</div>
     <div class="sub">Пока нет устройств</div>
 
@@ -450,7 +427,8 @@ img{display:block;max-width:100%;}
       <div class="card">
         <div class="cardGlow"></div>
         <div class="cardIconWrap">
-          <img class="cardIcon" src="assets/icons/home.svg" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+          <img class="cardIcon" src="assets/icons/home.svg" alt=""
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
           <div class="navEmoji" style="display:none">🏠</div>
         </div>
         <h3>Устройства с Алисой</h3>
@@ -460,7 +438,8 @@ img{display:block;max-width:100%;}
       <div class="card">
         <div class="cardGlow"></div>
         <div class="cardIconWrap">
-          <img class="cardIcon" src="assets/icons/catalog.svg" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+          <img class="cardIcon" src="assets/icons/catalog.svg" alt=""
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
           <div class="navEmoji" style="display:none">📦</div>
         </div>
         <h3>Устройства умного дома</h3>
@@ -475,50 +454,50 @@ img{display:block;max-width:100%;}
         <button class="btn">Сформировать команду</button>
       </div>
     </div>
-
-    <div class="spacer"></div>
   </div>
 </div>
 
-<!-- DOCK -->
 <div class="dock" role="navigation" aria-label="Нижняя навигация">
-
   <div class="nav active">
-    <img class="navIcon" src="assets/icons/home.svg" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+    <img class="navIcon" src="assets/icons/home.svg" alt=""
+         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
     <div class="navEmoji" style="display:none">🏠</div>
     <div>Мой дом</div>
   </div>
 
   <div class="nav">
-    <img class="navIcon" src="assets/icons/scenes.svg" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+    <img class="navIcon" src="assets/icons/scenes.svg" alt=""
+         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
     <div class="navEmoji" style="display:none">📋</div>
     <div>Сценарии</div>
   </div>
 
   <div class="navCenter" aria-label="Добавить">
-    <img src="assets/icons/plus.svg" alt="" onerror="this.style.display='none'; this.parentNode.querySelector('.plusFallback').style.display='block';">
+    <img src="assets/icons/plus.svg" alt=""
+         onerror="this.style.display='none'; this.parentNode.querySelector('.plusFallback').style.display='block';">
     <div class="plusFallback" style="display:none">+</div>
   </div>
 
   <div class="nav">
-    <img class="navIcon" src="assets/icons/catalog.svg" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+    <img class="navIcon" src="assets/icons/catalog.svg" alt=""
+         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
     <div class="navEmoji" style="display:none">📦</div>
     <div>Каталог</div>
   </div>
 
   <div class="nav">
-    <img class="navIcon" src="assets/icons/tips.svg" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+    <img class="navIcon" src="assets/icons/tips.svg" alt=""
+         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
     <div class="navEmoji" style="display:none">ℹ️</div>
     <div>Советы</div>
   </div>
-
 </div>
 
 <script>
-/* блокируем pinch-zoom на iOS (на всякий) */
-document.addEventListener('gesturestart', function(e){ e.preventDefault(); }, {passive:false});
-document.addEventListener('gesturechange', function(e){ e.preventDefault(); }, {passive:false});
-document.addEventListener('gestureend', function(e){ e.preventDefault(); }, {passive:false});
+/* блокируем pinch-zoom на iOS */
+document.addEventListener('gesturestart', e => e.preventDefault(), {passive:false});
+document.addEventListener('gesturechange', e => e.preventDefault(), {passive:false});
+document.addEventListener('gestureend', e => e.preventDefault(), {passive:false});
 </script>
 
 </body>
