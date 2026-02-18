@@ -1,751 +1,276 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
-  <title>AURA</title>
+<meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-  <style>
-    :root{
-      --bg: #0b0f1c;
-      --panel: rgba(18,22,38,.62);
-      --panel2: rgba(18,22,38,.78);
-      --stroke: rgba(255,255,255,.12);
-      --stroke2: rgba(255,255,255,.08);
-      --text: rgba(255,255,255,.92);
-      --muted: rgba(255,255,255,.62);
+<title>AURA</title>
 
-      --accent: #8a6bff;
-      --accent2: #6b7cff;
-      --green: #2af08a;
+<style>
 
-      /* твой фон */
-      --hero-url: url("./assets/IMG_1348.jpeg");
-    }
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
 
-    *{box-sizing:border-box;margin:0;padding:0}
-    html,body{height:100%}
-    body{
-      background: var(--bg);
-      color: var(--text);
-      font-family: -apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",Inter,Segoe UI,Roboto,Arial,sans-serif;
-      overflow-x:hidden;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: pan-y;
-    }
-    a{color:inherit;text-decoration:none}
+html,body{
+  height:100%;
+  background:#0b1220;
+  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+  color:white;
+  overflow-x:hidden;
+}
 
-    /* ===== HERO ===== */
-    .hero{
-      position:relative;
-      height: 420px;
-      width: 100%;
-      overflow:hidden;
-      background: #0b0f1c;
-    }
-    .hero::before{
-      content:"";
-      position:absolute; inset:-18px;
-      background-image: var(--hero-url);
-      background-size: cover;
-      background-position: center;
-      transform: scale(1.06);
-      filter: saturate(1.05) contrast(1.02);
-    }
-    .hero::after{
-      content:"";
-      position:absolute; inset:0;
-      background:
-        radial-gradient(1200px 520px at 50% 70%, rgba(124,92,255,.26), rgba(0,0,0,0) 55%),
-        linear-gradient(180deg, rgba(9,10,16,.10) 0%, rgba(9,10,16,.64) 55%, rgba(9,10,16,.92) 100%);
-      pointer-events:none;
-    }
-    .heroVignette{
-      position:absolute; inset:0;
-      background: radial-gradient(900px 540px at 50% 66%, rgba(0,0,0,0) 20%, rgba(0,0,0,.55) 100%);
-      pointer-events:none;
-    }
+/* HERO */
+.hero{
+  position:relative;
+  height:340px;
+  width:100%;
+  background:url("assets/IMG_1348.jpeg") center/cover no-repeat;
+}
 
-    /* ===== TOP APP BAR ===== */
-    .appbar{
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      height: calc(52px + env(safe-area-inset-top));
-      padding-top: env(safe-area-inset-top);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      z-index: 50;
-      background: rgba(15,16,24,.55);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border-bottom: 1px solid rgba(255,255,255,.06);
-    }
-    .appbar .title{
-      font-weight: 750;
-      letter-spacing: .2px;
-      opacity:.96;
-    }
-    .appbar .left, .appbar .right{
-      position:absolute;
-      top: env(safe-area-inset-top);
-      height: 52px;
-      display:flex;
-      align-items:center;
-      gap:10px;
-    }
-    .appbar .left{left: 14px;}
-    .appbar .right{right: 14px;}
-    .barBtn{
-      width: 40px; height: 40px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.06);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      display:flex; align-items:center; justify-content:center;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.10);
-      transition: transform .12s ease;
-    }
-    .barBtn:active{transform: scale(.96);}
-    .barBtn img{width:18px;height:18px;opacity:.9}
+.hero::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:180px;
+  background:linear-gradient(to bottom,transparent,#0b1220);
+}
 
-    /* ===== CONTENT SHEET ===== */
-    .sheet{
-      position: relative;
-      margin-top: -180px;
-      padding: 22px 18px 24px;
-      border-top-left-radius: 28px;
-      border-top-right-radius: 28px;
-      background: rgba(14,16,26,.70);
-      backdrop-filter: blur(22px);
-      -webkit-backdrop-filter: blur(22px);
-      border-top: 1px solid rgba(255,255,255,.10);
-      box-shadow: 0 -30px 90px rgba(0,0,0,.55);
-      min-height: calc(100vh - 120px);
-    }
+/* CONTENT */
+.content{
+  padding:24px;
+  padding-bottom:140px;
+}
 
-    .headerRow{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap: 16px;
-      margin-bottom: 14px;
-    }
-    .hLeft .h1{
-      font-size: 44px;
-      line-height: 1.0;
-      font-weight: 860;
-      letter-spacing: -0.02em;
-      margin-bottom: 6px;
-      text-shadow: 0 14px 40px rgba(0,0,0,.45);
-    }
-    .hLeft .sub{
-      font-size: 16px;
-      color: rgba(255,255,255,.50);
-      font-weight: 550;
-    }
-    .hRight{
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      padding-top: 6px;
-    }
+h1{
+  font-size:42px;
+  font-weight:700;
+  margin-bottom:8px;
+}
 
-    .pill{
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      padding: 12px 14px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.06);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      box-shadow:
-        0 16px 50px rgba(0,0,0,.40),
-        inset 0 1px 0 rgba(255,255,255,.10);
-      margin: 12px 0 18px;
-      width: fit-content;
-    }
-    .dot{
-      width: 10px; height: 10px;
-      border-radius: 50%;
-      background: var(--green);
-      box-shadow: 0 0 14px rgba(42,240,138,.55);
-    }
-    .pill span{font-weight: 700; color: rgba(255,255,255,.88)}
+.sub{
+  opacity:.6;
+  margin-bottom:16px;
+}
 
-    /* ===== CENTER TEXT ===== */
-    .centerTitle{
-      text-align:center;
-      margin: 8px 0 4px;
-      font-size: 26px;
-      font-weight: 860;
-      letter-spacing: -.01em;
-    }
-    .centerSub{
-      text-align:center;
-      color: rgba(255,255,255,.48);
-      font-weight: 600;
-      margin-bottom: 18px;
-    }
+.status{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 16px;
+  border-radius:20px;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.08);
+  margin-bottom:28px;
+}
 
-    /* ===== CARDS GRID ===== */
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-bottom: 16px;
-    }
+.dot{
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:#00ff66;
+  box-shadow:0 0 12px #00ff66;
+}
 
-    .card{
-      position:relative;
-      border-radius: 22px;
-      padding: 16px;
-      border: 1px solid rgba(255,255,255,.10);
-      background:
-        radial-gradient(600px 220px at 20% 0%, rgba(124,92,255,.22), rgba(0,0,0,0) 60%),
-        rgba(255,255,255,.05);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      box-shadow:
-        0 24px 70px rgba(0,0,0,.45),
-        inset 0 1px 0 rgba(255,255,255,.12);
-      overflow:hidden;
-      min-height: 178px;
-      transition: transform .14s ease, box-shadow .14s ease;
-    }
-    .card:active{
-      transform: translateY(1px) scale(.99);
-      box-shadow:
-        0 18px 45px rgba(0,0,0,.55),
-        inset 0 1px 0 rgba(255,255,255,.12);
-    }
+/* CARDS */
+.cards{
+  display:flex;
+  gap:16px;
+  margin-bottom:32px;
+}
 
-    /* “стеклянная” иконка как в Яндексе */
-    .glassIcon{
-      width: 64px; height: 64px;
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,.16);
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.20), rgba(255,255,255,.06));
-      backdrop-filter: blur(22px);
-      -webkit-backdrop-filter: blur(22px);
-      box-shadow:
-        0 18px 55px rgba(0,0,0,.50),
-        inset 0 1px 0 rgba(255,255,255,.22),
-        inset 0 -12px 24px rgba(0,0,0,.22);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      margin-bottom: 12px;
-      position:relative;
-      overflow:hidden;
-    }
-    .glassIcon::after{
-      content:"";
-      position:absolute;
-      top:-40%; left:-60%;
-      width: 120%;
-      height: 120%;
-      transform: rotate(18deg);
-      background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.22) 45%, rgba(255,255,255,0) 70%);
-      opacity: .55;
-      animation: shine 5.5s linear infinite;
-      pointer-events:none;
-    }
-    @keyframes shine{
-      0%{transform: translateX(-40%) rotate(18deg); opacity:.0;}
-      10%{opacity:.55;}
-      40%{opacity:.0;}
-      100%{transform: translateX(120%) rotate(18deg); opacity:0;}
-    }
-    .glassIcon img{
-      width: 26px; height: 26px;
-      opacity: .92;
-      filter:
-        drop-shadow(0 10px 20px rgba(0,0,0,.45))
-        drop-shadow(0 0 14px rgba(124,92,255,.35));
-    }
+.card{
+  flex:1;
+  padding:20px;
+  border-radius:22px;
+  background:linear-gradient(145deg,rgba(140,120,255,.15),rgba(80,70,140,.2));
+  border:1px solid rgba(255,255,255,.06);
+  backdrop-filter:blur(25px);
+}
 
-    .card h3{
-      font-size: 22px;
-      font-weight: 860;
-      letter-spacing: -.01em;
-      margin-bottom: 8px;
-    }
-    .card p{
-      color: rgba(255,255,255,.50);
-      font-weight: 650;
-      line-height: 1.25;
-    }
+.card h3{
+  margin-bottom:8px;
+}
 
-    /* ===== AI BLOCK ===== */
-    .ai{
-      border-radius: 26px;
-      padding: 18px 16px 16px;
-      border: 1px solid rgba(255,255,255,.10);
-      background:
-        radial-gradient(800px 340px at 50% 0%, rgba(124,92,255,.20), rgba(0,0,0,0) 55%),
-        rgba(255,255,255,.05);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      box-shadow:
-        0 30px 90px rgba(0,0,0,.50),
-        inset 0 1px 0 rgba(255,255,255,.12);
-      margin-bottom: 120px; /* чтобы док никогда не резал */
-      position:relative;
-      overflow:hidden;
-    }
-    .ai::before{
-      content:"";
-      position:absolute; inset:-40px;
-      background:
-        radial-gradient(420px 160px at 30% 10%, rgba(124,92,255,.20), rgba(0,0,0,0) 70%),
-        radial-gradient(520px 220px at 80% 20%, rgba(107,124,255,.14), rgba(0,0,0,0) 70%);
-      filter: blur(2px);
-      pointer-events:none;
-    }
-    .ai h2{
-      font-size: 34px;
-      font-weight: 900;
-      letter-spacing: -0.02em;
-      margin-bottom: 14px;
-      position:relative;
-      z-index:1;
-    }
+.card p{
+  font-size:14px;
+  opacity:.6;
+}
 
-    .input{
-      width:100%;
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.06);
-      padding: 14px 14px;
-      color: rgba(255,255,255,.88);
-      font-weight: 700;
-      outline:none;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      margin-bottom: 12px;
-      position:relative;
-      z-index:1;
-    }
-    .input::placeholder{color: rgba(255,255,255,.35); font-weight:700}
+/* AI BLOCK */
+.ai{
+  padding:22px;
+  border-radius:26px;
+  background:linear-gradient(145deg,rgba(150,120,255,.25),rgba(60,40,110,.4));
+  border:1px solid rgba(255,255,255,.08);
+  backdrop-filter:blur(30px);
+}
 
-    /* ===== PREMIUM BUTTON with “live” glow ===== */
-    .btn{
-      width:100%;
-      border:none;
-      border-radius: 20px;
-      padding: 18px 18px;
-      font-weight: 900;
-      font-size: 20px;
-      letter-spacing: -.01em;
-      color: white;
-      cursor:pointer;
-      position:relative;
-      z-index:1;
+.ai h2{
+  margin-bottom:14px;
+}
 
-      background: linear-gradient(90deg, #7a63ff, #9a7bff);
-      box-shadow:
-        0 22px 70px rgba(124,92,255,.38),
-        0 18px 50px rgba(0,0,0,.35),
-        inset 0 1px 0 rgba(255,255,255,.22);
-      overflow:hidden;
-      transition: transform .14s ease, box-shadow .14s ease;
-    }
-    .btn::after{
-      content:"";
-      position:absolute;
-      top:-60%;
-      left:-40%;
-      width: 80%;
-      height: 220%;
-      background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.28) 40%, rgba(255,255,255,0) 70%);
-      transform: rotate(16deg);
-      animation: btnShine 2.9s ease-in-out infinite;
-    }
-    @keyframes btnShine{
-      0%{transform: translateX(-30%) rotate(16deg); opacity:0;}
-      20%{opacity:.85;}
-      60%{opacity:0;}
-      100%{transform: translateX(220%) rotate(16deg); opacity:0;}
-    }
-    .btn:active{
-      transform: scale(.985);
-      box-shadow:
-        0 26px 90px rgba(124,92,255,.50),
-        0 14px 36px rgba(0,0,0,.50);
-    }
+.ai input{
+  width:100%;
+  padding:14px;
+  border-radius:14px;
+  border:none;
+  background:rgba(255,255,255,.08);
+  margin-bottom:16px;
+  color:white;
+}
 
-    /* ===== TELEGRAM-STYLE PREMIUM DOCK (bright) ===== */
-    .dockWrap{
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      z-index: 1000;
-      padding: 12px 14px calc(14px + env(safe-area-inset-bottom));
-      pointer-events:none;
-    }
+.button{
+  width:100%;
+  padding:16px;
+  border:none;
+  border-radius:18px;
+  background:linear-gradient(90deg,#7c5cff,#b28dff);
+  color:white;
+  font-weight:600;
+  font-size:16px;
+  box-shadow:0 0 30px rgba(140,100,255,.6);
+  transition:.2s;
+}
 
-    .dock{
-      pointer-events:auto;
-      height: 76px;
-      border-radius: 28px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding: 10px 12px;
+.button:active{
+  transform:scale(.97);
+}
 
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.06)),
-        rgba(15,18,30,.62);
+/* TELEGRAM STYLE PREMIUM DOCK */
+.bottomNav{
+  position:fixed;
+  left:16px;
+  right:16px;
+  bottom:16px;
 
-      backdrop-filter: blur(var(--dock-blur, 26px));
-      -webkit-backdrop-filter: blur(var(--dock-blur, 26px));
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 
-      border: 1px solid rgba(255,255,255,.16);
+  padding:14px 20px;
 
-      box-shadow:
-        0 34px 90px rgba(0,0,0,.70),
-        0 0 70px rgba(124,92,255,.18),
-        inset 0 1px 0 rgba(255,255,255,.18);
+  background:rgba(25,28,45,.55);
+  backdrop-filter:blur(30px) saturate(180%);
+  -webkit-backdrop-filter:blur(30px) saturate(180%);
 
-      position:relative;
-      overflow:hidden;
-    }
+  border-radius:28px;
+  border:1px solid rgba(255,255,255,.08);
 
-    /* “живой свет” внутри дока */
-    .dock::after{
-      content:"";
-      position:absolute;
-      top:-80%;
-      left:-30%;
-      width: 60%;
-      height: 260%;
-      transform: rotate(18deg);
-      background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.22) 45%, rgba(255,255,255,0) 70%);
-      opacity: .35;
-      animation: dockSweep 4.2s ease-in-out infinite;
-      pointer-events:none;
-    }
-    @keyframes dockSweep{
-      0%{transform: translateX(-60%) rotate(18deg); opacity:0;}
-      15%{opacity:.38;}
-      55%{opacity:0;}
-      100%{transform: translateX(260%) rotate(18deg); opacity:0;}
-    }
+  box-shadow:
+    0 10px 40px rgba(0,0,0,.6),
+    inset 0 0 20px rgba(255,255,255,.05);
 
-    .tab{
-      flex:1;
-      height: 56px;
-      border-radius: 18px;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      gap: 4px;
-      background:transparent;
-      border:none;
-      color: rgba(255,255,255,.55);
-      transition: all .18s ease;
-    }
-    .tab img{
-      width: 22px;
-      height: 22px;
-      opacity: .78;
-      transition: all .18s ease;
-      filter: drop-shadow(0 10px 16px rgba(0,0,0,.45));
-    }
-    .tab span{
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: .01em;
-    }
+  z-index:1000;
+}
 
-    /* активная вкладка (дорого) */
-    .tab.active{
-      background: rgba(255,255,255,.10);
-      color: rgba(255,255,255,.95);
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.16),
-        0 0 28px rgba(124,92,255,.22);
-    }
-    .tab.active img{
-      opacity: 1;
-      filter:
-        drop-shadow(0 10px 16px rgba(0,0,0,.45))
-        drop-shadow(0 0 16px rgba(124,92,255,.55));
-    }
-    .tab:active{transform: scale(.985)}
+.nav-item{
+  flex:1;
+  text-align:center;
+  font-size:12px;
+  color:rgba(255,255,255,.5);
+  transition:.3s;
+}
 
-    /* центральный плюс (как “премиум кнопка”) */
-    .plusBtn{
-      width: 64px;
-      height: 64px;
-      border-radius: 22px;
-      border: 1px solid rgba(255,255,255,.18);
+.nav-item.active{
+  color:#fff;
+  text-shadow:0 0 15px rgba(160,120,255,.7);
+}
 
-      background:
-        radial-gradient(90px 90px at 30% 20%, rgba(255,255,255,.26), rgba(255,255,255,0) 55%),
-        linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
+.nav-item span{
+  display:block;
+  font-size:20px;
+  margin-bottom:4px;
+}
 
-      backdrop-filter: blur(30px);
-      -webkit-backdrop-filter: blur(30px);
+.nav-center{
+  width:56px;
+  height:56px;
+  border-radius:18px;
 
-      box-shadow:
-        0 24px 70px rgba(0,0,0,.62),
-        0 0 55px rgba(124,92,255,.30),
-        inset 0 1px 0 rgba(255,255,255,.22);
+  background:linear-gradient(145deg,#8f7cff,#b28dff);
+  box-shadow:
+    0 8px 25px rgba(140,100,255,.6),
+    inset 0 0 15px rgba(255,255,255,.4);
 
-      display:flex;
-      align-items:center;
-      justify-content:center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 
-      transform: translateY(-12px);
-      transition: transform .14s ease, box-shadow .14s ease;
-      position:relative;
-      overflow:hidden;
-    }
-    .plusBtn::after{
-      content:"";
-      position:absolute;
-      inset:-40px;
-      background: radial-gradient(220px 120px at 50% 40%, rgba(124,92,255,.22), rgba(0,0,0,0) 70%);
-      animation: plusPulse 2.8s ease-in-out infinite;
-      pointer-events:none;
-    }
-    @keyframes plusPulse{
-      0%,100%{opacity:.35; transform: scale(1);}
-      50%{opacity:.6; transform: scale(1.04);}
-    }
-    .plusBtn img{
-      width: 24px;
-      height: 24px;
-      opacity:.95;
-      filter: drop-shadow(0 0 16px rgba(124,92,255,.70));
-      position:relative;
-      z-index:1;
-    }
-    .plusBtn:active{
-      transform: translateY(-12px) scale(.95);
-      box-shadow:
-        0 18px 50px rgba(0,0,0,.72),
-        0 0 70px rgba(124,92,255,.55);
-    }
+  font-size:26px;
+  color:white;
 
-    /* ===== PAGE / TABS ===== */
-    .page{display:none}
-    .page.active{display:block}
+  transform:translateY(-18px);
+}
 
-    /* мелкая “жизнь” как в Яндексе */
-    .floatGlow{
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-      background: radial-gradient(420px 220px at 50% 78%, rgba(124,92,255,.18), rgba(0,0,0,0) 65%);
-      filter: blur(2px);
-      animation: floatGlow 6s ease-in-out infinite;
-    }
-    @keyframes floatGlow{
-      0%,100%{transform: translateY(0); opacity:.55}
-      50%{transform: translateY(10px); opacity:.75}
-    }
-
-    /* чтобы док не резался никогда */
-    .contentPad{
-      padding-bottom: calc(120px + env(safe-area-inset-bottom));
-    }
-  </style>
+</style>
 </head>
 
 <body>
-  <!-- фикс-верх -->
-  <div class="appbar">
-    <div class="left">
-      <button class="barBtn" type="button" aria-label="Назад">
-        <img src="./assets/icons/more.svg" alt="">
-      </button>
-    </div>
-    <div class="title">AURA</div>
-    <div class="right">
-      <button class="barBtn" type="button" aria-label="Меню">
-        <img src="./assets/icons/more.svg" alt="">
-      </button>
-    </div>
+
+<div class="hero"></div>
+
+<div class="content">
+
+<h1>Мой дом</h1>
+<div class="sub">Пока нет устройств</div>
+
+<div class="status">
+  <div class="dot"></div>
+  Всё спокойно
+</div>
+
+<div class="cards">
+  <div class="card">
+    <h3>Устройства с Алисой</h3>
+    <p>Яндекс, Xiaomi, JBL и другие</p>
   </div>
 
-  <!-- фон -->
-  <div class="hero" aria-hidden="true">
-    <div class="heroVignette"></div>
+  <div class="card">
+    <h3>Устройства умного дома</h3>
+    <p>Свет, розетки, телевизор</p>
+  </div>
+</div>
+
+<div class="ai">
+  <h2>ИИ-команда для Алисы</h2>
+  <input placeholder="Например: включи свет в гостиной на 30%">
+  <button class="button">Сформировать команду</button>
+</div>
+
+</div>
+
+<div class="bottomNav">
+
+  <div class="nav-item active">
+    <span>🏠</span>
+    Мой дом
   </div>
 
-  <!-- контент -->
-  <div class="sheet contentPad">
-    <div class="floatGlow"></div>
-
-    <!-- HOME -->
-    <section class="page active" data-page="home">
-      <div class="headerRow">
-        <div class="hLeft">
-          <div class="h1">Мой дом</div>
-          <div class="sub">Пока нет устройств</div>
-        </div>
-        <div class="hRight">
-          <!-- можешь потом поменять на реальные иконки -->
-          <button class="barBtn" type="button" aria-label="Настройки">
-            <img src="./assets/icons/gear.svg" alt="">
-          </button>
-          <button class="barBtn" type="button" aria-label="Добавить">
-            <img src="./assets/icons/plus.svg" alt="">
-          </button>
-        </div>
-      </div>
-
-      <div class="pill">
-        <div class="dot"></div>
-        <span>Всё спокойно</span>
-      </div>
-
-      <div class="centerTitle">Пока нет устройств</div>
-      <div class="centerSub">Добавьте устройство и управляйте им из приложения</div>
-
-      <div class="grid">
-        <div class="card">
-          <div class="glassIcon">
-            <img src="./assets/icons/home.svg" alt="">
-          </div>
-          <h3>Устройства с Алисой</h3>
-          <p>Яндекс, Xiaomi, JBL, LG, Elari, Irbis, Dexp, Prestigio</p>
-        </div>
-
-        <div class="card">
-          <div class="glassIcon">
-            <img src="./assets/icons/catalog.svg" alt="">
-          </div>
-          <h3>Устройства умного дома</h3>
-          <p>Свет, розетки, телевизор и другое</p>
-        </div>
-      </div>
-
-      <div class="ai">
-        <h2>ИИ-команда для Алисы</h2>
-        <input class="input" placeholder="Например: включи свет в гостиной на 30%" />
-        <button class="btn" type="button">Сформировать команду</button>
-      </div>
-    </section>
-
-    <!-- SCENES -->
-    <section class="page" data-page="scenes">
-      <div style="padding: 16px 2px 18px;">
-        <div style="font-size:34px;font-weight:900;letter-spacing:-.02em;">Сценарии</div>
-        <div style="margin-top:8px;color:rgba(255,255,255,.55);font-weight:650;">
-          Тут будут твои сценарии и рекомендованные. Пока заглушка.
-        </div>
-      </div>
-    </section>
-
-    <!-- CATALOG -->
-    <section class="page" data-page="catalog">
-      <div style="padding: 16px 2px 18px;">
-        <div style="font-size:34px;font-weight:900;letter-spacing:-.02em;">Каталог</div>
-        <div style="margin-top:8px;color:rgba(255,255,255,.55);font-weight:650;">
-          Тут будет каталог устройств/сценариев. Пока заглушка.
-        </div>
-      </div>
-    </section>
-
-    <!-- TIPS -->
-    <section class="page" data-page="tips">
-      <div style="padding: 16px 2px 18px;">
-        <div style="font-size:34px;font-weight:900;letter-spacing:-.02em;">Советы</div>
-        <div style="margin-top:8px;color:rgba(255,255,255,.55);font-weight:650;">
-          Тут будут советы и подсказки. Пока заглушка.
-        </div>
-      </div>
-    </section>
+  <div class="nav-item">
+    <span>📋</span>
+    Сценарии
   </div>
 
-  <!-- ДОК -->
-  <div class="dockWrap">
-    <nav class="dock" aria-label="Навигация">
-      <button class="tab active" type="button" data-tab="home" aria-label="Мой дом">
-        <img src="./assets/icons/home.svg" alt="">
-        <span>Мой дом</span>
-      </button>
+  <div class="nav-center">+</div>
 
-      <button class="tab" type="button" data-tab="scenes" aria-label="Сценарии">
-        <img src="./assets/icons/scenes.svg" alt="">
-        <span>Сценарии</span>
-      </button>
-
-      <button class="plusBtn" type="button" aria-label="Добавить">
-        <img src="./assets/icons/plus.svg" alt="">
-      </button>
-
-      <button class="tab" type="button" data-tab="catalog" aria-label="Каталог">
-        <img src="./assets/icons/catalog.svg" alt="">
-        <span>Каталог</span>
-      </button>
-
-      <button class="tab" type="button" data-tab="tips" aria-label="Советы">
-        <img src="./assets/icons/tips.svg" alt="">
-        <span>Советы</span>
-      </button>
-    </nav>
+  <div class="nav-item">
+    <span>📦</span>
+    Каталог
   </div>
 
-  <script>
-    // ===== запрет pinch-zoom (iOS) =====
-    document.addEventListener('gesturestart', e => e.preventDefault(), { passive: false });
-    document.addEventListener('gesturechange', e => e.preventDefault(), { passive: false });
-    document.addEventListener('gestureend', e => e.preventDefault(), { passive: false });
+  <div class="nav-item">
+    <span>ℹ️</span>
+    Советы
+  </div>
 
-    // двойной тап зум (Safari) — тоже режем
-    let lastTouchEnd = 0;
-    document.addEventListener('touchend', function (e) {
-      const now = Date.now();
-      if (now - lastTouchEnd <= 300) e.preventDefault();
-      lastTouchEnd = now;
-    }, { passive: false });
+</div>
 
-    // ===== вкладки =====
-    const tabs = Array.from(document.querySelectorAll('.tab[data-tab]'));
-    const pages = Array.from(document.querySelectorAll('.page'));
-
-    function setActive(tabName){
-      tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tabName));
-      pages.forEach(p => p.classList.toggle('active', p.dataset.page === tabName));
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-    tabs.forEach(t => t.addEventListener('click', () => setActive(t.dataset.tab)));
-
-    // ===== “blur на скролле” для дока (как живой эффект) =====
-    const dock = document.querySelector('.dock');
-    let last = 0;
-    window.addEventListener('scroll', () => {
-      const y = window.scrollY || 0;
-      // чем сильнее скролл — тем сильнее blur (но аккуратно)
-      const b = Math.min(34, 26 + Math.max(0, (y - last)) * 0.08);
-      dock.style.setProperty('--dock-blur', b.toFixed(1) + 'px');
-      last = y;
-      // возвращаем плавно
-      clearTimeout(window.__dockT);
-      window.__dockT = setTimeout(() => dock.style.setProperty('--dock-blur', '26px'), 120);
-    }, { passive: true });
-
-    // ===== плюс =====
-    document.querySelector('.plusBtn').addEventListener('click', () => {
-      // заглушка (потом повесим реальную логику)
-      const btn = document.querySelector('.plusBtn');
-      btn.animate([
-        { transform: 'translateY(-12px) scale(1)' },
-        { transform: 'translateY(-12px) scale(.92)' },
-        { transform: 'translateY(-12px) scale(1)' }
-      ], { duration: 220, easing: 'cubic-bezier(.2,.9,.2,1)' });
-    });
-  </script>
 </body>
 </html>
