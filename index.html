@@ -1,787 +1,799 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <!-- ЗАПРЕТ ЗУМА + правильный viewport -->
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta charset="utf-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no, maximum-scale=1"
+  />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="theme-color" content="#0b1020" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>AURA</title>
 
   <style>
     :root{
-      --bg:#070B14;
-      --card: rgba(22, 26, 40, .62);
-      --card2: rgba(22, 26, 40, .78);
-      --stroke: rgba(255,255,255,.10);
-      --stroke2: rgba(255,255,255,.06);
-      --text: rgba(255,255,255,.92);
-      --muted: rgba(255,255,255,.62);
-      --muted2: rgba(255,255,255,.46);
+      --bg:#0a0b12;
+      --panel:rgba(18,20,33,.62);
+      --panel2:rgba(22,24,40,.70);
+      --stroke:rgba(255,255,255,.10);
+      --stroke2:rgba(255,255,255,.14);
+      --text:#eef0ff;
+      --muted:rgba(238,240,255,.62);
+      --muted2:rgba(238,240,255,.42);
 
-      --accent: #A78BFA;
-      --accent2:#7C5CFF;
+      --accent:#8a6bff;
+      --accent2:#b5a6ff;
+      --green:#28e07b;
 
-      --r16:16px;
-      --r20:20px;
       --r24:24px;
+      --r20:20px;
+      --r16:16px;
 
-      --shadow: 0 16px 48px rgba(0,0,0,.45);
-      --shadow2: 0 10px 30px rgba(0,0,0,.35);
+      --shadow: 0 18px 60px rgba(0,0,0,.45);
+      --glass: blur(18px) saturate(140%);
+      --max: 420px;
 
-      --dock-h: 76px;
-      --dock-pad: 10px;
+      --navH: 78px;
     }
 
-    *{ box-sizing:border-box; }
-    html, body{ height:100%; }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{height:100%}
     body{
       margin:0;
-      background: var(--bg);
-      color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Inter, Arial, sans-serif;
-      overflow: hidden; /* скролл только внутри .scroll */
-      -webkit-font-smoothing: antialiased;
-      -webkit-tap-highlight-color: transparent;
+      background:var(--bg);
+      color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,Inter,Segoe UI,Roboto,Arial,sans-serif;
+      overflow-x:hidden;
+      touch-action:pan-y;
     }
 
-    /* Декоративные слои НЕ должны ловить тапы */
-    .noTap{ pointer-events:none; }
+    /* анти-зум */
+    input,textarea,button{font-size:16px}
+    body, .app { -webkit-text-size-adjust: 100%; }
 
     .app{
-      position: relative;
-      height: 100vh;
-      width: 100%;
-      overflow: hidden;
+      min-height:100dvh;
+      position:relative;
+      padding-bottom: calc(var(--navH) + env(safe-area-inset-bottom) + 16px);
     }
 
     /* HERO */
     .hero{
-      position: absolute;
-      inset: 0;
-      height: 44vh;
-      min-height: 280px;
-      max-height: 420px;
-      background: url("./assets/hero.jpg") center/cover no-repeat;
-      transform: scale(1.03);
-      filter: saturate(1.05) contrast(1.02);
+      position:relative;
+      height: 320px;
+      width:100%;
+      overflow:hidden;
+      background:#0b0d18;
     }
-    .heroVeil{
+    .hero::before{
+      content:"";
+      position:absolute;
+      inset:-12px;
+      background-image:url("./assets/IMG_1348.jpeg");
+      background-size:cover;
+      background-position:center;
+      transform: scale(1.05);
+      filter: blur(0px);
+      opacity: .92;
+    }
+    .hero::after{
+      content:"";
       position:absolute;
       inset:0;
       background:
-        radial-gradient(1200px 420px at 50% 10%, rgba(160,120,255,.26) 0%, rgba(7,11,20,0) 55%),
-        linear-gradient(180deg, rgba(7,11,20,.00) 0%, rgba(7,11,20,.55) 40%, rgba(7,11,20,.92) 80%, rgba(7,11,20,1) 100%);
-      backdrop-filter: blur(2px);
+        radial-gradient(1200px 420px at 50% 10%, rgba(138,107,255,.18), rgba(0,0,0,0) 55%),
+        linear-gradient(180deg, rgba(10,11,18,.15) 0%, rgba(10,11,18,.55) 45%, rgba(10,11,18,.92) 88%, rgba(10,11,18,1) 100%);
     }
 
-    /* ВЕРХНЯЯ ПАНЕЛЬ (как в телеге внутри мини-аппа) */
-    .topBar{
-      position: sticky;
-      top: 0;
-      z-index: 20;
+    /* TOP BAR (Telegram-like) */
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:50;
       padding: calc(env(safe-area-inset-top) + 10px) 14px 10px;
-      background: linear-gradient(180deg, rgba(7,11,20,.88), rgba(7,11,20,.12));
-      backdrop-filter: blur(14px);
-      border-bottom: 1px solid rgba(255,255,255,.06);
+      background: linear-gradient(180deg, rgba(10,11,18,.82), rgba(10,11,18,.35));
+      backdrop-filter: blur(14px) saturate(120%);
+      -webkit-backdrop-filter: blur(14px) saturate(120%);
+      border-bottom:1px solid rgba(255,255,255,.06);
     }
-    .topRow{
+    .topbarRow{
+      max-width: var(--max);
+      margin:0 auto;
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:10px;
     }
-    .topTitle{
-      font-weight: 700;
-      letter-spacing: .2px;
-      opacity:.92;
-    }
-    .topBtn{
-      width:38px;height:38px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.06);
-      backdrop-filter: blur(14px);
-      box-shadow: 0 10px 26px rgba(0,0,0,.28);
+    .tbtn{
+      width:42px;height:42px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(20,22,36,.55);
+      backdrop-filter: blur(14px) saturate(130%);
+      -webkit-backdrop-filter: blur(14px) saturate(130%);
       display:flex;align-items:center;justify-content:center;
-      color: rgba(255,255,255,.85);
+      color:var(--text);
+      box-shadow: 0 8px 24px rgba(0,0,0,.22);
+      cursor:pointer;
       user-select:none;
     }
-    .topBtn:active{ transform: scale(.97); }
-
-    /* СКРОЛЛ-КОНТЕЙНЕР */
-    .scroll{
-      position: relative;
-      height: 100%;
-      overflow: auto;
-      -webkit-overflow-scrolling: touch;
-      padding-bottom: calc(var(--dock-h) + var(--dock-pad) + env(safe-area-inset-bottom) + 18px);
+    .tbtn:active{transform:scale(.98)}
+    .titleMini{
+      font-weight:800;
+      letter-spacing:.08em;
+      font-size:13px;
+      opacity:.95;
+      text-transform:uppercase;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      line-height:1.05;
+    }
+    .titleMini span{
+      font-size:12px;
+      font-weight:650;
+      opacity:.55;
+      letter-spacing:.02em;
+      text-transform:none;
     }
 
-    /* КОНТЕНТ */
-    .content{
-      position: relative;
-      z-index: 5;
-      padding: 14px;
-      padding-top: 18vh; /* чтобы “Мой дом” не был с огромным разрывом */
-      max-width: 980px;
-      margin: 0 auto;
+    /* CONTENT CONTAINER (ровная сетка) */
+    .wrap{
+      position:relative;
+      z-index:5;
+      margin-top:-140px; /* поднимаем контент на герое — ровно, красиво */
+      padding: 0 14px;
+    }
+    .container{
+      max-width: var(--max);
+      margin:0 auto;
+      display:flex;
+      flex-direction:column;
+      gap: 14px;
     }
 
+    /* Header block */
+    .hblock{
+      padding: 8px 2px 0;
+    }
     .h1{
-      font-size: 44px;
-      line-height: 1.02;
-      margin: 0;
-      letter-spacing: -0.9px;
-      font-weight: 860;
-      text-shadow: 0 10px 30px rgba(0,0,0,.35);
+      font-size:52px;
+      line-height:.92;
+      margin: 0 0 10px;
+      letter-spacing:-.02em;
+      font-weight:900;
+      text-shadow: 0 14px 44px rgba(0,0,0,.55);
     }
     .sub{
-      margin-top: 10px;
+      margin:0;
       color: var(--muted);
-      font-size: 15px;
+      font-size:16px;
+      font-weight:600;
     }
 
+    /* status pill */
     .pill{
-      margin-top: 14px;
       display:inline-flex;
       align-items:center;
       gap:10px;
       padding: 12px 14px;
-      border-radius: 18px;
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.10);
-      backdrop-filter: blur(18px);
-      box-shadow: var(--shadow2);
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(18,20,33,.58);
+      backdrop-filter: var(--glass);
+      -webkit-backdrop-filter: var(--glass);
+      box-shadow: 0 10px 30px rgba(0,0,0,.24);
+      width: fit-content;
     }
     .dot{
-      width:10px;height:10px;border-radius: 999px;
-      background: #27D17C;
-      box-shadow: 0 0 0 4px rgba(39,209,124,.12), 0 0 20px rgba(39,209,124,.55);
+      width:10px;height:10px;border-radius:999px;
+      background:var(--green);
+      box-shadow: 0 0 18px rgba(40,224,123,.55);
+    }
+    .pill b{font-weight:800}
+    .pill small{
+      margin-left:auto;
+      color:var(--muted2);
+      font-weight:650;
+      font-size:13px;
     }
 
-    .grid{
-      margin-top: 16px;
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
+    /* Glass card base */
     .card{
       border-radius: var(--r24);
-      background: var(--card);
-      border: 1px solid var(--stroke);
-      backdrop-filter: blur(22px);
+      border:1px solid rgba(255,255,255,.10);
+      background: var(--panel);
+      backdrop-filter: var(--glass);
+      -webkit-backdrop-filter: var(--glass);
       box-shadow: var(--shadow);
-      padding: 16px;
-      position: relative;
-      overflow: hidden;
+      overflow:hidden;
+      position:relative;
     }
     .card::before{
       content:"";
-      position:absolute; inset:-60px -80px auto auto;
-      width: 220px; height: 220px;
-      background: radial-gradient(circle, rgba(167,139,250,.24) 0%, rgba(167,139,250,0) 65%);
+      position:absolute;inset:0;
+      background: radial-gradient(900px 320px at 20% 0%, rgba(138,107,255,.20), rgba(0,0,0,0) 55%);
       pointer-events:none;
     }
 
-    .cardHead{
+    /* Comfort */
+    .comfort{
+      padding: 16px 16px 14px;
+    }
+    .row{
       display:flex;
-      align-items:center;
-      justify-content:flex-start;
-      gap:12px;
-      margin-bottom: 10px;
-    }
-    .iconGlass{
-      width:54px;height:54px;border-radius: 18px;
-      background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.14);
-      backdrop-filter: blur(16px);
-      display:flex;align-items:center;justify-content:center;
-      box-shadow:
-        0 10px 30px rgba(0,0,0,.25),
-        inset 0 1px 0 rgba(255,255,255,.18);
-    }
-    .iconGlass img{
-      width:26px;height:26px;
-      filter: drop-shadow(0 8px 14px rgba(0,0,0,.35));
-      opacity: .92;
-    }
-
-    .cardTitle{
-      font-size: 20px;
-      margin: 0;
-      font-weight: 820;
-      letter-spacing: -.3px;
-    }
-    .cardText{
-      margin: 8px 0 0;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.35;
-    }
-
-    .block{
-      margin-top: 14px;
-      border-radius: var(--r24);
-      background: var(--card2);
-      border: 1px solid var(--stroke);
-      backdrop-filter: blur(24px);
-      box-shadow: var(--shadow);
-      padding: 16px;
-    }
-
-    .progressRow{
-      display:flex;
-      align-items:center;
+      align-items:flex-end;
       justify-content:space-between;
-      gap:10px;
-      margin-bottom: 12px;
+      gap:12px;
+      position:relative;
+      z-index:1;
     }
-    .progressTitle{
-      font-weight: 750;
-      font-size: 16px;
-      color: rgba(255,255,255,.88);
+    .label{
+      font-weight:800;
+      font-size:14px;
+      color:var(--muted);
+      letter-spacing:.02em;
+    }
+    .big{
+      font-size:26px;
+      font-weight:900;
+      letter-spacing:-.02em;
     }
     .bar{
-      height: 10px;
-      border-radius: 999px;
+      margin-top:12px;
+      height:12px;
+      border-radius:999px;
       background: rgba(255,255,255,.10);
       overflow:hidden;
-      border: 1px solid rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.08);
+      position:relative;
+      z-index:1;
     }
-    .bar > span{
+    .bar > i{
       display:block;
       height:100%;
-      width: 72%;
-      border-radius: 999px;
-      background: linear-gradient(90deg, var(--accent2), var(--accent));
-      box-shadow: 0 0 18px rgba(167,139,250,.35);
+      width:82%;
+      border-radius:999px;
+      background: linear-gradient(90deg, var(--accent), rgba(181,166,255,.98));
+      box-shadow: 0 0 24px rgba(138,107,255,.38);
+    }
+    .meta{
+      margin-top:10px;
+      color:var(--muted2);
+      font-weight:650;
+      font-size:13px;
+      position:relative;
+      z-index:1;
     }
 
-    .chips{
+    /* Tabs mood */
+    .moods{
+      padding: 12px;
       display:flex;
       gap:10px;
       overflow:auto;
-      padding-bottom: 2px;
-      -webkit-overflow-scrolling: touch;
+      -webkit-overflow-scrolling:touch;
+      position:relative;
+      z-index:1;
     }
+    .moods::-webkit-scrollbar{display:none}
     .chip{
-      flex: 0 0 auto;
-      padding: 10px 14px;
+      flex:0 0 auto;
+      padding: 12px 14px;
       border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.10);
+      border:1px solid rgba(255,255,255,.10);
       background: rgba(255,255,255,.06);
-      color: rgba(255,255,255,.82);
-      backdrop-filter: blur(14px);
-      font-weight: 650;
+      color: var(--text);
+      font-weight:800;
+      cursor:pointer;
       user-select:none;
+      transition: transform .15s ease, background .2s ease, border-color .2s ease;
     }
-    .chip.isActive{
-      background: linear-gradient(180deg, rgba(167,139,250,.36), rgba(124,92,255,.22));
-      border-color: rgba(167,139,250,.50);
-      box-shadow: 0 10px 30px rgba(124,92,255,.22);
-      color: rgba(255,255,255,.95);
+    .chip:active{transform:scale(.98)}
+    .chip.active{
+      background: linear-gradient(90deg, rgba(138,107,255,.95), rgba(181,166,255,.95));
+      border-color: rgba(255,255,255,.18);
+      color: #0a0b12;
+      box-shadow: 0 10px 26px rgba(138,107,255,.26);
     }
 
-    .miniGrid{
-      margin-top: 12px;
+    /* Quick grid */
+    .grid{
+      padding: 14px;
       display:grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      gap:12px;
+      position:relative;
+      z-index:1;
     }
-    .toggleCard{
+    .tile{
       border-radius: 22px;
-      padding: 16px;
+      border:1px solid rgba(255,255,255,.10);
       background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.10);
-      backdrop-filter: blur(16px);
-      box-shadow: 0 12px 30px rgba(0,0,0,.30);
+      padding: 14px;
+      min-height: 94px;
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap: 12px;
-    }
-    .toggleCard b{
-      font-size: 16px;
-      letter-spacing: -.2px;
-    }
-
-    /* КРАСИВЫЙ ПЕРЕКЛЮЧАТЕЛЬ */
-    .switch{
-      width: 56px;
-      height: 32px;
-      border-radius: 999px;
-      position: relative;
-      background: rgba(255,255,255,.14);
-      border: 1px solid rgba(255,255,255,.14);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.14);
-      cursor: pointer;
-      flex: 0 0 auto;
-    }
-    .switch::after{
-      content:"";
-      position:absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      left: 4px;
-      width: 24px;
-      height: 24px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.92);
-      box-shadow: 0 10px 20px rgba(0,0,0,.35);
-      transition: .22s ease;
-    }
-    .switch.on{
-      background: linear-gradient(90deg, rgba(124,92,255,.90), rgba(167,139,250,.92));
-      border-color: rgba(167,139,250,.55);
-      box-shadow: 0 0 22px rgba(124,92,255,.25);
-    }
-    .switch.on::after{
-      left: 28px;
-    }
-
-    /* AI блок */
-    .aiRow{
-      margin-top: 12px;
-      display:flex;
       gap:12px;
-      align-items:center;
+      position:relative;
+      overflow:hidden;
     }
-    .aiInput{
-      flex:1;
-      border-radius: 18px;
-      padding: 14px 14px;
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.10);
-      color: rgba(255,255,255,.92);
-      outline:none;
-      font-size: 15px;
-    }
-    .aiInput::placeholder{ color: rgba(255,255,255,.42); }
-
-    .cta{
-      margin-top: 12px;
-      width: 100%;
-      border: none;
-      border-radius: 22px;
-      padding: 18px 18px;
-      font-size: 18px;
-      font-weight: 860;
-      letter-spacing: -.2px;
-      color: rgba(255,255,255,.96);
-      background: linear-gradient(90deg, var(--accent2), var(--accent));
-      box-shadow: 0 18px 48px rgba(124,92,255,.28);
-      transform: translateZ(0);
-      transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
-      user-select:none;
-    }
-    .cta:active{
-      transform: scale(.985);
-      box-shadow: 0 12px 30px rgba(124,92,255,.22);
-      filter: brightness(.98);
-    }
-
-    /* ТАБЫ: показываем только активный */
-    .tab{ display:none; }
-    .tab.isActive{ display:block; }
-
-    /* TELEGRAM-STYLE DOCK (КЛИКАБЕЛЬНЫЙ) */
-    .dock{
-      position: fixed;
-      left: 10px;
-      right: 10px;
-      bottom: calc(10px + env(safe-area-inset-bottom));
-      height: var(--dock-h);
-      z-index: 999; /* выше всего */
-      border-radius: 26px;
-      background: rgba(18, 22, 34, .62);
-      border: 1px solid rgba(255,255,255,.12);
-      backdrop-filter: blur(26px);
-      box-shadow: 0 18px 60px rgba(0,0,0,.50);
-      display:grid;
-      grid-template-columns: 1fr 1fr 1.2fr 1fr 1fr;
-      align-items:center;
-      padding: 10px;
-      gap: 6px;
-    }
-    /* важно: декоративный хайлайт дока не ловит тапы */
-    .dock::before{
+    .tile::after{
       content:"";
+      position:absolute;inset:0;
+      background: radial-gradient(260px 120px at 10% 0%, rgba(138,107,255,.18), rgba(0,0,0,0) 60%);
+      pointer-events:none;
+    }
+    .tileLeft{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
+      position:relative;
+      z-index:1;
+    }
+    .ico{
+      width:42px;height:42px;
+      border-radius:16px;
+      display:flex;align-items:center;justify-content:center;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(16,18,30,.55);
+      backdrop-filter: blur(14px) saturate(130%);
+      -webkit-backdrop-filter: blur(14px) saturate(130%);
+      box-shadow: 0 10px 22px rgba(0,0,0,.18);
+    }
+    .ico img{width:22px;height:22px;opacity:.95}
+    .tileTitle{
+      font-weight:900;
+      font-size:16px;
+      letter-spacing:-.01em;
+      margin:0;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .tileSub{
+      margin:2px 0 0;
+      color:var(--muted2);
+      font-weight:700;
+      font-size:12px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 150px;
+    }
+
+    /* Switch */
+    .sw{
+      width:52px;height:32px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.12);
+      position:relative;
+      cursor:pointer;
+      user-select:none;
+      flex:0 0 auto;
+      z-index:2;
+    }
+    .sw i{
       position:absolute;
-      inset:0;
+      top:50%;
+      transform:translateY(-50%);
+      left:4px;
+      width:24px;height:24px;
+      border-radius:999px;
+      background: rgba(255,255,255,.92);
+      box-shadow: 0 10px 20px rgba(0,0,0,.25);
+      transition: left .18s ease, background .18s ease;
+    }
+    .sw.on{
+      background: linear-gradient(90deg, rgba(138,107,255,.95), rgba(181,166,255,.95));
+      border-color: rgba(255,255,255,.16);
+      box-shadow: 0 0 26px rgba(138,107,255,.22);
+    }
+    .sw.on i{left:24px;background:#0a0b12}
+
+    /* AI Center */
+    .ai{
+      padding: 16px;
+      position:relative;
+      z-index:1;
+    }
+    .ai h3{
+      margin:0 0 10px;
+      font-size:16px;
+      font-weight:900;
+      letter-spacing:-.01em;
+      color: var(--text);
+    }
+    .input{
+      width:100%;
+      border-radius: 18px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.06);
+      padding: 14px 14px;
+      color: var(--text);
+      outline:none;
+      font-weight:750;
+    }
+    .input::placeholder{color:rgba(238,240,255,.45);font-weight:700}
+    .btn{
+      margin-top:12px;
+      width:100%;
+      padding: 16px 16px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: linear-gradient(90deg, rgba(138,107,255,.95), rgba(181,166,255,.95));
+      color:#0a0b12;
+      font-weight:1000;
+      letter-spacing:-.01em;
+      font-size:18px;
+      cursor:pointer;
+      box-shadow: 0 16px 44px rgba(138,107,255,.26);
+      transition: transform .12s ease, box-shadow .2s ease, filter .2s ease;
+    }
+    .btn:active{
+      transform: scale(.985);
+      box-shadow: 0 10px 26px rgba(138,107,255,.34);
+      filter: brightness(1.02);
+    }
+    .hint{
+      margin-top:10px;
+      color:var(--muted2);
+      font-weight:700;
+      font-size:12.5px;
+      line-height:1.35;
+    }
+
+    /* NAV (Telegram-like + premium) */
+    .nav{
+      position:fixed;
+      left:0; right:0;
+      bottom:0;
+      z-index:200;
+      padding: 10px 12px calc(env(safe-area-inset-bottom) + 10px);
+      pointer-events:none; /* чтобы только внутрянка ловила клики */
+    }
+    .navInner{
+      max-width: var(--max);
+      margin:0 auto;
+      height: var(--navH);
       border-radius: 26px;
-      background: radial-gradient(420px 120px at 50% 0%, rgba(167,139,250,.22) 0%, rgba(167,139,250,0) 70%);
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(16,18,30,.62);
+      backdrop-filter: blur(22px) saturate(150%);
+      -webkit-backdrop-filter: blur(22px) saturate(150%);
+      box-shadow: 0 22px 70px rgba(0,0,0,.50);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 10px 12px;
+      gap:10px;
+      pointer-events:auto; /* клики */
+      position:relative;
+      overflow:hidden;
+    }
+    .navInner::before{
+      content:"";
+      position:absolute;inset:-2px;
+      background:
+        radial-gradient(420px 120px at 50% 0%, rgba(138,107,255,.22), rgba(0,0,0,0) 60%),
+        linear-gradient(90deg, rgba(138,107,255,.10), rgba(181,166,255,.06));
       pointer-events:none;
     }
 
-    .dockBtn{
-      position: relative;
-      z-index: 2;
-      border: none;
-      background: transparent;
-      color: rgba(255,255,255,.70);
+    .navItem{
+      width: 72px;
+      height: 58px;
+      border-radius: 18px;
+      border:1px solid transparent;
+      background: rgba(255,255,255,.04);
       display:flex;
       flex-direction:column;
       align-items:center;
       justify-content:center;
-      gap: 6px;
-      padding: 8px 6px;
-      border-radius: 18px;
+      gap:6px;
+      color: rgba(238,240,255,.72);
+      font-weight:850;
+      font-size:12px;
+      cursor:pointer;
       user-select:none;
+      transition: transform .15s ease, background .2s ease, border-color .2s ease, color .2s ease;
+      position:relative;
+      z-index:1;
     }
-    .dockBtn img{
-      width: 22px;
-      height: 22px;
-      opacity: .86;
-      filter: drop-shadow(0 10px 20px rgba(0,0,0,.25));
-    }
-    .dockBtn span{
-      font-size: 12px;
-      font-weight: 650;
-      letter-spacing: -.1px;
-    }
-    .dockBtn:active{ transform: scale(.98); }
-
-    .dockBtn.isActive{
-      color: rgba(255,255,255,.95);
-      background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.10);
-    }
-    .dockBtn.isActive img{
-      opacity: 1;
-      filter: drop-shadow(0 0 16px rgba(167,139,250,.35));
+    .navItem img{width:20px;height:20px;opacity:.95}
+    .navItem:active{transform:scale(.98)}
+    .navItem.active{
+      color:#0a0b12;
+      background: linear-gradient(90deg, rgba(138,107,255,.98), rgba(181,166,255,.98));
+      border-color: rgba(255,255,255,.18);
+      box-shadow: 0 16px 40px rgba(138,107,255,.26);
     }
 
-    /* центральная кнопка (премиум) */
-    .dockFabWrap{
-      display:flex;
-      justify-content:center;
-      align-items:center;
-    }
-    .dockFab{
-      width: 62px;
-      height: 62px;
+    .navPlus{
+      width: 64px;
+      height: 64px;
       border-radius: 22px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: linear-gradient(180deg, rgba(167,139,250,.55), rgba(124,92,255,.35));
-      box-shadow:
-        0 24px 50px rgba(124,92,255,.22),
-        inset 0 1px 0 rgba(255,255,255,.20);
-      backdrop-filter: blur(18px);
+      border:1px solid rgba(255,255,255,.14);
+      background: linear-gradient(180deg, rgba(181,166,255,.98), rgba(138,107,255,.98));
       display:flex;
       align-items:center;
       justify-content:center;
-      transform: translateY(-16px);
-      position: relative;
+      box-shadow: 0 18px 50px rgba(138,107,255,.28);
+      cursor:pointer;
       user-select:none;
+      transform: translateY(-16px);
+      position:relative;
+      z-index:2;
+      transition: transform .15s ease, box-shadow .2s ease, filter .2s ease;
     }
-    .dockFab::before{
-      content:"";
-      position:absolute;
-      inset:-10px;
-      border-radius: 28px;
-      background: radial-gradient(circle, rgba(167,139,250,.24) 0%, rgba(167,139,250,0) 65%);
-      pointer-events:none;
-    }
-    .dockFab i{
-      width: 22px;
-      height: 22px;
-      display:block;
-      position: relative;
-    }
-    .dockFab i::before,
-    .dockFab i::after{
-      content:"";
-      position:absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%,-50%);
-      background: rgba(255,255,255,.92);
-      border-radius: 999px;
-      box-shadow: 0 14px 30px rgba(0,0,0,.25);
-    }
-    .dockFab i::before{ width: 18px; height: 3px; }
-    .dockFab i::after{ width: 3px; height: 18px; }
-
-    .dockFab:active{
-      transform: translateY(-16px) scale(.985);
-      box-shadow:
-        0 18px 34px rgba(124,92,255,.18),
-        inset 0 1px 0 rgba(255,255,255,.18);
+    .navPlus img{width:24px;height:24px;filter: drop-shadow(0 8px 18px rgba(0,0,0,.25))}
+    .navPlus:active{
+      transform: translateY(-16px) scale(.98);
+      box-shadow: 0 12px 34px rgba(138,107,255,.34);
+      filter: brightness(1.03);
     }
 
-    /* адаптив */
-    @media (max-width: 380px){
-      .h1{ font-size: 40px; }
-      .dock{ left: 8px; right: 8px; }
-      .dockBtn span{ font-size: 11px; }
-    }
+    /* pages */
+    .page{display:none}
+    .page.active{display:block}
+
+    /* small helper for perfect alignment */
+    .sp8{height:8px}
   </style>
 </head>
 
 <body>
-  <div class="app">
-    <div class="hero noTap"></div>
-    <div class="heroVeil noTap"></div>
-
-    <div class="scroll" id="scroll">
-      <div class="topBar">
-        <div class="topRow">
-          <div class="topTitle">AURA</div>
-          <div style="display:flex; gap:10px;">
-            <button class="topBtn" type="button" aria-label="Меню">⋯</button>
-          </div>
+  <div class="app" id="app">
+    <div class="topbar">
+      <div class="topbarRow">
+        <div class="tbtn" id="menuBtn" aria-label="Меню">☰</div>
+        <div class="titleMini">
+          AURA
+          <span id="pageHint">Дом</span>
         </div>
-      </div>
-
-      <div class="content">
-        <!-- TAB: Дом -->
-        <section class="tab isActive" data-tab="home">
-          <h1 class="h1">Мой дом</h1>
-          <div class="sub">Пока нет устройств</div>
-
-          <div class="pill">
-            <span class="dot"></span>
-            <span style="font-weight:720;">Всё спокойно</span>
-          </div>
-
-          <div class="grid">
-            <div class="card">
-              <div class="cardHead">
-                <div class="iconGlass">
-                  <img src="./assets/icons/home.svg" alt="">
-                </div>
-              </div>
-              <p class="cardTitle">Устройства с Алисой</p>
-              <p class="cardText">Яндекс, Xiaomi, JBL, LG, Elari, Irbis, Dexp, Prestigio</p>
-            </div>
-
-            <div class="card">
-              <div class="cardHead">
-                <div class="iconGlass">
-                  <img src="./assets/icons/catalog.svg" alt="">
-                </div>
-              </div>
-              <p class="cardTitle">Устройства умного дома</p>
-              <p class="cardText">Свет, розетки, пылесос, телевизор и другое</p>
-            </div>
-          </div>
-
-          <div class="block">
-            <div class="progressRow">
-              <div class="progressTitle">Индекс комфорта: <b>91%</b></div>
-            </div>
-            <div class="bar"><span style="width:91%"></span></div>
-
-            <div style="height:12px"></div>
-
-            <div class="chips" id="moods">
-              <div class="chip">Уют</div>
-              <div class="chip">Фокус</div>
-              <div class="chip">Энергия</div>
-              <div class="chip isActive">Спокойствие</div>
-            </div>
-
-            <div class="miniGrid">
-              <div class="toggleCard">
-                <div><b>Свет</b><div style="color:var(--muted2); font-size:12px; margin-top:4px;">Гостиная</div></div>
-                <div class="switch on" role="switch" aria-checked="true" tabindex="0"></div>
-              </div>
-              <div class="toggleCard">
-                <div><b>TV</b><div style="color:var(--muted2); font-size:12px; margin-top:4px;">Сцена</div></div>
-                <div class="switch" role="switch" aria-checked="false" tabindex="0"></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="block">
-            <div style="font-weight:860; font-size:18px; letter-spacing:-.2px;">AI Центр</div>
-            <div style="color:var(--muted); font-size:13px; margin-top:6px;">Скажи, что сделать — AURA соберёт команду.</div>
-
-            <div class="aiRow">
-              <input class="aiInput" id="aiInput" placeholder="Например: сделай уютно" />
-            </div>
-            <button class="cta" id="aiRun" type="button">Выполнить</button>
-          </div>
-        </section>
-
-        <!-- TAB: Сцены -->
-        <section class="tab" data-tab="scenes">
-          <h1 class="h1">Сцены</h1>
-          <div class="sub">Быстрые режимы для настроения и привычек</div>
-
-          <div class="block">
-            <div class="chips">
-              <div class="chip isActive">Утро</div>
-              <div class="chip">Вечер</div>
-              <div class="chip">Кино</div>
-              <div class="chip">Сон</div>
-              <div class="chip">Работа</div>
-            </div>
-
-            <div class="grid" style="margin-top:14px;">
-              <div class="card">
-                <p class="cardTitle">Кино</p>
-                <p class="cardText">Тёплый свет · 15% · ТВ включён</p>
-                <button class="cta" style="margin-top:12px" type="button">Запустить</button>
-              </div>
-              <div class="card">
-                <p class="cardTitle">Сон</p>
-                <p class="cardText">Свет выкл · Тишина · 23°</p>
-                <button class="cta" style="margin-top:12px" type="button">Запустить</button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- TAB: Профиль -->
-        <section class="tab" data-tab="profile">
-          <h1 class="h1">Профиль</h1>
-          <div class="sub">Дом, доступы, безопасность, семейные роли</div>
-
-          <div class="block">
-            <div class="toggleCard" style="margin-top:0;">
-              <div>
-                <b>Детский режим</b>
-                <div style="color:var(--muted2); font-size:12px; margin-top:4px;">Ограничение опасных действий</div>
-              </div>
-              <div class="switch" role="switch" aria-checked="false" tabindex="0"></div>
-            </div>
-
-            <div style="height:12px"></div>
-
-            <div class="toggleCard">
-              <div>
-                <b>Гео-режим</b>
-                <div style="color:var(--muted2); font-size:12px; margin-top:4px;">Автосцены при входе/выходе</div>
-              </div>
-              <div class="switch on" role="switch" aria-checked="true" tabindex="0"></div>
-            </div>
-          </div>
-        </section>
-
-        <!-- TAB: AI -->
-        <section class="tab" data-tab="ai">
-          <h1 class="h1">AI</h1>
-          <div class="sub">Проактивные подсказки и история команд</div>
-
-          <div class="block">
-            <div style="font-weight:860; font-size:18px;">Рекомендация</div>
-            <div style="color:var(--muted); margin-top:8px;">
-              Сегодня вечером прохладнее — могу заранее включить “Уют” и приглушить свет.
-            </div>
-            <button class="cta" style="margin-top:12px" type="button">Применить</button>
-          </div>
-
-          <div class="block">
-            <div style="font-weight:860; font-size:18px;">История</div>
-            <div style="color:var(--muted); margin-top:8px; font-size:14px; line-height:1.4;">
-              • “Сделай уютно” → Свет 20% · Тёплый тон<br>
-              • “Включи ТВ” → HDMI · Громкость 18<br>
-              • “Режим сон” → Всё выключено
-            </div>
-          </div>
-        </section>
-
-        <div style="height:12px"></div>
+        <div class="tbtn" id="moreBtn" aria-label="Ещё">⋯</div>
       </div>
     </div>
 
-    <!-- ДОК-БАР: КЛИКАБЕЛЬНЫЙ (ничего не перекрывает) -->
-    <nav class="dock" aria-label="Навигация">
-      <button class="dockBtn isActive" data-go="home" type="button">
-        <img src="./assets/icons/home.svg" alt="">
-        <span>Дом</span>
-      </button>
+    <div class="hero"></div>
 
-      <button class="dockBtn" data-go="scenes" type="button">
-        <img src="./assets/icons/scenes.svg" alt="">
-        <span>Сцены</span>
-      </button>
+    <div class="wrap">
+      <div class="container">
 
-      <div class="dockFabWrap">
-        <button class="dockFab" id="fab" type="button" aria-label="Быстрое действие">
-          <i></i>
-        </button>
+        <!-- PAGE: HOME -->
+        <section class="page active" id="page-home">
+          <div class="hblock">
+            <h1 class="h1">Мой дом</h1>
+            <p class="sub">Устройства готовы · AURA Premium</p>
+            <div class="sp8"></div>
+          </div>
+
+          <div class="pill card" style="padding:14px 14px;">
+            <span class="dot"></span>
+            <b>Всё спокойно</b>
+            <small id="timeNow">—</small>
+          </div>
+
+          <div class="card comfort">
+            <div class="row">
+              <div>
+                <div class="label">Индекс комфорта</div>
+                <div class="big">Комфорт</div>
+              </div>
+              <div class="big" id="comfortPct">82%</div>
+            </div>
+            <div class="bar"><i id="comfortBar"></i></div>
+            <div class="meta">Эко · <b id="ecoPct">11%</b> · Цифровое спокойствие · <b>ON</b> · Гео · <b>OFF</b></div>
+          </div>
+
+          <div class="card">
+            <div class="moods" id="moods">
+              <div class="chip active" data-mode="cozy">Уют</div>
+              <div class="chip" data-mode="focus">Фокус</div>
+              <div class="chip" data-mode="energy">Энергия</div>
+              <div class="chip" data-mode="calm">Спокойствие</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="grid">
+              <div class="tile">
+                <div class="tileLeft">
+                  <div class="ico"><img alt="" src="./assets/icons/home.svg"></div>
+                  <div style="min-width:0">
+                    <p class="tileTitle">Свет</p>
+                    <p class="tileSub" id="lightSub">Гостиная · 60%</p>
+                  </div>
+                </div>
+                <div class="sw on" id="swLight" role="switch" aria-checked="true"><i></i></div>
+              </div>
+
+              <div class="tile">
+                <div class="tileLeft">
+                  <div class="ico"><img alt="" src="./assets/icons/catalog.svg"></div>
+                  <div style="min-width:0">
+                    <p class="tileTitle">TV</p>
+                    <p class="tileSub" id="tvSub">Гостиная · Выкл</p>
+                  </div>
+                </div>
+                <div class="sw" id="swTv" role="switch" aria-checked="false"><i></i></div>
+              </div>
+
+              <div class="tile">
+                <div class="tileLeft">
+                  <div class="ico"><img alt="" src="./assets/icons/gear.svg"></div>
+                  <div style="min-width:0">
+                    <p class="tileTitle">Розетки</p>
+                    <p class="tileSub" id="plugSub">Кухня · 1 активна</p>
+                  </div>
+                </div>
+                <div class="sw on" id="swPlug" role="switch" aria-checked="true"><i></i></div>
+              </div>
+
+              <div class="tile">
+                <div class="tileLeft">
+                  <div class="ico"><img alt="" src="./assets/icons/scenes.svg"></div>
+                  <div style="min-width:0">
+                    <p class="tileTitle">Пылесос</p>
+                    <p class="tileSub" id="vacSub">Дом · Выкл</p>
+                  </div>
+                </div>
+                <div class="sw" id="swVac" role="switch" aria-checked="false"><i></i></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card ai">
+            <h3>AI Центр</h3>
+            <input class="input" id="aiInput" placeholder="Например: сделай уютно, свет 30%, тише" />
+            <button class="btn" id="aiRun">Выполнить</button>
+            <div class="hint">AI понимает контекст: время · погода · присутствие · привычки (демо)</div>
+          </div>
+        </section>
+
+        <!-- PAGE: SCENES -->
+        <section class="page" id="page-scenes">
+          <div class="card" style="padding:16px;">
+            <div class="label" style="margin-bottom:6px;">Сцены</div>
+            <div class="big" style="font-size:22px;">Скоро будет красиво ✨</div>
+            <div class="meta" style="margin-top:10px;">Добавим: пресеты настроения, расписания, авто-сцены по погоде/гео.</div>
+          </div>
+        </section>
+
+        <!-- PAGE: PROFILE -->
+        <section class="page" id="page-profile">
+          <div class="card" style="padding:16px;">
+            <div class="label" style="margin-bottom:6px;">Профиль</div>
+            <div class="big" style="font-size:22px;">AURA ID</div>
+            <div class="meta" style="margin-top:10px;">Здесь будет: домочадцы, роли, гостевой доступ, безопасность, история.</div>
+          </div>
+        </section>
+
+        <!-- PAGE: AI -->
+        <section class="page" id="page-ai">
+          <div class="card ai">
+            <h3>AI</h3>
+            <input class="input" placeholder="Например: включи ночной режим и поставь тёплый свет" />
+            <button class="btn">Сформировать план</button>
+            <div class="hint">Дальше добавим: память, рекомендации, объяснение «почему», журнал действий.</div>
+          </div>
+        </section>
+
       </div>
+    </div>
 
-      <button class="dockBtn" data-go="profile" type="button">
-        <img src="./assets/icons/catalog.svg" alt="">
-        <span>Профиль</span>
-      </button>
+    <!-- NAV -->
+    <div class="nav">
+      <div class="navInner" id="nav">
+        <div class="navItem active" data-go="home">
+          <img alt="" src="./assets/icons/home.svg">
+          Дом
+        </div>
 
-      <button class="dockBtn" data-go="ai" type="button">
-        <img src="./assets/icons/tips.svg" alt="">
-        <span>AI</span>
-      </button>
-    </nav>
+        <div class="navItem" data-go="scenes">
+          <img alt="" src="./assets/icons/scenes.svg">
+          Сцены
+        </div>
+
+        <div class="navPlus" id="navPlus" aria-label="Добавить">
+          <img alt="" src="./assets/icons/plus.svg">
+        </div>
+
+        <div class="navItem" data-go="profile">
+          <img alt="" src="./assets/icons/gear.svg">
+          Профиль
+        </div>
+
+        <div class="navItem" data-go="ai">
+          <img alt="" src="./assets/icons/tips.svg">
+          AI
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
-    // 1) Блокируем жесты зума (двойной тап / pinch)
-    document.addEventListener('gesturestart', e => e.preventDefault());
-    document.addEventListener('gesturechange', e => e.preventDefault());
-    document.addEventListener('gestureend', e => e.preventDefault());
-
-    // 2) Табы (быстро, без лагов)
-    const tabs = [...document.querySelectorAll('.tab')];
-    const navBtns = [...document.querySelectorAll('.dockBtn')];
-
-    function showTab(name){
-      tabs.forEach(t => t.classList.toggle('isActive', t.dataset.tab === name));
-      navBtns.forEach(b => b.classList.toggle('isActive', b.dataset.go === name));
-      // лёгкий “премиум” возврат вверх при смене раздела
-      document.getElementById('scroll').scrollTo({ top: 0, behavior: 'smooth' });
+    // время справа в плашке
+    function pad(n){ return String(n).padStart(2,'0'); }
+    function setTime(){
+      const d = new Date();
+      const t = pad(d.getHours()) + ":" + pad(d.getMinutes());
+      const el = document.getElementById("timeNow");
+      if(el) el.textContent = t;
     }
+    setTime();
+    setInterval(setTime, 15000);
 
-    navBtns.forEach(btn=>{
-      btn.addEventListener('click', ()=> showTab(btn.dataset.go));
-    });
-
-    // 3) Switch toggles (красиво и правильно)
-    function toggleSwitch(el){
-      const on = el.classList.toggle('on');
-      el.setAttribute('aria-checked', on ? 'true' : 'false');
-    }
-    document.querySelectorAll('.switch').forEach(sw=>{
-      sw.addEventListener('click', ()=> toggleSwitch(sw));
-      sw.addEventListener('keydown', (e)=>{
-        if(e.key === 'Enter' || e.key === ' '){
-          e.preventDefault();
-          toggleSwitch(sw);
-        }
+    // переключатель (универсальный)
+    function bindSwitch(id, onText){
+      const el = document.getElementById(id);
+      if(!el) return;
+      el.addEventListener("click", () => {
+        el.classList.toggle("on");
+        el.setAttribute("aria-checked", el.classList.contains("on") ? "true" : "false");
       });
-    });
+    }
+    bindSwitch("swLight");
+    bindSwitch("swTv");
+    bindSwitch("swPlug");
+    bindSwitch("swVac");
 
-    // 4) Чипы режимов
-    const moods = document.getElementById('moods');
+    // moods
+    const moods = document.getElementById("moods");
     if(moods){
-      moods.addEventListener('click', (e)=>{
-        const chip = e.target.closest('.chip');
+      moods.addEventListener("click", (e) => {
+        const chip = e.target.closest(".chip");
         if(!chip) return;
-        [...moods.querySelectorAll('.chip')].forEach(c=>c.classList.remove('isActive'));
-        chip.classList.add('isActive');
+        [...moods.querySelectorAll(".chip")].forEach(x=>x.classList.remove("active"));
+        chip.classList.add("active");
       });
     }
 
-    // 5) FAB: быстрое действие (пример)
-    const fab = document.getElementById('fab');
-    fab.addEventListener('click', ()=>{
-      // Открываем AI вкладку и фокус на ввод
-      showTab('home');
-      const input = document.getElementById('aiInput');
-      if(input){
-        input.focus();
-        input.value = 'Сделай уютно';
+    // nav pages (фикс кликабельности + ровность)
+    const pages = {
+      home: document.getElementById("page-home"),
+      scenes: document.getElementById("page-scenes"),
+      profile: document.getElementById("page-profile"),
+      ai: document.getElementById("page-ai")
+    };
+    const hint = document.getElementById("pageHint");
+
+    function showPage(key){
+      Object.keys(pages).forEach(k => pages[k].classList.toggle("active", k===key));
+      document.querySelectorAll(".navItem").forEach(i => i.classList.toggle("active", i.dataset.go===key));
+      if(hint){
+        hint.textContent = (key==="home"?"Дом":key==="scenes"?"Сцены":key==="profile"?"Профиль":"AI");
       }
+      // мягкий скролл наверх при смене вкладки
+      window.scrollTo({top:0, behavior:"smooth"});
+    }
+
+    document.getElementById("nav").addEventListener("click", (e)=>{
+      const it = e.target.closest(".navItem");
+      if(!it) return;
+      showPage(it.dataset.go);
     });
 
-    // 6) AI кнопка: демо
-    document.getElementById('aiRun').addEventListener('click', ()=>{
-      const v = (document.getElementById('aiInput').value || '').trim();
-      alert(v ? ('Команда принята: ' + v) : 'Напиши команду 🙂');
+    // plus action demo
+    document.getElementById("navPlus").addEventListener("click", ()=>{
+      // быстрый premium "tap" + демо
+      const btn = document.getElementById("navPlus");
+      btn.style.filter = "brightness(1.05)";
+      setTimeout(()=>btn.style.filter="", 180);
+      alert("AURA: Добавление устройства / сцены (демо)");
     });
+
+    // AI demo
+    document.getElementById("aiRun").addEventListener("click", ()=>{
+      const val = (document.getElementById("aiInput").value || "").trim();
+      alert(val ? ("AURA выполнит: " + val) : "Напиши команду 🙂");
+    });
+
+    // доп. анти-зум для iOS жестов
+    document.addEventListener('gesturestart', function (e) { e.preventDefault(); });
   </script>
 </body>
 </html>
