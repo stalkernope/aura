@@ -7,18 +7,16 @@
 
 <style>
 :root{
-  --bg:#0b1220;
-  --panel:rgba(18,22,36,.6);
-  --stroke:rgba(255,255,255,.10);
-  --text:#eef2ff;
+  --bg:#0c0f1a;
+  --glass:rgba(255,255,255,.06);
+  --stroke:rgba(255,255,255,.12);
+  --text:#f5f7ff;
   --muted:rgba(255,255,255,.55);
-  --accent:#8b5cff;
-  --accent2:#b9a6ff;
-  --good:#1aff8c;
-  --warn:#ffd166;
-  --danger:#ff5e7e;
-  --radius:24px;
-  --shadow:0 20px 60px rgba(0,0,0,.45);
+  --accent1:#7c5cff;
+  --accent2:#a88bff;
+  --good:#27ff9f;
+  --danger:#ff5f7f;
+  --radius:28px;
 }
 
 *{box-sizing:border-box}
@@ -26,14 +24,15 @@ html,body{height:100%}
 body{
   margin:0;
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui;
-  background:var(--bg);
+  background:radial-gradient(1200px 600px at 50% -200px,#1a1f38 0%,#0c0f1a 60%);
   color:var(--text);
   overflow-x:hidden;
   -webkit-tap-highlight-color:transparent;
 }
 
+/* HERO */
 .hero{
-  height:320px;
+  height:340px;
   background:url("./assets/IMG_1348.jpeg") center/cover no-repeat;
   position:relative;
 }
@@ -41,34 +40,43 @@ body{
   content:"";
   position:absolute;
   inset:0;
-  background:linear-gradient(180deg,rgba(11,18,32,.1) 0%,rgba(11,18,32,.9) 100%);
+  background:linear-gradient(180deg,rgba(12,15,26,.1) 0%,rgba(12,15,26,.9) 100%);
 }
 
+/* CONTENT */
 .content{
-  margin-top:-140px;
-  padding:0 16px 120px;
+  margin-top:-160px;
+  padding:0 18px 130px;
+  animation:fadeIn .6s ease;
+}
+
+@keyframes fadeIn{
+  from{opacity:0; transform:translateY(20px)}
+  to{opacity:1; transform:translateY(0)}
 }
 
 .title{
-  font-size:44px;
+  font-size:52px;
   font-weight:900;
   margin-bottom:6px;
+  letter-spacing:-1px;
 }
 
 .subtitle{
   color:var(--muted);
-  margin-bottom:16px;
+  margin-bottom:18px;
 }
 
 .status{
   display:flex;
   align-items:center;
   gap:10px;
-  padding:12px 16px;
+  padding:14px 18px;
   border-radius:999px;
-  background:rgba(255,255,255,.06);
+  background:var(--glass);
+  backdrop-filter:blur(25px);
   border:1px solid var(--stroke);
-  margin-bottom:14px;
+  margin-bottom:18px;
 }
 
 .dot{
@@ -76,138 +84,152 @@ body{
   height:10px;
   border-radius:50%;
   background:var(--good);
-  box-shadow:0 0 12px var(--good);
+  box-shadow:0 0 14px var(--good);
 }
 
+/* GLASS PANEL */
 .panel{
-  background:var(--panel);
+  background:var(--glass);
+  backdrop-filter:blur(30px);
   border:1px solid var(--stroke);
   border-radius:var(--radius);
-  padding:16px;
-  margin-bottom:14px;
-  backdrop-filter:blur(18px);
-  box-shadow:var(--shadow);
+  padding:20px;
+  margin-bottom:18px;
+  box-shadow:0 30px 80px rgba(0,0,0,.5);
+  transition:transform .2s ease;
+}
+.panel:active{
+  transform:scale(.98);
 }
 
-.panel h3{
-  margin:0 0 10px;
-}
-
+/* COMFORT */
 .bar{
-  height:10px;
+  height:12px;
   border-radius:999px;
-  background:rgba(255,255,255,.08);
+  background:rgba(255,255,255,.1);
   overflow:hidden;
+  margin-top:8px;
 }
-
 .fill{
   height:100%;
-  width:80%;
-  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  width:82%;
+  background:linear-gradient(90deg,var(--accent1),var(--accent2));
   transition:width .4s ease;
 }
 
+/* DEVICES */
 .grid{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:14px;
+  gap:16px;
 }
 
 .card{
-  padding:14px;
+  padding:18px;
   border-radius:var(--radius);
+  background:var(--glass);
   border:1px solid var(--stroke);
-  background:rgba(255,255,255,.05);
+  backdrop-filter:blur(25px);
+  text-align:center;
+  transition:all .2s ease;
+}
+.card:active{
+  transform:scale(.97);
 }
 
+/* SWITCH */
 .switch{
-  width:42px;
-  height:24px;
+  margin:12px auto 0;
+  width:50px;
+  height:28px;
   border-radius:999px;
   background:rgba(255,255,255,.2);
   position:relative;
-  cursor:pointer;
+  transition:.3s;
 }
 .switch::after{
   content:"";
   position:absolute;
-  width:18px;
-  height:18px;
+  width:22px;
+  height:22px;
   border-radius:50%;
   background:white;
   top:3px;
   left:3px;
-  transition:.2s;
+  transition:.3s;
 }
 .switch.on{
-  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  background:linear-gradient(90deg,var(--accent1),var(--accent2));
 }
 .switch.on::after{
-  left:21px;
+  left:25px;
 }
 
+/* MOODS */
 .moods{
   display:flex;
-  gap:8px;
+  gap:10px;
   overflow:auto;
-  margin-bottom:14px;
+  margin-bottom:18px;
 }
 .mood{
-  padding:8px 14px;
+  padding:10px 16px;
   border-radius:999px;
-  border:1px solid var(--stroke);
-  background:rgba(255,255,255,.05);
-  cursor:pointer;
-}
-.mood.active{
-  background:linear-gradient(90deg,var(--accent),var(--accent2));
-}
-
-.ai-input{
-  width:100%;
-  height:44px;
-  border-radius:14px;
-  border:1px solid var(--stroke);
-  background:rgba(255,255,255,.06);
-  padding:0 12px;
-  color:white;
-}
-
-.btn{
-  margin-top:8px;
-  width:100%;
-  height:48px;
-  border:none;
-  border-radius:16px;
-  background:linear-gradient(90deg,var(--accent),var(--accent2));
-  color:white;
-  font-weight:800;
-  cursor:pointer;
-}
-.btn:active{
-  transform:scale(.98);
-}
-
-.tabbar{
-  position:fixed;
-  bottom:10px;
-  left:10px;
-  right:10px;
-  height:70px;
-  border-radius:20px;
-  background:rgba(20,22,35,.7);
+  background:var(--glass);
   border:1px solid var(--stroke);
   backdrop-filter:blur(20px);
+  cursor:pointer;
+  white-space:nowrap;
+  transition:.3s;
+}
+.mood.active{
+  background:linear-gradient(90deg,var(--accent1),var(--accent2));
+}
+
+/* AI */
+.ai-input{
+  width:100%;
+  height:50px;
+  border-radius:18px;
+  border:1px solid var(--stroke);
+  background:rgba(255,255,255,.08);
+  padding:0 14px;
+  color:white;
+}
+.btn{
+  margin-top:12px;
+  width:100%;
+  height:56px;
+  border:none;
+  border-radius:22px;
+  background:linear-gradient(90deg,var(--accent1),var(--accent2));
+  color:white;
+  font-weight:800;
+  font-size:18px;
+  transition:.2s;
+}
+.btn:active{
+  transform:scale(.97);
+}
+
+/* TAB BAR */
+.tabbar{
+  position:fixed;
+  bottom:14px;
+  left:14px;
+  right:14px;
+  height:80px;
+  border-radius:32px;
+  background:rgba(20,22,35,.7);
+  backdrop-filter:blur(30px);
+  border:1px solid var(--stroke);
   display:flex;
   justify-content:space-around;
   align-items:center;
 }
-
 .tab{
-  text-align:center;
   font-size:12px;
   color:var(--muted);
-  cursor:pointer;
 }
 .tab.active{
   color:white;
@@ -222,7 +244,7 @@ body{
 <div class="content">
 
 <div class="title">Дом</div>
-<div class="subtitle">Цифровая душа вашего дома</div>
+<div class="subtitle">Digital Soul</div>
 
 <div class="status">
   <div class="dot"></div>
@@ -230,7 +252,7 @@ body{
 </div>
 
 <div class="panel">
-  <h3>Индекс комфорта: <span id="comfortVal">82</span>%</h3>
+  <div>Индекс комфорта: <strong id="comfortVal">82%</strong></div>
   <div class="bar"><div class="fill" id="comfortBar"></div></div>
 </div>
 
@@ -247,15 +269,15 @@ body{
     <div class="switch on"></div>
   </div>
   <div class="card">
-    Телевизор
+    ТВ
     <div class="switch"></div>
   </div>
 </div>
 
 <div class="panel">
-  <h3>AI Центр</h3>
-  <input class="ai-input" placeholder="Например: сделай уютно"/>
-  <button class="btn">Сформировать</button>
+  <div style="margin-bottom:10px;font-weight:800;">AI Центр</div>
+  <input class="ai-input" placeholder="Сделай уютно"/>
+  <button class="btn">Выполнить</button>
 </div>
 
 </div>
@@ -268,10 +290,11 @@ body{
 </div>
 
 <script>
+const switches=document.querySelectorAll(".switch");
 const comfortBar=document.getElementById("comfortBar");
 const comfortVal=document.getElementById("comfortVal");
 
-document.querySelectorAll(".switch").forEach(sw=>{
+switches.forEach(sw=>{
   sw.onclick=()=>{
     sw.classList.toggle("on");
     updateComfort();
@@ -288,7 +311,7 @@ document.querySelectorAll(".mood").forEach(m=>{
 
 function updateComfort(){
   const val=Math.floor(Math.random()*20)+75;
-  comfortVal.innerText=val;
+  comfortVal.innerText=val+"%";
   comfortBar.style.width=val+"%";
 }
 </script>
