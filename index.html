@@ -1,1511 +1,787 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"/>
-  <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta charset="UTF-8" />
+  <!-- ЗАПРЕТ ЗУМА + правильный viewport -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#0b1020" />
   <title>AURA</title>
 
   <style>
     :root{
-      --bg0:#070915;
-      --bg1:#0b0f1f;
-
-      --glass: rgba(255,255,255,.06);
-      --glass2: rgba(255,255,255,.09);
-      --stroke: rgba(255,255,255,.12);
-      --stroke2: rgba(255,255,255,.18);
-
-      --text:#f5f7ff;
+      --bg:#070B14;
+      --card: rgba(22, 26, 40, .62);
+      --card2: rgba(22, 26, 40, .78);
+      --stroke: rgba(255,255,255,.10);
+      --stroke2: rgba(255,255,255,.06);
+      --text: rgba(255,255,255,.92);
       --muted: rgba(255,255,255,.62);
-      --muted2: rgba(255,255,255,.42);
+      --muted2: rgba(255,255,255,.46);
 
-      --accentA:#7c5cff;
-      --accentB:#b79bff;
-      --accentC:#56d7ff;
+      --accent: #A78BFA;
+      --accent2:#7C5CFF;
 
-      --good:#28ff9f;
-      --warn:#ffd36a;
-      --bad:#ff5c7c;
-
-      --shadow: 0 18px 60px rgba(0,0,0,.55);
-      --shadow2: 0 10px 26px rgba(0,0,0,.35);
-
-      --r14:14px;
       --r16:16px;
       --r20:20px;
       --r24:24px;
-      --r28:28px;
-      --r32:32px;
 
-      --pad:18px;
-      --gap:14px;
+      --shadow: 0 16px 48px rgba(0,0,0,.45);
+      --shadow2: 0 10px 30px rgba(0,0,0,.35);
 
-      --tabH:78px;
-      --tabInset:14px;
-
-      --heroMin: 190px;
-      --heroMax: 280px;
+      --dock-h: 76px;
+      --dock-pad: 10px;
     }
 
-    *{box-sizing:border-box}
-    html,body{height:100%}
+    *{ box-sizing:border-box; }
+    html, body{ height:100%; }
     body{
       margin:0;
-      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui;
-      color:var(--text);
-      background: radial-gradient(1200px 700px at 50% -200px, #1a1f3f 0%, var(--bg1) 40%, var(--bg0) 100%);
-      overflow-x:hidden;
-      -webkit-tap-highlight-color:transparent;
-      touch-action: pan-x pan-y;
-      -webkit-text-size-adjust:100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Inter, Arial, sans-serif;
+      overflow: hidden; /* скролл только внутри .scroll */
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    /* iOS zoom guard */
-    body{ -webkit-user-select:none; user-select:none; }
-    input, textarea{ -webkit-user-select:text; user-select:text; }
+    /* Декоративные слои НЕ должны ловить тапы */
+    .noTap{ pointer-events:none; }
 
-    .bg{
-      position:fixed;
-      inset:0;
-      background:
-        radial-gradient(1200px 520px at 50% 25%, rgba(124,92,255,.20) 0%, rgba(124,92,255,0) 60%),
-        url("./assets/IMG_1348.jpeg") center top / cover no-repeat;
-      filter:saturate(1.05) contrast(1.05);
-      transform:scale(1.02);
-      z-index:-2;
+    .app{
+      position: relative;
+      height: 100vh;
+      width: 100%;
+      overflow: hidden;
     }
-    .bg::after{
-      content:"";
+
+    /* HERO */
+    .hero{
+      position: absolute;
+      inset: 0;
+      height: 44vh;
+      min-height: 280px;
+      max-height: 420px;
+      background: url("./assets/hero.jpg") center/cover no-repeat;
+      transform: scale(1.03);
+      filter: saturate(1.05) contrast(1.02);
+    }
+    .heroVeil{
       position:absolute;
       inset:0;
       background:
-        linear-gradient(180deg,
-          rgba(7,9,21,.08) 0%,
-          rgba(7,9,21,.62) 40%,
-          rgba(7,9,21,.88) 68%,
-          rgba(7,9,21,.95) 100%);
-    }
-    .noise{
-      position:fixed;
-      inset:0;
-      pointer-events:none;
-      z-index:-1;
-      opacity:.06;
-      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
-      background-size:240px 240px;
+        radial-gradient(1200px 420px at 50% 10%, rgba(160,120,255,.26) 0%, rgba(7,11,20,0) 55%),
+        linear-gradient(180deg, rgba(7,11,20,.00) 0%, rgba(7,11,20,.55) 40%, rgba(7,11,20,.92) 80%, rgba(7,11,20,1) 100%);
+      backdrop-filter: blur(2px);
     }
 
-    /* Topbar (Telegram feel) */
-    .topbar{
-      position:sticky;
-      top:0;
-      z-index:60;
-      padding-top: env(safe-area-inset-top);
-      background: rgba(10,12,24,.32);
-      backdrop-filter: blur(22px);
-      -webkit-backdrop-filter: blur(22px);
+    /* ВЕРХНЯЯ ПАНЕЛЬ (как в телеге внутри мини-аппа) */
+    .topBar{
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      padding: calc(env(safe-area-inset-top) + 10px) 14px 10px;
+      background: linear-gradient(180deg, rgba(7,11,20,.88), rgba(7,11,20,.12));
+      backdrop-filter: blur(14px);
       border-bottom: 1px solid rgba(255,255,255,.06);
     }
-    .topbarInner{
-      height:54px;
+    .topRow{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      padding: 0 var(--pad);
-      gap:12px;
+      gap:10px;
     }
-    .tbLeft,.tbRight{display:flex; align-items:center; gap:10px; min-width:92px;}
-    .tbCenter{
-      flex:1;
-      text-align:center;
-      font-weight:900;
-      letter-spacing:.2px;
-      opacity:.95;
-      line-height:1.05;
+    .topTitle{
+      font-weight: 700;
+      letter-spacing: .2px;
+      opacity:.92;
     }
-    .tbSub{
-      display:block;
-      font-weight:800;
-      font-size:11px;
-      color: rgba(255,255,255,.55);
-      letter-spacing:.2px;
-      margin-top:2px;
-    }
-    .iconBtn{
+    .topBtn{
       width:38px;height:38px;
       border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.10);
       background: rgba(255,255,255,.06);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      display:grid;
-      place-items:center;
-      box-shadow: 0 10px 22px rgba(0,0,0,.25);
-      transition:.14s ease;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 10px 26px rgba(0,0,0,.28);
+      display:flex;align-items:center;justify-content:center;
+      color: rgba(255,255,255,.85);
       user-select:none;
     }
-    .iconBtn:active{ transform:scale(.97); }
-    .iconBtn svg{ width:18px;height:18px; opacity:.92; }
+    .topBtn:active{ transform: scale(.97); }
 
-    /* Content */
-    .app{
-      max-width:520px;
-      margin:0 auto;
-      padding: 0 var(--pad) calc(var(--tabH) + var(--tabInset) + env(safe-area-inset-bottom) + 18px);
+    /* СКРОЛЛ-КОНТЕЙНЕР */
+    .scroll{
+      position: relative;
+      height: 100%;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: calc(var(--dock-h) + var(--dock-pad) + env(safe-area-inset-bottom) + 18px);
     }
 
-    /* Pages switch = Telegram-fast (no heavy animations) */
-    .page{ display:none; }
-    .page.active{ display:block; }
-    .page.enter{ animation: tgEnter .12s ease-out; transform-origin: 50% 20%; }
-    @keyframes tgEnter{ from{opacity:.78; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
-    @media (prefers-reduced-motion: reduce){ .page.enter{ animation:none; } }
-
-    /* HERO: no huge gap (auto compress) */
-    .heroSpacer{
-      height: clamp(var(--heroMin), 26vh, var(--heroMax));
+    /* КОНТЕНТ */
+    .content{
+      position: relative;
+      z-index: 5;
+      padding: 14px;
+      padding-top: 18vh; /* чтобы “Мой дом” не был с огромным разрывом */
+      max-width: 980px;
+      margin: 0 auto;
     }
 
-    .titleBlock{
-      margin-top: -34px; /* подтягиваем контент ближе к картинке */
-      padding-bottom: 6px;
-    }
     .h1{
-      font-size:44px;
-      font-weight:950;
-      letter-spacing:-.9px;
+      font-size: 44px;
+      line-height: 1.02;
       margin: 0;
-      line-height:1.02;
-      text-shadow: 0 10px 40px rgba(0,0,0,.55);
+      letter-spacing: -0.9px;
+      font-weight: 860;
+      text-shadow: 0 10px 30px rgba(0,0,0,.35);
     }
     .sub{
-      margin-top:8px;
-      color:var(--muted);
-      font-size:15px;
-      font-weight:800;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 15px;
     }
 
-    /* Premium glass card (Yandex-ish) */
-    .card{
-      position:relative;
-      border-radius: var(--r32);
-      background: var(--glass);
-      border: 1px solid var(--stroke);
-      backdrop-filter: blur(26px);
-      -webkit-backdrop-filter: blur(26px);
+    .pill{
+      margin-top: 14px;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding: 12px 14px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+      backdrop-filter: blur(18px);
       box-shadow: var(--shadow2);
-      overflow:hidden;
+    }
+    .dot{
+      width:10px;height:10px;border-radius: 999px;
+      background: #27D17C;
+      box-shadow: 0 0 0 4px rgba(39,209,124,.12), 0 0 20px rgba(39,209,124,.55);
+    }
+
+    .grid{
+      margin-top: 16px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .card{
+      border-radius: var(--r24);
+      background: var(--card);
+      border: 1px solid var(--stroke);
+      backdrop-filter: blur(22px);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
     }
     .card::before{
       content:"";
-      position:absolute;
-      inset:-1px;
-      border-radius:inherit;
-      background:
-        radial-gradient(900px 260px at 18% 0%, rgba(255,255,255,.16) 0%, rgba(255,255,255,0) 55%),
-        radial-gradient(900px 280px at 80% 120%, rgba(124,92,255,.18) 0%, rgba(124,92,255,0) 60%);
+      position:absolute; inset:-60px -80px auto auto;
+      width: 220px; height: 220px;
+      background: radial-gradient(circle, rgba(167,139,250,.24) 0%, rgba(167,139,250,0) 65%);
       pointer-events:none;
-      mix-blend-mode:screen;
-      opacity:.55;
-    }
-    .cardInner{ position:relative; padding:16px; }
-
-    .stack{ display:flex; flex-direction:column; gap: var(--gap); }
-
-    .blockTitle{
-      font-size:13px;
-      color: rgba(255,255,255,.62);
-      letter-spacing:.3px;
-      margin:0 0 10px 0;
-      font-weight:900;
     }
 
-    /* Status pill */
-    .statusPill{
+    .cardHead{
       display:flex;
       align-items:center;
-      gap:10px;
-      font-weight:950;
-      font-size:16px;
-      padding: 14px 14px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.10);
-      box-shadow: 0 12px 28px rgba(0,0,0,.25);
+      justify-content:flex-start;
+      gap:12px;
+      margin-bottom: 10px;
     }
-    .dot{
-      width:10px;height:10px;border-radius:50%;
-      background:var(--good);
-      box-shadow:0 0 18px rgba(40,255,159,.75);
+    .iconGlass{
+      width:54px;height:54px;border-radius: 18px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.14);
+      backdrop-filter: blur(16px);
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:
+        0 10px 30px rgba(0,0,0,.25),
+        inset 0 1px 0 rgba(255,255,255,.18);
+    }
+    .iconGlass img{
+      width:26px;height:26px;
+      filter: drop-shadow(0 8px 14px rgba(0,0,0,.35));
+      opacity: .92;
     }
 
-    /* Comfort */
-    .comfortTop{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
-    .comfortVal{ font-weight:950; font-size:20px; letter-spacing:-.3px; }
+    .cardTitle{
+      font-size: 20px;
+      margin: 0;
+      font-weight: 820;
+      letter-spacing: -.3px;
+    }
+    .cardText{
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .block{
+      margin-top: 14px;
+      border-radius: var(--r24);
+      background: var(--card2);
+      border: 1px solid var(--stroke);
+      backdrop-filter: blur(24px);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    .progressRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom: 12px;
+    }
+    .progressTitle{
+      font-weight: 750;
+      font-size: 16px;
+      color: rgba(255,255,255,.88);
+    }
     .bar{
-      height:12px;
-      border-radius:999px;
+      height: 10px;
+      border-radius: 999px;
       background: rgba(255,255,255,.10);
       overflow:hidden;
-      border:1px solid rgba(255,255,255,.08);
-      margin-top:12px;
+      border: 1px solid rgba(255,255,255,.08);
     }
-    .fill{
+    .bar > span{
+      display:block;
       height:100%;
-      width:82%;
-      border-radius:999px;
-      background: linear-gradient(90deg, var(--accentA), var(--accentB));
-      box-shadow: 0 0 22px rgba(124,92,255,.45);
-      transition: width .22s ease;
+      width: 72%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+      box-shadow: 0 0 18px rgba(167,139,250,.35);
     }
 
-    /* Chips */
     .chips{
       display:flex;
       gap:10px;
       overflow:auto;
-      padding: 2px 2px;
-      -webkit-overflow-scrolling:touch;
-      scrollbar-width:none;
+      padding-bottom: 2px;
+      -webkit-overflow-scrolling: touch;
     }
-    .chips::-webkit-scrollbar{display:none}
     .chip{
-      flex:0 0 auto;
-      padding:10px 14px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
-      color: rgba(255,255,255,.78);
-      font-weight:950;
-      letter-spacing:.1px;
-      transition: .14s ease;
-    }
-    .chip.active{
-      background: linear-gradient(90deg, rgba(124,92,255,.95), rgba(183,155,255,.95));
-      border-color: rgba(255,255,255,.18);
-      color: #fff;
-      box-shadow: 0 12px 30px rgba(124,92,255,.24);
-    }
-    .chip:active{ transform:scale(.98) }
-
-    /* Grid controls */
-    .grid{ display:grid; grid-template-columns:1fr 1fr; gap: var(--gap); }
-    .device{
-      border-radius: var(--r32);
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.055);
-      backdrop-filter: blur(22px);
-      -webkit-backdrop-filter: blur(22px);
-      padding: 16px;
-      position:relative;
-      overflow:hidden;
-      box-shadow: var(--shadow2);
-    }
-    .device::before{
-      content:"";
-      position:absolute;
-      inset:-1px;
-      background: radial-gradient(420px 170px at 20% 0%, rgba(255,255,255,.14) 0%, rgba(255,255,255,0) 60%);
-      opacity:.45;
-      pointer-events:none;
-    }
-    .deviceTop{ display:flex; align-items:center; justify-content:space-between; gap:10px; position:relative; }
-    .deviceLeft{display:flex; align-items:center; gap:10px;}
-    .deviceName{ font-weight:1000; letter-spacing:-.2px; font-size:16px; }
-    .deviceHint{ margin-top:6px; color: var(--muted2); font-size:13px; position:relative; font-weight:850; }
-
-    /* Glass icon (Yandex glass-ish) */
-    .gIcon{
-      width:44px;height:44px;
-      border-radius: 16px;
-      background: rgba(255,255,255,.07);
-      border: 1px solid rgba(255,255,255,.14);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      box-shadow: 0 12px 24px rgba(0,0,0,.22);
-      display:grid;
-      place-items:center;
-      position:relative;
-      overflow:hidden;
-    }
-    .gIcon::before{
-      content:"";
-      position:absolute;
-      inset:-1px;
-      background: radial-gradient(140px 70px at 30% 0%, rgba(255,255,255,.18) 0%, rgba(255,255,255,0) 60%);
-      opacity:.75;
-      pointer-events:none;
-    }
-    .gIcon svg{ width:20px;height:20px; opacity:.92; }
-
-    /* Toggle */
-    .toggle{
-      width:52px;height:30px;border-radius:999px;
-      background: rgba(255,255,255,.16);
-      border:1px solid rgba(255,255,255,.16);
-      position:relative;
-      transition: .16s ease;
-      flex:0 0 auto;
-      cursor:pointer;
-    }
-    .toggle::after{
-      content:"";
-      position:absolute;
-      width:24px;height:24px;border-radius:50%;
-      top:2.5px; left:3px;
-      background: rgba(255,255,255,.92);
-      box-shadow: 0 8px 18px rgba(0,0,0,.35);
-      transition: .16s ease;
-    }
-    .toggle.on{
-      background: linear-gradient(90deg, rgba(124,92,255,.95), rgba(183,155,255,.95));
-      border-color: rgba(255,255,255,.18);
-      box-shadow: 0 10px 26px rgba(124,92,255,.25);
-    }
-    .toggle.on::after{ left:25px; }
-
-    /* AI */
-    .aiRow{ display:flex; flex-direction:column; gap:12px; }
-    .input{
-      height:52px;
-      border-radius: 18px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      padding: 0 14px;
-      color:#fff;
-      outline:none;
-      font-size:15px;
-      font-weight:850;
-    }
-    .input::placeholder{ color: rgba(255,255,255,.38); font-weight:850; }
-    .btn{
-      height:58px;
-      border:none;
-      border-radius: 22px;
-      font-weight:1000;
-      font-size:18px;
-      color:#fff;
-      letter-spacing:.1px;
-      background: linear-gradient(90deg, var(--accentA), var(--accentB));
-      box-shadow: 0 18px 40px rgba(124,92,255,.28);
-      transition:.14s ease;
-      user-select:none;
-      cursor:pointer;
-    }
-    .btn:active{
-      transform: scale(.985);
-      box-shadow: 0 10px 24px rgba(124,92,255,.22);
-    }
-
-    /* Telegram-style list rows */
-    .list{ display:flex; flex-direction:column; gap:12px; }
-    .row{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      padding:14px 14px;
-      border-radius: 22px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.055);
-      backdrop-filter: blur(22px);
-      -webkit-backdrop-filter: blur(22px);
-      box-shadow: var(--shadow2);
-      position:relative;
-      overflow:hidden;
-    }
-    .row::before{
-      content:"";
-      position:absolute;
-      inset:-1px;
-      background: radial-gradient(520px 160px at 20% 0%, rgba(255,255,255,.14) 0%, rgba(255,255,255,0) 62%);
-      opacity:.38;
-      pointer-events:none;
-    }
-    .rowTitle{ font-weight:1000; position:relative; }
-    .rowHint{ color: var(--muted2); font-weight:850; font-size:12px; margin-top:2px; position:relative; }
-    .miniTag{
-      padding:8px 10px;
+      flex: 0 0 auto;
+      padding: 10px 14px;
       border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.14);
+      border: 1px solid rgba(255,255,255,.10);
       background: rgba(255,255,255,.06);
-      color: rgba(255,255,255,.75);
-      font-weight:950;
-      font-size:12px;
-      position:relative;
-      flex:0 0 auto;
+      color: rgba(255,255,255,.82);
+      backdrop-filter: blur(14px);
+      font-weight: 650;
+      user-select:none;
+    }
+    .chip.isActive{
+      background: linear-gradient(180deg, rgba(167,139,250,.36), rgba(124,92,255,.22));
+      border-color: rgba(167,139,250,.50);
+      box-shadow: 0 10px 30px rgba(124,92,255,.22);
+      color: rgba(255,255,255,.95);
     }
 
-    /* Modal (Create / Quick actions) */
-    .overlay{
-      position:fixed; inset:0;
-      background: rgba(0,0,0,.55);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      display:none;
-      z-index:90;
-      padding: 16px;
-      padding-top: calc(env(safe-area-inset-top) + 16px);
+    .miniGrid{
+      margin-top: 12px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
     }
-    .overlay.show{ display:block; }
-    .sheet{
-      max-width:520px;
-      margin:0 auto;
-      border-radius: 28px;
-      background: rgba(18,20,36,.78);
-      border:1px solid rgba(255,255,255,.14);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-    }
-    .sheetHead{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding: 14px 14px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-    }
-    .sheetTitle{ font-weight:1000; }
-    .sheetClose{
-      width:38px;height:38px;border-radius: 14px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
-      display:grid; place-items:center;
-      cursor:pointer;
-    }
-    .sheetBody{ padding: 14px; }
-    .grid2{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
-    .action{
+    .toggleCard{
       border-radius: 22px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.055);
-      padding: 14px;
-      box-shadow: var(--shadow2);
-      cursor:pointer;
-      position:relative;
-      overflow:hidden;
-      transition:.14s ease;
-    }
-    .action:active{ transform:scale(.99); }
-    .actionTop{ display:flex; align-items:center; gap:10px; }
-    .actionName{ font-weight:1000; }
-    .actionDesc{ margin-top:6px; color: var(--muted2); font-weight:850; font-size:12px; }
-
-    /* Tabbar (Telegram-like, premium) */
-    .tabbar{
-      position:fixed;
-      left:var(--tabInset);
-      right:var(--tabInset);
-      bottom: var(--tabInset);
-      padding-bottom: env(safe-area-inset-bottom);
-      height: var(--tabH);
-      border-radius: 30px;
-      background: rgba(20,22,35,.72);
-      border:1px solid rgba(255,255,255,.14);
-      backdrop-filter: blur(28px);
-      -webkit-backdrop-filter: blur(28px);
-      box-shadow: var(--shadow);
+      padding: 16px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 12px 30px rgba(0,0,0,.30);
       display:flex;
       align-items:center;
       justify-content:space-between;
-      padding-left: 14px;
-      padding-right: 14px;
-      z-index:80;
-      overflow:hidden;
+      gap: 12px;
     }
-    .tabbar::before{
+    .toggleCard b{
+      font-size: 16px;
+      letter-spacing: -.2px;
+    }
+
+    /* КРАСИВЫЙ ПЕРЕКЛЮЧАТЕЛЬ */
+    .switch{
+      width: 56px;
+      height: 32px;
+      border-radius: 999px;
+      position: relative;
+      background: rgba(255,255,255,.14);
+      border: 1px solid rgba(255,255,255,.14);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.14);
+      cursor: pointer;
+      flex: 0 0 auto;
+    }
+    .switch::after{
       content:"";
       position:absolute;
-      inset:-1px;
-      background:
-        radial-gradient(420px 220px at 30% 0%, rgba(255,255,255,.16) 0%, rgba(255,255,255,0) 60%),
-        radial-gradient(520px 240px at 70% 120%, rgba(124,92,255,.22) 0%, rgba(124,92,255,0) 62%);
-      opacity:.55;
-      pointer-events:none;
-      mix-blend-mode:screen;
+      top: 50%;
+      transform: translateY(-50%);
+      left: 4px;
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.92);
+      box-shadow: 0 10px 20px rgba(0,0,0,.35);
+      transition: .22s ease;
     }
-    .tab{
-      position:relative;
-      width: 74px;
-      height: 56px;
+    .switch.on{
+      background: linear-gradient(90deg, rgba(124,92,255,.90), rgba(167,139,250,.92));
+      border-color: rgba(167,139,250,.55);
+      box-shadow: 0 0 22px rgba(124,92,255,.25);
+    }
+    .switch.on::after{
+      left: 28px;
+    }
+
+    /* AI блок */
+    .aiRow{
+      margin-top: 12px;
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+    .aiInput{
+      flex:1;
       border-radius: 18px;
+      padding: 14px 14px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+      color: rgba(255,255,255,.92);
+      outline:none;
+      font-size: 15px;
+    }
+    .aiInput::placeholder{ color: rgba(255,255,255,.42); }
+
+    .cta{
+      margin-top: 12px;
+      width: 100%;
+      border: none;
+      border-radius: 22px;
+      padding: 18px 18px;
+      font-size: 18px;
+      font-weight: 860;
+      letter-spacing: -.2px;
+      color: rgba(255,255,255,.96);
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+      box-shadow: 0 18px 48px rgba(124,92,255,.28);
+      transform: translateZ(0);
+      transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+      user-select:none;
+    }
+    .cta:active{
+      transform: scale(.985);
+      box-shadow: 0 12px 30px rgba(124,92,255,.22);
+      filter: brightness(.98);
+    }
+
+    /* ТАБЫ: показываем только активный */
+    .tab{ display:none; }
+    .tab.isActive{ display:block; }
+
+    /* TELEGRAM-STYLE DOCK (КЛИКАБЕЛЬНЫЙ) */
+    .dock{
+      position: fixed;
+      left: 10px;
+      right: 10px;
+      bottom: calc(10px + env(safe-area-inset-bottom));
+      height: var(--dock-h);
+      z-index: 999; /* выше всего */
+      border-radius: 26px;
+      background: rgba(18, 22, 34, .62);
+      border: 1px solid rgba(255,255,255,.12);
+      backdrop-filter: blur(26px);
+      box-shadow: 0 18px 60px rgba(0,0,0,.50);
+      display:grid;
+      grid-template-columns: 1fr 1fr 1.2fr 1fr 1fr;
+      align-items:center;
+      padding: 10px;
+      gap: 6px;
+    }
+    /* важно: декоративный хайлайт дока не ловит тапы */
+    .dock::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius: 26px;
+      background: radial-gradient(420px 120px at 50% 0%, rgba(167,139,250,.22) 0%, rgba(167,139,250,0) 70%);
+      pointer-events:none;
+    }
+
+    .dockBtn{
+      position: relative;
+      z-index: 2;
+      border: none;
+      background: transparent;
+      color: rgba(255,255,255,.70);
       display:flex;
       flex-direction:column;
       align-items:center;
       justify-content:center;
-      gap:6px;
-      color: rgba(255,255,255,.58);
-      font-size:11px;
-      font-weight:950;
-      transition:.14s ease;
-      cursor:pointer;
+      gap: 6px;
+      padding: 8px 6px;
+      border-radius: 18px;
+      user-select:none;
     }
-    .tab:active{ transform:scale(.985); }
-    .tab.active{
-      color:#fff;
-      background: rgba(255,255,255,.08);
-      border:1px solid rgba(255,255,255,.14);
-      box-shadow: 0 12px 26px rgba(0,0,0,.35);
+    .dockBtn img{
+      width: 22px;
+      height: 22px;
+      opacity: .86;
+      filter: drop-shadow(0 10px 20px rgba(0,0,0,.25));
     }
-    .ico{ width:18px;height:18px; display:block; opacity:.92; }
-    .tab.active .ico{ filter: drop-shadow(0 0 10px rgba(124,92,255,.35)); }
+    .dockBtn span{
+      font-size: 12px;
+      font-weight: 650;
+      letter-spacing: -.1px;
+    }
+    .dockBtn:active{ transform: scale(.98); }
 
-    /* Center FAB */
-    .fab{
-      position:relative;
-      width: 66px;
-      height: 66px;
-      margin-top: -10px;
+    .dockBtn.isActive{
+      color: rgba(255,255,255,.95);
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.10);
+    }
+    .dockBtn.isActive img{
+      opacity: 1;
+      filter: drop-shadow(0 0 16px rgba(167,139,250,.35));
+    }
+
+    /* центральная кнопка (премиум) */
+    .dockFabWrap{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+    }
+    .dockFab{
+      width: 62px;
+      height: 62px;
       border-radius: 22px;
-      background: linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,.08));
-      border:1px solid rgba(255,255,255,.18);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,.14);
+      background: linear-gradient(180deg, rgba(167,139,250,.55), rgba(124,92,255,.35));
+      box-shadow:
+        0 24px 50px rgba(124,92,255,.22),
+        inset 0 1px 0 rgba(255,255,255,.20);
+      backdrop-filter: blur(18px);
       display:flex;
       align-items:center;
       justify-content:center;
-      box-shadow: 0 18px 40px rgba(124,92,255,.18);
-      overflow:hidden;
-      transition:.14s ease;
-      cursor:pointer;
+      transform: translateY(-16px);
+      position: relative;
+      user-select:none;
     }
-    .fab::before{
+    .dockFab::before{
       content:"";
       position:absolute;
-      inset:-1px;
-      background: radial-gradient(220px 120px at 30% 0%, rgba(255,255,255,.20) 0%, rgba(255,255,255,0) 60%);
-      opacity:.65;
+      inset:-10px;
+      border-radius: 28px;
+      background: radial-gradient(circle, rgba(167,139,250,.24) 0%, rgba(167,139,250,0) 65%);
       pointer-events:none;
     }
-    .fabPlus{ width:20px;height:20px; opacity:.96; }
-    .fab:active{ transform:scale(.985); }
-
-    /* Toast */
-    .toast{
-      position:fixed;
-      left:50%;
-      transform: translateX(-50%);
-      bottom: calc(var(--tabH) + var(--tabInset) + env(safe-area-inset-bottom) + 14px);
-      background: rgba(18,20,36,.78);
-      border:1px solid rgba(255,255,255,.14);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      box-shadow: var(--shadow2);
-      padding: 12px 14px;
-      border-radius: 999px;
-      font-weight:950;
-      color:#fff;
-      display:none;
-      z-index:100;
-      max-width: 92vw;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
+    .dockFab i{
+      width: 22px;
+      height: 22px;
+      display:block;
+      position: relative;
     }
-    .toast.show{ display:block; animation: toastIn .16s ease-out; }
-    @keyframes toastIn{ from{opacity:0; transform: translateX(-50%) translateY(10px);} to{opacity:1; transform: translateX(-50%) translateY(0);} }
+    .dockFab i::before,
+    .dockFab i::after{
+      content:"";
+      position:absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%,-50%);
+      background: rgba(255,255,255,.92);
+      border-radius: 999px;
+      box-shadow: 0 14px 30px rgba(0,0,0,.25);
+    }
+    .dockFab i::before{ width: 18px; height: 3px; }
+    .dockFab i::after{ width: 3px; height: 18px; }
 
-    /* Small helper */
-    .muted{ color: var(--muted); font-weight:850; }
-    .sep{ height:10px; }
+    .dockFab:active{
+      transform: translateY(-16px) scale(.985);
+      box-shadow:
+        0 18px 34px rgba(124,92,255,.18),
+        inset 0 1px 0 rgba(255,255,255,.18);
+    }
 
+    /* адаптив */
+    @media (max-width: 380px){
+      .h1{ font-size: 40px; }
+      .dock{ left: 8px; right: 8px; }
+      .dockBtn span{ font-size: 11px; }
+    }
   </style>
 </head>
 
 <body>
-  <div class="bg"></div>
-  <div class="noise"></div>
-
-  <!-- Topbar -->
-  <div class="topbar">
-    <div class="topbarInner">
-      <div class="tbLeft">
-        <div class="iconBtn" id="tbMenu" aria-label="Меню">
-          <svg viewBox="0 0 24 24" fill="none">
-            <path d="M5 7h14M5 12h14M5 17h10" stroke="white" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-        </div>
-      </div>
-
-      <div class="tbCenter">
-        AURA
-        <span class="tbSub" id="tbSub">Дом</span>
-      </div>
-
-      <div class="tbRight">
-        <div class="iconBtn" id="tbMore" aria-label="Ещё">
-          <svg viewBox="0 0 24 24" fill="none">
-            <path d="M6.8 12a1.2 1.2 0 1 0 0 .01M12 12a1.2 1.2 0 1 0 0 .01M17.2 12a1.2 1.2 0 1 0 0 .01" stroke="white" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <div class="app">
+    <div class="hero noTap"></div>
+    <div class="heroVeil noTap"></div>
 
-    <!-- HOME -->
-    <section class="page active enter" id="page-home" data-title="Дом">
-      <div class="heroSpacer"></div>
-
-      <div class="titleBlock">
-        <div class="h1">Мой дом</div>
-        <div class="sub"><span id="homeSubtitle">Пока нет устройств</span> · <span class="muted">AURA Premium</span></div>
+    <div class="scroll" id="scroll">
+      <div class="topBar">
+        <div class="topRow">
+          <div class="topTitle">AURA</div>
+          <div style="display:flex; gap:10px;">
+            <button class="topBtn" type="button" aria-label="Меню">⋯</button>
+          </div>
+        </div>
       </div>
 
-      <div class="stack">
+      <div class="content">
+        <!-- TAB: Дом -->
+        <section class="tab isActive" data-tab="home">
+          <h1 class="h1">Мой дом</h1>
+          <div class="sub">Пока нет устройств</div>
 
-        <!-- Status -->
-        <div class="card">
-          <div class="cardInner">
-            <div class="statusPill">
-              <span class="dot"></span>
-              <span id="statusText">Всё спокойно</span>
-              <span style="margin-left:auto;color:rgba(255,255,255,.52);font-weight:900;font-size:12px;" id="statusTime">сейчас</span>
+          <div class="pill">
+            <span class="dot"></span>
+            <span style="font-weight:720;">Всё спокойно</span>
+          </div>
+
+          <div class="grid">
+            <div class="card">
+              <div class="cardHead">
+                <div class="iconGlass">
+                  <img src="./assets/icons/home.svg" alt="">
+                </div>
+              </div>
+              <p class="cardTitle">Устройства с Алисой</p>
+              <p class="cardText">Яндекс, Xiaomi, JBL, LG, Elari, Irbis, Dexp, Prestigio</p>
+            </div>
+
+            <div class="card">
+              <div class="cardHead">
+                <div class="iconGlass">
+                  <img src="./assets/icons/catalog.svg" alt="">
+                </div>
+              </div>
+              <p class="cardTitle">Устройства умного дома</p>
+              <p class="cardText">Свет, розетки, пылесос, телевизор и другое</p>
             </div>
           </div>
-        </div>
 
-        <!-- Comfort Index -->
-        <div class="card">
-          <div class="cardInner">
-            <div class="blockTitle">Индекс комфорта</div>
-            <div class="comfortTop">
-              <div style="font-weight:1000;letter-spacing:-.2px;">Комфорт</div>
-              <div class="comfortVal"><span id="comfortVal">82</span>%</div>
+          <div class="block">
+            <div class="progressRow">
+              <div class="progressTitle">Индекс комфорта: <b>91%</b></div>
             </div>
-            <div class="bar"><div class="fill" id="comfortBar" style="width:82%"></div></div>
-            <div class="sep"></div>
-            <div class="muted" style="font-size:12px;">
-              <span id="ecoLine">Эко · 12%</span> · <span id="calmLine">Цифровое спокойствие · ON</span> · <span id="geoLine">Гео · OFF</span>
-            </div>
-          </div>
-        </div>
+            <div class="bar"><span style="width:91%"></span></div>
 
-        <!-- Mood modes -->
-        <div class="card">
-          <div class="cardInner">
-            <div class="blockTitle">Режимы настроения</div>
+            <div style="height:12px"></div>
+
             <div class="chips" id="moods">
-              <div class="chip active" data-mood="cozy">Уют</div>
-              <div class="chip" data-mood="focus">Фокус</div>
-              <div class="chip" data-mood="energy">Энергия</div>
-              <div class="chip" data-mood="calm">Спокойствие</div>
+              <div class="chip">Уют</div>
+              <div class="chip">Фокус</div>
+              <div class="chip">Энергия</div>
+              <div class="chip isActive">Спокойствие</div>
+            </div>
+
+            <div class="miniGrid">
+              <div class="toggleCard">
+                <div><b>Свет</b><div style="color:var(--muted2); font-size:12px; margin-top:4px;">Гостиная</div></div>
+                <div class="switch on" role="switch" aria-checked="true" tabindex="0"></div>
+              </div>
+              <div class="toggleCard">
+                <div><b>TV</b><div style="color:var(--muted2); font-size:12px; margin-top:4px;">Сцена</div></div>
+                <div class="switch" role="switch" aria-checked="false" tabindex="0"></div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Quick controls -->
-        <div class="card">
-          <div class="cardInner">
-            <div class="blockTitle">Быстрое управление</div>
-            <div class="grid" id="devicesGrid"></div>
-          </div>
-        </div>
+          <div class="block">
+            <div style="font-weight:860; font-size:18px; letter-spacing:-.2px;">AI Центр</div>
+            <div style="color:var(--muted); font-size:13px; margin-top:6px;">Скажи, что сделать — AURA соберёт команду.</div>
 
-        <!-- AI Center -->
-        <div class="card">
-          <div class="cardInner">
-            <div class="blockTitle">AI Центр</div>
             <div class="aiRow">
-              <input class="input" id="aiInput" placeholder="Например: сделай уютно, свет 30%, тише ТВ"/>
-              <button class="btn" id="aiBtn">Выполнить</button>
-              <div class="muted" style="font-size:12px;">
-                AI понимает контекст: время · погода · присутствие · привычки (демо)
+              <input class="aiInput" id="aiInput" placeholder="Например: сделай уютно" />
+            </div>
+            <button class="cta" id="aiRun" type="button">Выполнить</button>
+          </div>
+        </section>
+
+        <!-- TAB: Сцены -->
+        <section class="tab" data-tab="scenes">
+          <h1 class="h1">Сцены</h1>
+          <div class="sub">Быстрые режимы для настроения и привычек</div>
+
+          <div class="block">
+            <div class="chips">
+              <div class="chip isActive">Утро</div>
+              <div class="chip">Вечер</div>
+              <div class="chip">Кино</div>
+              <div class="chip">Сон</div>
+              <div class="chip">Работа</div>
+            </div>
+
+            <div class="grid" style="margin-top:14px;">
+              <div class="card">
+                <p class="cardTitle">Кино</p>
+                <p class="cardText">Тёплый свет · 15% · ТВ включён</p>
+                <button class="cta" style="margin-top:12px" type="button">Запустить</button>
+              </div>
+              <div class="card">
+                <p class="cardTitle">Сон</p>
+                <p class="cardText">Свет выкл · Тишина · 23°</p>
+                <button class="cta" style="margin-top:12px" type="button">Запустить</button>
               </div>
             </div>
           </div>
-        </div>
+        </section>
 
-      </div>
-    </section>
+        <!-- TAB: Профиль -->
+        <section class="tab" data-tab="profile">
+          <h1 class="h1">Профиль</h1>
+          <div class="sub">Дом, доступы, безопасность, семейные роли</div>
 
-    <!-- SCENES -->
-    <section class="page" id="page-scenes" data-title="Сцены">
-      <div class="heroSpacer" style="height: 150px;"></div>
-      <div class="titleBlock">
-        <div class="h1" style="font-size:34px;">Сцены</div>
-        <div class="sub">Мгновенные сценарии · 1 тап</div>
-      </div>
-
-      <div class="stack">
-        <div class="card">
-          <div class="cardInner">
-            <div class="blockTitle">Рекомендованные</div>
-            <div class="list" id="scenesList"></div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="cardInner">
-            <div class="blockTitle">Автоматизация</div>
-            <div class="list">
-              <div class="row" id="autoWeather">
-                <div>
-                  <div class="rowTitle">Адаптация к погоде</div>
-                  <div class="rowHint">Теплее/ярче в пасмурный день</div>
-                </div>
-                <span class="miniTag" id="autoWeatherTag">ON</span>
-              </div>
-
-              <div class="row" id="autoTime">
-                <div>
-                  <div class="rowTitle">По времени суток</div>
-                  <div class="rowHint">Утро · День · Вечер · Ночь</div>
-                </div>
-                <span class="miniTag" id="autoTimeTag">ON</span>
-              </div>
-
-              <div class="row" id="autoGeo">
-                <div>
-                  <div class="rowTitle">Гео-режим</div>
-                  <div class="rowHint">Уход/возврат домой (демо)</div>
-                </div>
-                <span class="miniTag" id="autoGeoTag">OFF</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- PROFILE -->
-    <section class="page" id="page-profile" data-title="Профиль">
-      <div class="heroSpacer" style="height: 150px;"></div>
-      <div class="titleBlock">
-        <div class="h1" style="font-size:34px;">Профиль</div>
-        <div class="sub">Безопасность · Социальный дом · Память</div>
-      </div>
-
-      <div class="stack">
-        <div class="card">
-          <div class="cardInner">
-            <div class="blockTitle">Дом</div>
-            <div class="list">
-              <div class="row" id="membersBtn">
-                <div>
-                  <div class="rowTitle">Участники</div>
-                  <div class="rowHint">Совместное управление через Telegram</div>
-                </div>
-                <span class="miniTag">3</span>
-              </div>
-
-              <div class="row" id="childModeBtn">
-                <div>
-                  <div class="rowTitle">Детский режим</div>
-                  <div class="rowHint">Ограничения и безопасные команды</div>
-                </div>
-                <span class="miniTag" id="childModeTag">OFF</span>
-              </div>
-
-              <div class="row" id="calmModeBtn">
-                <div>
-                  <div class="rowTitle">Цифровое спокойствие</div>
-                  <div class="rowHint">Меньше шума · больше смысла</div>
-                </div>
-                <span class="miniTag" id="calmModeTag">ON</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="cardInner">
-            <div class="blockTitle">Безопасность</div>
-            <div class="list">
-              <div class="row" id="pinBtn">
-                <div>
-                  <div class="rowTitle">PIN / Биометрия</div>
-                  <div class="rowHint">Защита управления домом</div>
-                </div>
-                <span class="miniTag">✓</span>
-              </div>
-              <div class="row" id="auditBtn">
-                <div>
-                  <div class="rowTitle">История действий</div>
-                  <div class="rowHint">Кто и что включал</div>
-                </div>
-                <span class="miniTag">log</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="cardInner">
-            <div class="blockTitle">AURA Memory</div>
-            <div class="muted" style="font-size:12px;">
-              В демо: сохраняем последние команды/режимы локально. Позже — серверная память и приватность.
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- AI -->
-    <section class="page" id="page-ai" data-title="AI">
-      <div class="heroSpacer" style="height: 150px;"></div>
-      <div class="titleBlock">
-        <div class="h1" style="font-size:34px;">AI</div>
-        <div class="sub">Проактивно · Контекстно · Премиум</div>
-      </div>
-
-      <div class="stack">
-        <div class="card">
-          <div class="cardInner">
-            <div class="blockTitle">Быстрые запросы</div>
-            <div class="chips" id="aiQuick">
-              <div class="chip active" data-q="Сделай уютно">Сделай уютно</div>
-              <div class="chip" data-q="Включи свет 30%">Свет 30%</div>
-              <div class="chip" data-q="Тише ТВ">Тише ТВ</div>
-              <div class="chip" data-q="Эко режим">Эко</div>
-              <div class="chip" data-q="Ночной режим">На ночь</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="cardInner">
-            <div class="blockTitle">Команда</div>
-            <div class="aiRow">
-              <input class="input" id="aiInput2" placeholder="Например: выключи свет в спальне и включи охрану"/>
-              <button class="btn" id="aiBtn2">Выполнить</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="cardInner">
-            <div class="blockTitle">История команд</div>
-            <div class="list" id="aiHistory"></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-  </div>
-
-  <!-- Modal sheet -->
-  <div class="overlay" id="overlay">
-    <div class="sheet">
-      <div class="sheetHead">
-        <div class="sheetTitle" id="sheetTitle">Быстрые действия</div>
-        <div class="sheetClose" id="sheetClose" aria-label="Закрыть">
-          <svg viewBox="0 0 24 24" fill="none" style="width:18px;height:18px;">
-            <path d="M6 6l12 12M18 6L6 18" stroke="white" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-        </div>
-      </div>
-      <div class="sheetBody">
-        <div class="grid2">
-          <div class="action" data-act="createScene">
-            <div class="actionTop">
-              <div class="gIcon">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M7 12h10M12 7v10" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-              </div>
+          <div class="block">
+            <div class="toggleCard" style="margin-top:0;">
               <div>
-                <div class="actionName">Создать сцену</div>
-                <div class="actionDesc">Быстрый сценарий 1 тап</div>
+                <b>Детский режим</b>
+                <div style="color:var(--muted2); font-size:12px; margin-top:4px;">Ограничение опасных действий</div>
               </div>
+              <div class="switch" role="switch" aria-checked="false" tabindex="0"></div>
             </div>
-          </div>
 
-          <div class="action" data-act="addDevice">
-            <div class="actionTop">
-              <div class="gIcon">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M9 7h6v10H9z" stroke="white" stroke-width="2" />
-                  <path d="M12 3v4M12 17v4" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-              </div>
+            <div style="height:12px"></div>
+
+            <div class="toggleCard">
               <div>
-                <div class="actionName">Добавить устройство</div>
-                <div class="actionDesc">Каталог интеграций</div>
+                <b>Гео-режим</b>
+                <div style="color:var(--muted2); font-size:12px; margin-top:4px;">Автосцены при входе/выходе</div>
               </div>
+              <div class="switch on" role="switch" aria-checked="true" tabindex="0"></div>
             </div>
           </div>
+        </section>
 
-          <div class="action" data-act="aiCommand">
-            <div class="actionTop">
-              <div class="gIcon">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                  <path d="M8 14c1.2 1.8 6.8 1.8 8 0" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-              </div>
-              <div>
-                <div class="actionName">AI команда</div>
-                <div class="actionDesc">Понять смысл, не слова</div>
-              </div>
+        <!-- TAB: AI -->
+        <section class="tab" data-tab="ai">
+          <h1 class="h1">AI</h1>
+          <div class="sub">Проактивные подсказки и история команд</div>
+
+          <div class="block">
+            <div style="font-weight:860; font-size:18px;">Рекомендация</div>
+            <div style="color:var(--muted); margin-top:8px;">
+              Сегодня вечером прохладнее — могу заранее включить “Уют” и приглушить свет.
             </div>
+            <button class="cta" style="margin-top:12px" type="button">Применить</button>
           </div>
 
-          <div class="action" data-act="calmToggle">
-            <div class="actionTop">
-              <div class="gIcon">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M12 3c4.97 0 9 4.03 9 9s-4.03 9-9 9-9-4.03-9-9 4.03-9 9-9Z" stroke="white" stroke-width="2"/>
-                  <path d="M8 12h8" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-              </div>
-              <div>
-                <div class="actionName">Тишина</div>
-                <div class="actionDesc">Режим спокойствия</div>
-              </div>
+          <div class="block">
+            <div style="font-weight:860; font-size:18px;">История</div>
+            <div style="color:var(--muted); margin-top:8px; font-size:14px; line-height:1.4;">
+              • “Сделай уютно” → Свет 20% · Тёплый тон<br>
+              • “Включи ТВ” → HDMI · Громкость 18<br>
+              • “Режим сон” → Всё выключено
             </div>
           </div>
+        </section>
 
-        </div>
-
-        <div class="sep"></div>
-        <div class="muted" style="font-size:12px;">
-          Премиум UX: мгновенные вкладки, лёгкие анимации, минимум нагрузки.
-        </div>
+        <div style="height:12px"></div>
       </div>
     </div>
-  </div>
 
-  <div class="toast" id="toast">Готово</div>
+    <!-- ДОК-БАР: КЛИКАБЕЛЬНЫЙ (ничего не перекрывает) -->
+    <nav class="dock" aria-label="Навигация">
+      <button class="dockBtn isActive" data-go="home" type="button">
+        <img src="./assets/icons/home.svg" alt="">
+        <span>Дом</span>
+      </button>
 
-  <!-- TABBAR -->
-  <div class="tabbar" id="tabbar">
-    <div class="tab active" data-tab="home">
-      <svg class="ico" viewBox="0 0 24 24" fill="none">
-        <path d="M4 10.5L12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-      </svg>
-      Дом
-    </div>
+      <button class="dockBtn" data-go="scenes" type="button">
+        <img src="./assets/icons/scenes.svg" alt="">
+        <span>Сцены</span>
+      </button>
 
-    <div class="tab" data-tab="scenes">
-      <svg class="ico" viewBox="0 0 24 24" fill="none">
-        <path d="M5 6h14M5 12h10M5 18h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-      </svg>
-      Сцены
-    </div>
+      <div class="dockFabWrap">
+        <button class="dockFab" id="fab" type="button" aria-label="Быстрое действие">
+          <i></i>
+        </button>
+      </div>
 
-    <div class="fab" id="fab" aria-label="Действия">
-      <svg class="fabPlus" viewBox="0 0 24 24" fill="none">
-        <path d="M12 5v14M5 12h14" stroke="white" stroke-width="2.4" stroke-linecap="round"/>
-      </svg>
-    </div>
+      <button class="dockBtn" data-go="profile" type="button">
+        <img src="./assets/icons/catalog.svg" alt="">
+        <span>Профиль</span>
+      </button>
 
-    <div class="tab" data-tab="profile">
-      <svg class="ico" viewBox="0 0 24 24" fill="none">
-        <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm-7 9a7 7 0 0 1 14 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-      </svg>
-      Профиль
-    </div>
-
-    <div class="tab" data-tab="ai">
-      <svg class="ico" viewBox="0 0 24 24" fill="none">
-        <path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        <path d="M12 7a5 5 0 1 0 5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-      </svg>
-      AI
-    </div>
+      <button class="dockBtn" data-go="ai" type="button">
+        <img src="./assets/icons/tips.svg" alt="">
+        <span>AI</span>
+      </button>
+    </nav>
   </div>
 
   <script>
-    // ===== iOS: запрет жеста масштабирования =====
-    document.addEventListener('gesturestart', e => e.preventDefault(), {passive:false});
-    document.addEventListener('gesturechange', e => e.preventDefault(), {passive:false});
-    document.addEventListener('gestureend', e => e.preventDefault(), {passive:false});
+    // 1) Блокируем жесты зума (двойной тап / pinch)
+    document.addEventListener('gesturestart', e => e.preventDefault());
+    document.addEventListener('gesturechange', e => e.preventDefault());
+    document.addEventListener('gestureend', e => e.preventDefault());
 
-    // ===== Telegram WebApp hooks (если открыто в Telegram) =====
-    const TG = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-    try{
-      if(TG){
-        TG.ready();
-        TG.expand();
-        // Нативный цвет хедера/фона (приятнее в ТГ)
-        TG.setHeaderColor && TG.setHeaderColor('#0b0f1f');
-        TG.setBackgroundColor && TG.setBackgroundColor('#070915');
-      }
-    }catch(e){}
+    // 2) Табы (быстро, без лагов)
+    const tabs = [...document.querySelectorAll('.tab')];
+    const navBtns = [...document.querySelectorAll('.dockBtn')];
 
-    const $ = (q,root=document)=>root.querySelector(q);
-    const $$ = (q,root=document)=>Array.from(root.querySelectorAll(q));
+    function showTab(name){
+      tabs.forEach(t => t.classList.toggle('isActive', t.dataset.tab === name));
+      navBtns.forEach(b => b.classList.toggle('isActive', b.dataset.go === name));
+      // лёгкий “премиум” возврат вверх при смене раздела
+      document.getElementById('scroll').scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
-    const toast = $('#toast');
-    function haptic(type='impact', style='light'){
-      try{
-        if(TG && TG.HapticFeedback){
-          if(type==='impact') TG.HapticFeedback.impactOccurred(style);
-          if(type==='selection') TG.HapticFeedback.selectionChanged();
-          if(type==='notification') TG.HapticFeedback.notificationOccurred(style);
+    navBtns.forEach(btn=>{
+      btn.addEventListener('click', ()=> showTab(btn.dataset.go));
+    });
+
+    // 3) Switch toggles (красиво и правильно)
+    function toggleSwitch(el){
+      const on = el.classList.toggle('on');
+      el.setAttribute('aria-checked', on ? 'true' : 'false');
+    }
+    document.querySelectorAll('.switch').forEach(sw=>{
+      sw.addEventListener('click', ()=> toggleSwitch(sw));
+      sw.addEventListener('keydown', (e)=>{
+        if(e.key === 'Enter' || e.key === ' '){
+          e.preventDefault();
+          toggleSwitch(sw);
         }
-      }catch(e){}
-    }
-    let toastTimer=null;
-    function showToast(text){
-      toast.textContent = text;
-      toast.classList.add('show');
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(()=> toast.classList.remove('show'), 1300);
-    }
+      });
+    });
 
-    // ===== State (fast + local) =====
-    const KEY = 'AURA_STATE_V1';
-    const now = () => new Date();
-    const fmtTime = (d)=> d.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
-
-    const defaultState = {
-      comfort: 82,
-      calm: true,
-      geo: false,
-      eco: 12,
-      childMode: false,
-      autoWeather: true,
-      autoTime: true,
-      autoGeo: false,
-      mood: 'cozy',
-      devices: [
-        {id:'light', name:'Свет', room:'Гостиная', value:'60%', on:true, icon:'bulb'},
-        {id:'tv', name:'ТВ', room:'Гостиная', value:'Выкл', on:false, icon:'tv'},
-        {id:'socket', name:'Розетки', room:'Кухня', value:'1 активна', on:true, icon:'plug'},
-        {id:'vac', name:'Пылесос', room:'Дом', value:'На базе', on:false, icon:'vac'}
-      ],
-      scenes: [
-        {id:'s1', name:'Уютный вечер', hint:'Свет 30% · Теплее · Тише', tag:'▶︎'},
-        {id:'s2', name:'Фокус', hint:'Свет 75% · Без уведомлений', tag:'▶︎'},
-        {id:'s3', name:'Ночь', hint:'Свет 5% · Тишина · Охрана', tag:'▶︎'},
-      ],
-      history: [
-        {t: Date.now()-1000*60*6, text:'Сделай уютно', result:'выполнено'},
-        {t: Date.now()-1000*60*18, text:'Свет 30%', result:'выполнено'},
-      ]
-    };
-
-    function loadState(){
-      try{
-        const raw = localStorage.getItem(KEY);
-        if(!raw) return structuredClone(defaultState);
-        const obj = JSON.parse(raw);
-        return {...structuredClone(defaultState), ...obj};
-      }catch(e){
-        return structuredClone(defaultState);
-      }
-    }
-    function saveState(){
-      try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){}
-    }
-
-    let state = loadState();
-
-    // ===== UI refs =====
-    const comfortBar = $('#comfortBar');
-    const comfortVal = $('#comfortVal');
-    const statusTime = $('#statusTime');
-    const statusText = $('#statusText');
-
-    const ecoLine = $('#ecoLine');
-    const calmLine = $('#calmLine');
-    const geoLine = $('#geoLine');
-
-    const childModeTag = $('#childModeTag');
-    const calmModeTag  = $('#calmModeTag');
-
-    const autoWeatherTag = $('#autoWeatherTag');
-    const autoTimeTag = $('#autoTimeTag');
-    const autoGeoTag = $('#autoGeoTag');
-
-    const devicesGrid = $('#devicesGrid');
-    const scenesList = $('#scenesList');
-    const aiHistory = $('#aiHistory');
-
-    const tbSub = $('#tbSub');
-
-    // ===== Icons (inline SVG) =====
-    function iconSvg(kind){
-      const s = (path)=>`<svg viewBox="0 0 24 24" fill="none">${path}</svg>`;
-      const common = 'stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
-      switch(kind){
-        case 'bulb': return s(`<path ${common} d="M12 3a7 7 0 0 0-4 12c.7.6 1 1.4 1 2.3V19h6v-1.7c0-.9.3-1.7 1-2.3A7 7 0 0 0 12 3Z"/><path ${common} d="M9 22h6"/>`);
-        case 'tv': return s(`<path ${common} d="M4 7h16v10H4z"/><path ${common} d="M8 21h8"/>`);
-        case 'plug': return s(`<path ${common} d="M9 3v7M15 3v7"/><path ${common} d="M7 10h10v3a5 5 0 0 1-10 0v-3Z"/><path ${common} d="M12 18v3"/>`);
-        case 'vac': return s(`<path ${common} d="M8 7h8v7a4 4 0 0 1-8 0V7Z"/><path ${common} d="M10 7V5h4v2"/><path ${common} d="M9 21h6"/>`);
-        default: return s(`<path ${common} d="M6 12h12"/><path ${common} d="M12 6v12"/>`);
-      }
-    }
-
-    // ===== Render =====
-    function setComfort(v){
-      state.comfort = Math.max(0, Math.min(100, v|0));
-      comfortVal.textContent = state.comfort;
-      comfortBar.style.width = state.comfort + '%';
-      saveState();
-    }
-    function bumpComfort(delta){
-      const v = state.comfort + delta;
-      setComfort(v);
-    }
-
-    function setStatus(text){
-      statusText.textContent = text;
-      statusTime.textContent = fmtTime(now());
-    }
-
-    function syncMetaLines(){
-      ecoLine.textContent = `Эко · ${state.eco}%`;
-      calmLine.textContent = `Цифровое спокойствие · ${state.calm ? 'ON' : 'OFF'}`;
-      geoLine.textContent = `Гео · ${state.geo ? 'ON' : 'OFF'}`;
-
-      childModeTag.textContent = state.childMode ? 'ON' : 'OFF';
-      calmModeTag.textContent = state.calm ? 'ON' : 'OFF';
-
-      autoWeatherTag.textContent = state.autoWeather ? 'ON' : 'OFF';
-      autoTimeTag.textContent = state.autoTime ? 'ON' : 'OFF';
-      autoGeoTag.textContent = state.autoGeo ? 'ON' : 'OFF';
-    }
-
-    function renderDevices(){
-      devicesGrid.innerHTML = '';
-      for(const d of state.devices){
-        const el = document.createElement('div');
-        el.className = 'device';
-        el.innerHTML = `
-          <div class="deviceTop">
-            <div class="deviceLeft">
-              <div class="gIcon">${iconSvg(d.icon)}</div>
-              <div>
-                <div class="deviceName">${d.name}</div>
-                <div class="deviceHint">${d.room} · <span>${d.on ? d.value : 'Выкл'}</span></div>
-              </div>
-            </div>
-            <div class="toggle ${d.on ? 'on':''}" role="switch" aria-checked="${d.on?'true':'false'}" data-dev="${d.id}"></div>
-          </div>
-        `;
-        devicesGrid.appendChild(el);
-      }
-
-      $$('.toggle', devicesGrid).forEach(t => {
-        t.addEventListener('click', () => {
-          const id = t.getAttribute('data-dev');
-          const dev = state.devices.find(x=>x.id===id);
-          if(!dev) return;
-          dev.on = !dev.on;
-          t.classList.toggle('on', dev.on);
-          t.setAttribute('aria-checked', dev.on ? 'true':'false');
-
-          // premium: мягкая логика "комфорта"
-          bumpComfort(dev.on ? +2 : -2);
-          setStatus(dev.on ? `${dev.name} включен` : `${dev.name} выключен`);
-          haptic('impact','light');
-          showToast(dev.on ? `${dev.name}: ON` : `${dev.name}: OFF`);
-          saveState();
-          renderDevices(); // обновим подпись value
-        }, {passive:true});
+    // 4) Чипы режимов
+    const moods = document.getElementById('moods');
+    if(moods){
+      moods.addEventListener('click', (e)=>{
+        const chip = e.target.closest('.chip');
+        if(!chip) return;
+        [...moods.querySelectorAll('.chip')].forEach(c=>c.classList.remove('isActive'));
+        chip.classList.add('isActive');
       });
     }
 
-    function renderScenes(){
-      scenesList.innerHTML = '';
-      for(const s of state.scenes){
-        const row = document.createElement('div');
-        row.className = 'row';
-        row.innerHTML = `
-          <div>
-            <div class="rowTitle">${s.name}</div>
-            <div class="rowHint">${s.hint}</div>
-          </div>
-          <span class="miniTag">${s.tag || '▶︎'}</span>
-        `;
-        row.addEventListener('click', ()=>{
-          haptic('selection');
-          setStatus(`Сцена: ${s.name}`);
-          // простая "магия" демо:
-          if(s.id==='s1'){ applyMood('cozy'); setComfort(86); }
-          if(s.id==='s2'){ applyMood('focus'); setComfort(84); }
-          if(s.id==='s3'){ applyMood('calm'); setComfort(80); }
-          showToast(`Запущено: ${s.name}`);
-          pushHistory(`Сцена: ${s.name}`);
-        }, {passive:true});
-        scenesList.appendChild(row);
+    // 5) FAB: быстрое действие (пример)
+    const fab = document.getElementById('fab');
+    fab.addEventListener('click', ()=>{
+      // Открываем AI вкладку и фокус на ввод
+      showTab('home');
+      const input = document.getElementById('aiInput');
+      if(input){
+        input.focus();
+        input.value = 'Сделай уютно';
       }
-    }
-
-    function pushHistory(text){
-      state.history.unshift({t: Date.now(), text, result:'выполнено'});
-      state.history = state.history.slice(0, 12);
-      saveState();
-      renderHistory();
-    }
-
-    function renderHistory(){
-      aiHistory.innerHTML = '';
-      if(!state.history.length){
-        aiHistory.innerHTML = `<div class="muted" style="font-size:12px;">Пока пусто</div>`;
-        return;
-      }
-      for(const h of state.history){
-        const row = document.createElement('div');
-        row.className = 'row';
-        row.innerHTML = `
-          <div>
-            <div class="rowTitle">«${escapeHtml(h.text)}»</div>
-            <div class="rowHint">${new Date(h.t).toLocaleString('ru-RU',{hour:'2-digit', minute:'2-digit'})} · ${h.result}</div>
-          </div>
-          <span class="miniTag">${state.comfort}%</span>
-        `;
-        aiHistory.appendChild(row);
-      }
-    }
-
-    function escapeHtml(s){
-      return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-    }
-
-    function applyMood(m){
-      state.mood = m;
-      // UI chips
-      $$('#moods .chip').forEach(x=>x.classList.toggle('active', x.dataset.mood===m));
-      // лёгкая демо-логика
-      if(m==='cozy'){ state.eco = Math.max(8, state.eco-1); setStatus('Режим: Уют'); }
-      if(m==='focus'){ state.eco = Math.min(22, state.eco+1); setStatus('Режим: Фокус'); }
-      if(m==='energy'){ state.eco = Math.min(28, state.eco+2); setStatus('Режим: Энергия'); }
-      if(m==='calm'){ state.eco = Math.max(10, state.eco-1); setStatus('Режим: Спокойствие'); }
-      syncMetaLines();
-      saveState();
-      haptic('selection');
-      showToast(`Режим: ${m==='cozy'?'Уют':m==='focus'?'Фокус':m==='energy'?'Энергия':'Спокойствие'}`);
-    }
-
-    // ===== Pages navigation (Telegram-fast) =====
-    const tabs = $$('.tab');
-    const pages = $$('.page');
-
-    function showPage(name){
-      pages.forEach(p=>p.classList.remove('active','enter'));
-      const page = $('#page-'+name);
-      if(!page) return;
-      page.classList.add('active');
-      requestAnimationFrame(()=> page.classList.add('enter'));
-      tbSub.textContent = page.getAttribute('data-title') || '';
-      haptic('selection');
-      // скролл наверх контента аккуратно
-      window.scrollTo({top:0, behavior:'instant'});
-    }
-
-    tabs.forEach(tab=>{
-      tab.addEventListener('click', ()=>{
-        tabs.forEach(x=>x.classList.remove('active'));
-        tab.classList.add('active');
-        showPage(tab.dataset.tab);
-      }, {passive:true});
     });
 
-    // ===== Overlay sheet =====
-    const overlay = $('#overlay');
-    const sheetClose = $('#sheetClose');
-    const fab = $('#fab');
-
-    function openSheet(){
-      overlay.classList.add('show');
-      haptic('impact','light');
-    }
-    function closeSheet(){
-      overlay.classList.remove('show');
-      haptic('impact','light');
-    }
-    fab.addEventListener('click', openSheet, {passive:true});
-    sheetClose.addEventListener('click', closeSheet, {passive:true});
-    overlay.addEventListener('click', (e)=>{
-      if(e.target === overlay) closeSheet();
-    }, {passive:true});
-
-    $$('.action', overlay).forEach(a=>{
-      a.addEventListener('click', ()=>{
-        const act = a.dataset.act;
-        closeSheet();
-        if(act==='createScene'){
-          const name = prompt('Название сцены:', 'Моя сцена');
-          if(!name) return;
-          state.scenes.unshift({id:'u'+Date.now(), name, hint:'AI подберёт параметры (демо)', tag:'▶︎'});
-          saveState();
-          renderScenes();
-          showToast('Сцена создана');
-          pushHistory('Создал сцену: ' + name);
-          // перейти на сцены
-          setActiveTab('scenes');
-        }
-        if(act==='addDevice'){
-          showToast('Каталог устройств (демо)');
-          pushHistory('Открыл каталог устройств');
-        }
-        if(act==='aiCommand'){
-          setActiveTab('ai');
-          setTimeout(()=> $('#aiInput2')?.focus(), 60);
-          showToast('AI готов');
-        }
-        if(act==='calmToggle'){
-          state.calm = !state.calm;
-          saveState();
-          syncMetaLines();
-          showToast(state.calm ? 'Спокойствие: ON' : 'Спокойствие: OFF');
-          pushHistory(state.calm ? 'Включил спокойствие' : 'Выключил спокойствие');
-        }
-      }, {passive:true});
+    // 6) AI кнопка: демо
+    document.getElementById('aiRun').addEventListener('click', ()=>{
+      const v = (document.getElementById('aiInput').value || '').trim();
+      alert(v ? ('Команда принята: ' + v) : 'Напиши команду 🙂');
     });
-
-    function setActiveTab(name){
-      tabs.forEach(x=>x.classList.toggle('active', x.dataset.tab===name));
-      showPage(name);
-    }
-
-    // ===== Topbar demo actions =====
-    $('#tbMenu').addEventListener('click', ()=>{
-      showToast('Меню (демо)');
-      haptic('impact','light');
-    }, {passive:true});
-
-    $('#tbMore').addEventListener('click', ()=>{
-      showToast('Настройки (демо)');
-      haptic('impact','light');
-    }, {passive:true});
-
-    // ===== AI actions =====
-    function runAI(text){
-      const t = (text || '').trim();
-      if(!t){
-        showToast('Введите команду');
-        haptic('notification','error');
-        return;
-      }
-
-      // демо-интерпретатор (быстрый, без лагов)
-      const low = t.toLowerCase();
-
-      if(low.includes('уют')){
-        applyMood('cozy');
-        setComfort(Math.min(96, state.comfort + 4));
-      }
-      if(low.includes('фокус')){
-        applyMood('focus');
-        setComfort(Math.min(96, state.comfort + 2));
-      }
-      if(low.includes('энерг')){
-        applyMood('energy');
-        setComfort(Math.min(96, state.comfort + 3));
-      }
-      if(low.includes('ноч') || low.includes('спокой')){
-        applyMood('calm');
-        setComfort(Math.max(70, state.comfort - 2));
-      }
-
-      if(low.includes('свет')){
-        const light = state.devices.find(d=>d.id==='light');
-        if(light){ light.on = true; light.value='30%'; }
-      }
-      if(low.includes('выключи') && low.includes('тв')){
-        const tv = state.devices.find(d=>d.id==='tv');
-        if(tv){ tv.on = false; }
-      }
-      if(low.includes('эко')){
-        state.eco = Math.min(35, state.eco + 6);
-      }
-
-      saveState();
-      renderDevices();
-      syncMetaLines();
-
-      setStatus('AI: выполнено');
-      showToast('Выполнено');
-      pushHistory(t);
-      haptic('notification','success');
-    }
-
-    $('#aiBtn').addEventListener('click', ()=> runAI($('#aiInput').value), {passive:true});
-    $('#aiBtn2').addEventListener('click', ()=> runAI($('#aiInput2').value), {passive:true});
-
-    $('#aiInput').addEventListener('keydown', (e)=>{ if(e.key==='Enter') runAI($('#aiInput').value); });
-    $('#aiInput2').addEventListener('keydown', (e)=>{ if(e.key==='Enter') runAI($('#aiInput2').value); });
-
-    // AI quick chips
-    $$('#aiQuick .chip').forEach(c=>{
-      c.addEventListener('click', ()=>{
-        $$('#aiQuick .chip').forEach(x=>x.classList.remove('active'));
-        c.classList.add('active');
-        const q = c.dataset.q || '';
-        $('#aiInput2').value = q;
-        runAI(q);
-      }, {passive:true});
-    });
-
-    // Mood chips
-    $$('#moods .chip').forEach(c=>{
-      c.addEventListener('click', ()=> applyMood(c.dataset.mood), {passive:true});
-    });
-
-    // Profile toggles
-    $('#childModeBtn').addEventListener('click', ()=>{
-      state.childMode = !state.childMode;
-      saveState();
-      syncMetaLines();
-      showToast(state.childMode ? 'Детский режим: ON' : 'Детский режим: OFF');
-      pushHistory(state.childMode ? 'Включил детский режим' : 'Выключил детский режим');
-    }, {passive:true});
-
-    $('#calmModeBtn').addEventListener('click', ()=>{
-      state.calm = !state.calm;
-      saveState();
-      syncMetaLines();
-      showToast(state.calm ? 'Спокойствие: ON' : 'Спокойствие: OFF');
-      pushHistory(state.calm ? 'Включил спокойствие' : 'Выключил спокойствие');
-    }, {passive:true});
-
-    $('#membersBtn').addEventListener('click', ()=>{
-      showToast('Социальный дом (демо)');
-      pushHistory('Открыл участников дома');
-      haptic('impact','light');
-    }, {passive:true});
-
-    $('#pinBtn').addEventListener('click', ()=>{
-      showToast('PIN/Биометрия (демо)');
-      pushHistory('Открыл безопасность');
-      haptic('impact','light');
-    }, {passive:true});
-
-    $('#auditBtn').addEventListener('click', ()=>{
-      showToast('История действий (демо)');
-      pushHistory('Открыл журнал');
-      haptic('impact','light');
-    }, {passive:true});
-
-    // Scenes auto toggles
-    function toggleFlag(key){
-      state[key] = !state[key];
-      saveState();
-      syncMetaLines();
-      showToast(`${key}: ${state[key]?'ON':'OFF'}`);
-    }
-    $('#autoWeather').addEventListener('click', ()=>{ state.autoWeather=!state.autoWeather; saveState(); syncMetaLines(); showToast('Погода: ' + (state.autoWeather?'ON':'OFF')); }, {passive:true});
-    $('#autoTime').addEventListener('click', ()=>{ state.autoTime=!state.autoTime; saveState(); syncMetaLines(); showToast('Время: ' + (state.autoTime?'ON':'OFF')); }, {passive:true});
-    $('#autoGeo').addEventListener('click', ()=>{ state.autoGeo=!state.autoGeo; state.geo = state.autoGeo; saveState(); syncMetaLines(); showToast('Гео: ' + (state.autoGeo?'ON':'OFF')); }, {passive:true});
-
-    // ===== Init =====
-    function init(){
-      // status time
-      statusTime.textContent = 'сейчас';
-      setTimeout(()=> statusTime.textContent = fmtTime(now()), 100);
-
-      // subtitle (если есть устройства)
-      const hasAny = (state.devices||[]).length>0;
-      $('#homeSubtitle').textContent = hasAny ? 'Устройства готовы' : 'Пока нет устройств';
-
-      setComfort(state.comfort);
-      syncMetaLines();
-      renderDevices();
-      renderScenes();
-      renderHistory();
-      applyMood(state.mood);
-
-      setStatus('Всё спокойно');
-    }
-
-    init();
   </script>
 </body>
 </html>
