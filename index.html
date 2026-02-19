@@ -3,284 +3,295 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="theme-color" content="#0b1220"/>
-<title>AURA — Digital Soul of Home</title>
+<title>AURA</title>
 
 <style>
 :root{
   --bg:#0b1220;
-  --panel:rgba(18,22,36,.55);
-  --panel2:rgba(14,18,30,.55);
+  --panel:rgba(18,22,36,.6);
   --stroke:rgba(255,255,255,.10);
-  --muted:rgba(255,255,255,.60);
-  --muted2:rgba(255,255,255,.44);
   --text:#eef2ff;
+  --muted:rgba(255,255,255,.55);
   --accent:#8b5cff;
   --accent2:#b9a6ff;
-  --good:#17e87a;
+  --good:#1aff8c;
   --warn:#ffd166;
-  --bad:#ff6b6b;
+  --danger:#ff5e7e;
+  --radius:24px;
   --shadow:0 20px 60px rgba(0,0,0,.45);
-  --r20:20px; --r24:24px;
-  --tabH:80px;
 }
+
 *{box-sizing:border-box}
 html,body{height:100%}
 body{
-  margin:0;background:var(--bg);color:var(--text);
-  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;
-  overflow-x:hidden;-webkit-tap-highlight-color:transparent; touch-action:manipulation;
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui;
+  background:var(--bg);
+  color:var(--text);
+  overflow-x:hidden;
+  -webkit-tap-highlight-color:transparent;
 }
-.app{min-height:100%;display:flex;flex-direction:column}
 
-/* HERO */
-.hero{position:relative;height:330px;overflow:hidden}
-.hero__img{
-  position:absolute;inset:0;
+.hero{
+  height:320px;
   background:url("./assets/IMG_1348.jpeg") center/cover no-repeat;
-  transform:scale(1.06); filter:saturate(1.02) contrast(1.02);
+  position:relative;
 }
-.hero__veil{
-  position:absolute;inset:0;
-  background:
-   radial-gradient(1100px 380px at 50% 86%, rgba(131,104,255,.35) 0%, rgba(131,104,255,0) 55%),
-   linear-gradient(180deg, rgba(11,18,32,.08) 0%, rgba(11,18,32,.55) 46%, rgba(11,18,32,.92) 100%);
-}
-.topBar{
-  position:absolute;top:calc(10px + env(safe-area-inset-top));
-  left:16px;right:16px;display:flex;justify-content:space-between;z-index:5
-}
-.brand{font-weight:800;letter-spacing:.22em;font-size:14px;text-transform:uppercase;color:rgba(255,255,255,.80)}
-.iconBtn{
-  border:1px solid var(--stroke);background:rgba(255,255,255,.06);
-  border-radius:14px;height:42px;width:52px;display:flex;align-items:center;justify-content:center;
-  backdrop-filter:blur(16px);box-shadow:0 10px 30px rgba(0,0,0,.28)
+.hero::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg,rgba(11,18,32,.1) 0%,rgba(11,18,32,.9) 100%);
 }
 
-/* CONTENT */
 .content{
-  margin-top:-170px;padding:0 16px calc(var(--tabH) + 26px + env(safe-area-inset-bottom));
-  z-index:3;position:relative;
+  margin-top:-140px;
+  padding:0 16px 120px;
 }
-.h1{font-size:48px;margin:0 0 8px;font-weight:880;letter-spacing:-.02em;text-shadow:0 18px 55px rgba(0,0,0,.45)}
-.sub{color:var(--muted2);font-size:16px;margin-bottom:14px}
 
-/* STATUS */
+.title{
+  font-size:44px;
+  font-weight:900;
+  margin-bottom:6px;
+}
+
+.subtitle{
+  color:var(--muted);
+  margin-bottom:16px;
+}
+
 .status{
-  display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:999px;
-  background:rgba(10,12,18,.25);border:1px solid var(--stroke);
-  backdrop-filter:blur(18px);box-shadow:var(--shadow);margin-bottom:14px
-}
-.dot{width:10px;height:10px;border-radius:50%;background:var(--good);box-shadow:0 0 14px rgba(23,232,122,.55)}
-
-/* INDEX COMFORT */
-.comfort{
-  margin-bottom:14px;border-radius:var(--r24);
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px 16px;
+  border-radius:999px;
+  background:rgba(255,255,255,.06);
   border:1px solid var(--stroke);
-  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-  backdrop-filter:blur(18px);box-shadow:var(--shadow);padding:16px
-}
-.comfort__title{font-weight:800;margin-bottom:6px}
-.comfort__bar{
-  height:10px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden
-}
-.comfort__fill{
-  height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));
-  transition:width .6s ease
+  margin-bottom:14px;
 }
 
-/* GRID */
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
-.card{
-  border-radius:var(--r24);border:1px solid var(--stroke);
-  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-  backdrop-filter:blur(18px);box-shadow:var(--shadow);padding:16px;position:relative
+.dot{
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:var(--good);
+  box-shadow:0 0 12px var(--good);
 }
-.card__title{font-weight:800;margin:8px 0}
+
+.panel{
+  background:var(--panel);
+  border:1px solid var(--stroke);
+  border-radius:var(--radius);
+  padding:16px;
+  margin-bottom:14px;
+  backdrop-filter:blur(18px);
+  box-shadow:var(--shadow);
+}
+
+.panel h3{
+  margin:0 0 10px;
+}
+
+.bar{
+  height:10px;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  overflow:hidden;
+}
+
+.fill{
+  height:100%;
+  width:80%;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  transition:width .4s ease;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+
+.card{
+  padding:14px;
+  border-radius:var(--radius);
+  border:1px solid var(--stroke);
+  background:rgba(255,255,255,.05);
+}
+
 .switch{
-  width:42px;height:24px;border-radius:999px;background:rgba(255,255,255,.18);
-  position:relative;cursor:pointer;transition:.2s
+  width:42px;
+  height:24px;
+  border-radius:999px;
+  background:rgba(255,255,255,.2);
+  position:relative;
+  cursor:pointer;
 }
 .switch::after{
-  content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;
-  background:white;transition:.2s
+  content:"";
+  position:absolute;
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  background:white;
+  top:3px;
+  left:3px;
+  transition:.2s;
 }
-.switch.on{background:linear-gradient(90deg,var(--accent),var(--accent2))}
-.switch.on::after{left:21px}
-
-/* MOODS */
-.moods{display:flex;gap:8px;overflow:auto;margin-bottom:14px}
-.mood{
-  padding:10px 14px;border-radius:999px;border:1px solid var(--stroke);
-  background:rgba(255,255,255,.05);font-size:14px;white-space:nowrap;cursor:pointer
-}
-.mood.active{background:linear-gradient(90deg,var(--accent),var(--accent2));}
-
-/* AI PANEL */
-.panel{
-  border-radius:28px;border:1px solid var(--stroke);
-  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-  backdrop-filter:blur(18px);box-shadow:var(--shadow);padding:16px
-}
-.panel__title{font-size:24px;font-weight:880;margin-bottom:10px}
-.input{
-  width:100%;height:48px;border-radius:16px;border:1px solid var(--stroke);
-  padding:0 14px;background:rgba(255,255,255,.06);color:white
-}
-.primaryBtn{
-  margin-top:10px;width:100%;height:52px;border:none;border-radius:18px;
+.switch.on{
   background:linear-gradient(90deg,var(--accent),var(--accent2));
-  color:white;font-weight:800;font-size:16px;box-shadow:0 18px 55px rgba(123,87,255,.28)
 }
-.primaryBtn:active{transform:scale(.98)}
+.switch.on::after{
+  left:21px;
+}
 
-/* TAB BAR */
-.tabBar{
-  position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));
-  height:var(--tabH);border-radius:26px;border:1px solid var(--stroke);
-  background:rgba(14,16,26,.55);backdrop-filter:blur(26px);
-  box-shadow:0 18px 55px rgba(0,0,0,.50);display:flex;justify-content:space-between;align-items:center;padding:10px 8px;z-index:999
+.moods{
+  display:flex;
+  gap:8px;
+  overflow:auto;
+  margin-bottom:14px;
 }
-.tab{width:72px;height:58px;border:0;background:none;color:var(--muted);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border-radius:18px;cursor:pointer}
-.tab.is-active{color:white}
-.tab img{width:22px;height:22px;filter:drop-shadow(0 10px 18px rgba(0,0,0,.45))}
-.tabBar__indicator{
-  position:absolute;top:10px;height:58px;width:72px;border-radius:18px;
-  background:rgba(255,255,255,.06);border:1px solid var(--stroke);
-  box-shadow:0 16px 45px rgba(0,0,0,.40);transition:transform .22s ease;z-index:-1
+.mood{
+  padding:8px 14px;
+  border-radius:999px;
+  border:1px solid var(--stroke);
+  background:rgba(255,255,255,.05);
+  cursor:pointer;
+}
+.mood.active{
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+}
+
+.ai-input{
+  width:100%;
+  height:44px;
+  border-radius:14px;
+  border:1px solid var(--stroke);
+  background:rgba(255,255,255,.06);
+  padding:0 12px;
+  color:white;
+}
+
+.btn{
+  margin-top:8px;
+  width:100%;
+  height:48px;
+  border:none;
+  border-radius:16px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  color:white;
+  font-weight:800;
+  cursor:pointer;
+}
+.btn:active{
+  transform:scale(.98);
+}
+
+.tabbar{
+  position:fixed;
+  bottom:10px;
+  left:10px;
+  right:10px;
+  height:70px;
+  border-radius:20px;
+  background:rgba(20,22,35,.7);
+  border:1px solid var(--stroke);
+  backdrop-filter:blur(20px);
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+}
+
+.tab{
+  text-align:center;
+  font-size:12px;
+  color:var(--muted);
+  cursor:pointer;
+}
+.tab.active{
+  color:white;
 }
 </style>
 </head>
 
 <body>
-<div class="app">
-<header class="hero">
-  <div class="hero__img"></div>
-  <div class="hero__veil"></div>
-  <div class="topBar">
-    <div class="brand">AURA</div>
-    <div class="iconBtn">···</div>
+
+<div class="hero"></div>
+
+<div class="content">
+
+<div class="title">Дом</div>
+<div class="subtitle">Цифровая душа вашего дома</div>
+
+<div class="status">
+  <div class="dot"></div>
+  Всё спокойно
+</div>
+
+<div class="panel">
+  <h3>Индекс комфорта: <span id="comfortVal">82</span>%</h3>
+  <div class="bar"><div class="fill" id="comfortBar"></div></div>
+</div>
+
+<div class="moods">
+  <div class="mood active">Уют</div>
+  <div class="mood">Фокус</div>
+  <div class="mood">Энергия</div>
+  <div class="mood">Спокойствие</div>
+</div>
+
+<div class="grid">
+  <div class="card">
+    Свет
+    <div class="switch on"></div>
   </div>
-</header>
+  <div class="card">
+    Телевизор
+    <div class="switch"></div>
+  </div>
+</div>
 
-<main class="content" id="content"></main>
+<div class="panel">
+  <h3>AI Центр</h3>
+  <input class="ai-input" placeholder="Например: сделай уютно"/>
+  <button class="btn">Сформировать</button>
+</div>
 
-<nav class="tabBar" id="tabBar">
-  <span class="tabBar__indicator" id="indicator"></span>
-  <button class="tab is-active" data-tab="home"><img src="./assets/icons/home.svg"/><span>Дом</span></button>
-  <button class="tab" data-tab="scenes"><img src="./assets/icons/scenes.svg"/><span>Сцены</span></button>
-  <button class="tab" data-tab="profile"><img src="./assets/icons/catalog.svg"/><span>Профиль</span></button>
-  <button class="tab" data-tab="ai"><img src="./assets/icons/tips.svg"/><span>AI</span></button>
-</nav>
+</div>
+
+<div class="tabbar">
+  <div class="tab active">Дом</div>
+  <div class="tab">Сцены</div>
+  <div class="tab">Профиль</div>
+  <div class="tab">AI</div>
 </div>
 
 <script>
-/* State */
-const state={
-  comfort:82,
-  devices:{light:true,tv:false},
-  mood:"Уют"
-};
+const comfortBar=document.getElementById("comfortBar");
+const comfortVal=document.getElementById("comfortVal");
 
-/* Screens */
-function renderHome(){
-  return `
-    <div class="h1">Дом</div>
-    <div class="sub">Цифровая душа вашего дома</div>
-
-    <div class="status">
-      <div class="dot"></div>
-      Всё спокойно
-    </div>
-
-    <div class="comfort">
-      <div class="comfort__title">Индекс комфорта: ${state.comfort}%</div>
-      <div class="comfort__bar"><div class="comfort__fill" style="width:${state.comfort}%"></div></div>
-    </div>
-
-    <div class="moods">
-      ${["Уют","Фокус","Энергия","Спокойствие"].map(m=>`
-        <div class="mood ${state.mood===m?'active':''}" data-mood="${m}">${m}</div>
-      `).join("")}
-    </div>
-
-    <div class="grid2">
-      <div class="card">
-        <div class="card__title">Свет</div>
-        <div class="switch ${state.devices.light?'on':''}" data-device="light"></div>
-      </div>
-      <div class="card">
-        <div class="card__title">Телевизор</div>
-        <div class="switch ${state.devices.tv?'on':''}" data-device="tv"></div>
-      </div>
-    </div>
-  `;
-}
-
-function renderAI(){
-  return `
-    <div class="panel">
-      <div class="panel__title">AI Центр</div>
-      <input class="input" id="aiInput" placeholder="Например: сделай уютно"/>
-      <button class="primaryBtn" onclick="generateAI()">Сформировать</button>
-    </div>
-  `;
-}
-
-function renderScenes(){
-  return `<div class="h1">Сценарии</div><div class="sub">Проактивные режимы</div>`;
-}
-function renderProfile(){
-  return `<div class="h1">Профиль</div><div class="sub">Telegram интеграция</div>`;
-}
-
-/* Navigation */
-const screens={
-  home:renderHome,
-  scenes:renderScenes,
-  profile:renderProfile,
-  ai:renderAI
-};
-function setTab(tab){
-  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("is-active"));
-  const btn=document.querySelector(`.tab[data-tab="${tab}"]`);
-  btn.classList.add("is-active");
-  const index=[...btn.parentNode.children].indexOf(btn);
-  document.getElementById("indicator").style.transform=`translateX(${index*72}px)`;
-  document.getElementById("content").innerHTML=screens[tab]();
-  bindHome();
-}
-document.querySelectorAll(".tab").forEach(btn=>{
-  btn.addEventListener("click",()=>setTab(btn.dataset.tab));
+document.querySelectorAll(".switch").forEach(sw=>{
+  sw.onclick=()=>{
+    sw.classList.toggle("on");
+    updateComfort();
+  }
 });
 
-/* Bind Home interactions */
-function bindHome(){
-  document.querySelectorAll(".switch").forEach(sw=>{
-    sw.onclick=()=>{
-      const dev=sw.dataset.device;
-      state.devices[dev]=!state.devices[dev];
-      setTab("home");
-    };
-  });
-  document.querySelectorAll(".mood").forEach(m=>{
-    m.onclick=()=>{
-      state.mood=m.dataset.mood;
-      state.comfort=Math.floor(Math.random()*20)+70;
-      setTab("home");
-    };
-  });
-}
+document.querySelectorAll(".mood").forEach(m=>{
+  m.onclick=()=>{
+    document.querySelectorAll(".mood").forEach(x=>x.classList.remove("active"));
+    m.classList.add("active");
+    updateComfort();
+  }
+});
 
-function generateAI(){
-  const input=document.getElementById("aiInput").value;
-  alert("AI понял: "+input);
+function updateComfort(){
+  const val=Math.floor(Math.random()*20)+75;
+  comfortVal.innerText=val;
+  comfortBar.style.width=val+"%";
 }
-
-/* Init */
-setTab("home");
 </script>
+
 </body>
 </html>
