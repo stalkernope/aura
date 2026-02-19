@@ -1,10 +1,10 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
   <meta
     name="viewport"
-    content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no, maximum-scale=1"
+    content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"
   />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -12,788 +12,1126 @@
 
   <style>
     :root{
-      --bg:#0a0b12;
-      --panel:rgba(18,20,33,.62);
-      --panel2:rgba(22,24,40,.70);
-      --stroke:rgba(255,255,255,.10);
-      --stroke2:rgba(255,255,255,.14);
-      --text:#eef0ff;
-      --muted:rgba(238,240,255,.62);
-      --muted2:rgba(238,240,255,.42);
+      --bg0:#070A12;
+      --bg1:#0B1020;
+      --glass: rgba(18, 22, 40, .62);
+      --glass2: rgba(255,255,255,.06);
+      --stroke: rgba(255,255,255,.10);
+      --stroke2: rgba(255,255,255,.14);
+      --txt: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.62);
+      --muted2: rgba(255,255,255,.44);
 
-      --accent:#8a6bff;
-      --accent2:#b5a6ff;
-      --green:#28e07b;
+      --accentA:#7B5CFF;
+      --accentB:#B49BFF;
+      --accentC:#53D1FF;
 
-      --r24:24px;
-      --r20:20px;
       --r16:16px;
+      --r18:18px;
+      --r22:22px;
+      --r26:26px;
 
-      --shadow: 0 18px 60px rgba(0,0,0,.45);
-      --glass: blur(18px) saturate(140%);
-      --max: 420px;
+      --shadow: 0 18px 55px rgba(0,0,0,.55);
+      --shadow2: 0 10px 30px rgba(0,0,0,.45);
 
-      --navH: 78px;
+      --safeTop: env(safe-area-inset-top);
+      --safeBot: env(safe-area-inset-bottom);
+
+      --dockH: 78px;
+      --dockPad: 10px;
+
+      --pagePad: 16px;
+      --maxW: 480px;
     }
 
-    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-    html,body{height:100%}
+    *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+    html,body{ height:100%; }
     body{
       margin:0;
-      background:var(--bg);
-      color:var(--text);
-      font-family:-apple-system,BlinkMacSystemFont,Inter,Segoe UI,Roboto,Arial,sans-serif;
+      background: radial-gradient(900px 500px at 50% -10%, rgba(123,92,255,.18), transparent 60%),
+                  radial-gradient(900px 600px at 30% 110%, rgba(83,209,255,.10), transparent 60%),
+                  linear-gradient(180deg, var(--bg0), var(--bg1));
+      color:var(--txt);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display","SF Pro Text", Inter, system-ui, Segoe UI, Roboto, Arial, sans-serif;
       overflow-x:hidden;
-      touch-action:pan-y;
     }
 
-    /* анти-зум */
-    input,textarea,button{font-size:16px}
-    body, .app { -webkit-text-size-adjust: 100%; }
-
+    /* ====== Prevent weird overlay/click issues ====== */
     .app{
-      min-height:100dvh;
+      min-height:100%;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
       position:relative;
-      padding-bottom: calc(var(--navH) + env(safe-area-inset-bottom) + 16px);
+      isolation:isolate; /* важно для слоёв */
     }
 
-    /* HERO */
-    .hero{
-      position:relative;
-      height: 320px;
+    /* Верхняя мини-шапка под телегой */
+    .topBar{
+      position:sticky;
+      top:0;
+      z-index:40;
       width:100%;
+      padding: calc(10px + var(--safeTop)) var(--pagePad) 10px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      pointer-events:auto;
+      background: linear-gradient(180deg, rgba(7,10,18,.86), rgba(7,10,18,.35) 65%, transparent);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      line-height:1.05;
+    }
+    .brand .name{
+      font-weight:800;
+      letter-spacing:.10em;
+      font-size:14px;
+      color:rgba(255,255,255,.88);
+    }
+    .brand .sub{
+      font-size:12px;
+      color:rgba(255,255,255,.45);
+    }
+
+    .iconBtn{
+      width:40px;height:40px;
+      border-radius:14px;
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.05);
+      box-shadow: 0 10px 24px rgba(0,0,0,.35);
+      display:grid;place-items:center;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      cursor:pointer;
+      user-select:none;
+      transition: transform .16s ease, background .2s ease, border-color .2s ease;
+    }
+    .iconBtn:active{ transform: scale(.96); }
+
+    /* Контейнер страниц */
+    .viewport{
+      width:100%;
+      max-width: var(--maxW);
+      padding: 0 var(--pagePad);
+      /* место под док */
+      padding-bottom: calc(var(--dockH) + var(--dockPad) + var(--safeBot) + 18px);
+    }
+
+    /* HERO (фон только на HOME) */
+    .hero{
+      margin-top: -64px; /* чтобы подлипало к topBar без огромного пустого */
+      border-radius: 0 0 30px 30px;
       overflow:hidden;
-      background:#0b0d18;
+      position:relative;
+      height: 280px;
+      width:100%;
+      box-shadow: var(--shadow);
+      z-index:1;
     }
     .hero::before{
       content:"";
-      position:absolute;
-      inset:-12px;
-      background-image:url("./assets/IMG_1348.jpeg");
-      background-size:cover;
-      background-position:center;
+      position:absolute; inset:-1px;
+      background-image: url("./assets/IMG_1348.jpeg");
+      background-size: cover;
+      background-position: center;
       transform: scale(1.05);
-      filter: blur(0px);
-      opacity: .92;
+      filter: saturate(1.05) contrast(1.03);
     }
     .hero::after{
       content:"";
-      position:absolute;
-      inset:0;
+      position:absolute; inset:0;
       background:
-        radial-gradient(1200px 420px at 50% 10%, rgba(138,107,255,.18), rgba(0,0,0,0) 55%),
-        linear-gradient(180deg, rgba(10,11,18,.15) 0%, rgba(10,11,18,.55) 45%, rgba(10,11,18,.92) 88%, rgba(10,11,18,1) 100%);
+        radial-gradient(900px 340px at 50% 20%, rgba(123,92,255,.22), transparent 60%),
+        linear-gradient(180deg, rgba(7,10,18,.25), rgba(7,10,18,.70) 62%, rgba(7,10,18,.92));
     }
 
-    /* TOP BAR (Telegram-like) */
-    .topbar{
-      position:sticky;
-      top:0;
-      z-index:50;
-      padding: calc(env(safe-area-inset-top) + 10px) 14px 10px;
-      background: linear-gradient(180deg, rgba(10,11,18,.82), rgba(10,11,18,.35));
-      backdrop-filter: blur(14px) saturate(120%);
-      -webkit-backdrop-filter: blur(14px) saturate(120%);
-      border-bottom:1px solid rgba(255,255,255,.06);
+    /* блоки */
+    .card{
+      border-radius: var(--r26);
+      background: var(--glass);
+      border: 1px solid var(--stroke);
+      box-shadow: var(--shadow2);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      position:relative;
+      overflow:hidden;
     }
-    .topbarRow{
-      max-width: var(--max);
-      margin:0 auto;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-    }
-    .tbtn{
-      width:42px;height:42px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(20,22,36,.55);
-      backdrop-filter: blur(14px) saturate(130%);
-      -webkit-backdrop-filter: blur(14px) saturate(130%);
-      display:flex;align-items:center;justify-content:center;
-      color:var(--text);
-      box-shadow: 0 8px 24px rgba(0,0,0,.22);
-      cursor:pointer;
-      user-select:none;
-    }
-    .tbtn:active{transform:scale(.98)}
-    .titleMini{
-      font-weight:800;
-      letter-spacing:.08em;
-      font-size:13px;
-      opacity:.95;
-      text-transform:uppercase;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      line-height:1.05;
-    }
-    .titleMini span{
-      font-size:12px;
-      font-weight:650;
-      opacity:.55;
-      letter-spacing:.02em;
-      text-transform:none;
+    .card::before{
+      content:"";
+      position:absolute; inset:0;
+      background: radial-gradient(600px 220px at 20% 10%, rgba(255,255,255,.08), transparent 55%),
+                  radial-gradient(500px 240px at 80% 0%, rgba(180,155,255,.10), transparent 60%);
+      pointer-events:none;
     }
 
-    /* CONTENT CONTAINER (ровная сетка) */
-    .wrap{
+    .section{
+      margin-top: 14px;
+    }
+
+    /* Заголовок HOME */
+    .titleBlock{
+      margin-top:-120px; /* тянем контент ближе к хиро (убираем огромный отступ) */
       position:relative;
       z-index:5;
-      margin-top:-140px; /* поднимаем контент на герое — ровно, красиво */
-      padding: 0 14px;
-    }
-    .container{
-      max-width: var(--max);
-      margin:0 auto;
-      display:flex;
-      flex-direction:column;
-      gap: 14px;
-    }
-
-    /* Header block */
-    .hblock{
-      padding: 8px 2px 0;
     }
     .h1{
-      font-size:52px;
-      line-height:.92;
-      margin: 0 0 10px;
-      letter-spacing:-.02em;
-      font-weight:900;
-      text-shadow: 0 14px 44px rgba(0,0,0,.55);
+      font-size: 52px;
+      font-weight: 900;
+      letter-spacing:-.03em;
+      margin: 0;
+      text-shadow: 0 10px 28px rgba(0,0,0,.55);
     }
-    .sub{
-      margin:0;
+    .hSub{
+      margin: 6px 0 0;
       color: var(--muted);
-      font-size:16px;
-      font-weight:600;
+      font-size: 15px;
+      letter-spacing:.01em;
     }
 
-    /* status pill */
+    .row{
+      display:flex;
+      gap: 12px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    /* статус */
     .pill{
       display:inline-flex;
       align-items:center;
       gap:10px;
       padding: 12px 14px;
       border-radius: 999px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(18,20,33,.58);
-      backdrop-filter: var(--glass);
-      -webkit-backdrop-filter: var(--glass);
-      box-shadow: 0 10px 30px rgba(0,0,0,.24);
-      width: fit-content;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.05);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow: 0 16px 35px rgba(0,0,0,.35);
     }
     .dot{
-      width:10px;height:10px;border-radius:999px;
-      background:var(--green);
-      box-shadow: 0 0 18px rgba(40,224,123,.55);
+      width:10px;height:10px;border-radius:99px;
+      background:#27E58C;
+      box-shadow: 0 0 0 4px rgba(39,229,140,.12), 0 0 18px rgba(39,229,140,.55);
     }
-    .pill b{font-weight:800}
-    .pill small{
+    .pill span{
+      font-weight: 750;
+      color: rgba(255,255,255,.86);
+      letter-spacing:.01em;
+    }
+    .time{
       margin-left:auto;
-      color:var(--muted2);
-      font-weight:650;
-      font-size:13px;
+      color: rgba(255,255,255,.45);
+      font-weight: 650;
+      font-size: 14px;
     }
 
-    /* Glass card base */
-    .card{
-      border-radius: var(--r24);
-      border:1px solid rgba(255,255,255,.10);
-      background: var(--panel);
-      backdrop-filter: var(--glass);
-      -webkit-backdrop-filter: var(--glass);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-      position:relative;
+    /* Индекс комфорта */
+    .meter{
+      padding: 16px;
     }
-    .card::before{
-      content:"";
-      position:absolute;inset:0;
-      background: radial-gradient(900px 320px at 20% 0%, rgba(138,107,255,.20), rgba(0,0,0,0) 55%);
-      pointer-events:none;
+    .meterHead{
+      display:flex; align-items:flex-end; justify-content:space-between;
+      gap: 12px;
+      margin-bottom: 10px;
     }
-
-    /* Comfort */
-    .comfort{
-      padding: 16px 16px 14px;
-    }
-    .row{
-      display:flex;
-      align-items:flex-end;
-      justify-content:space-between;
-      gap:12px;
-      position:relative;
-      z-index:1;
-    }
-    .label{
-      font-weight:800;
-      font-size:14px;
-      color:var(--muted);
+    .meterTitle{
+      font-weight: 800;
+      color: rgba(255,255,255,.78);
+      font-size: 13px;
       letter-spacing:.02em;
+      text-transform: uppercase;
     }
-    .big{
-      font-size:26px;
-      font-weight:900;
+    .meterValue{
+      font-size: 26px;
+      font-weight: 900;
       letter-spacing:-.02em;
     }
     .bar{
-      margin-top:12px;
-      height:12px;
-      border-radius:999px;
+      height: 10px;
       background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 999px;
       overflow:hidden;
-      border:1px solid rgba(255,255,255,.08);
       position:relative;
-      z-index:1;
     }
     .bar > i{
       display:block;
       height:100%;
-      width:82%;
-      border-radius:999px;
-      background: linear-gradient(90deg, var(--accent), rgba(181,166,255,.98));
-      box-shadow: 0 0 24px rgba(138,107,255,.38);
+      width: 82%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accentA), var(--accentB), var(--accentC));
+      box-shadow: 0 0 26px rgba(123,92,255,.45);
     }
-    .meta{
-      margin-top:10px;
-      color:var(--muted2);
-      font-weight:650;
-      font-size:13px;
-      position:relative;
-      z-index:1;
+    .meterMeta{
+      margin-top: 10px;
+      color: rgba(255,255,255,.50);
+      font-weight: 650;
+      font-size: 12px;
+      letter-spacing:.01em;
     }
 
-    /* Tabs mood */
-    .moods{
-      padding: 12px;
+    /* Режимы настроения */
+    .chips{
       display:flex;
       gap:10px;
+      padding: 12px;
       overflow:auto;
-      -webkit-overflow-scrolling:touch;
-      position:relative;
-      z-index:1;
+      -webkit-overflow-scrolling: touch;
     }
-    .moods::-webkit-scrollbar{display:none}
     .chip{
       flex:0 0 auto;
-      padding: 12px 14px;
+      padding: 10px 14px;
       border-radius: 999px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.06);
-      color: var(--text);
-      font-weight:800;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      color: rgba(255,255,255,.78);
+      font-weight: 800;
+      letter-spacing:.01em;
       cursor:pointer;
-      user-select:none;
-      transition: transform .15s ease, background .2s ease, border-color .2s ease;
+      transition: transform .16s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
     }
-    .chip:active{transform:scale(.98)}
+    .chip:active{ transform: scale(.98); }
     .chip.active{
-      background: linear-gradient(90deg, rgba(138,107,255,.95), rgba(181,166,255,.95));
-      border-color: rgba(255,255,255,.18);
-      color: #0a0b12;
-      box-shadow: 0 10px 26px rgba(138,107,255,.26);
+      background: linear-gradient(180deg, rgba(123,92,255,.38), rgba(180,155,255,.22));
+      border-color: rgba(180,155,255,.28);
+      box-shadow: 0 0 0 4px rgba(123,92,255,.12), 0 16px 40px rgba(123,92,255,.25);
+      color: rgba(255,255,255,.92);
     }
 
-    /* Quick grid */
-    .grid{
-      padding: 14px;
+    /* Быстрое управление */
+    .grid2{
       display:grid;
       grid-template-columns: 1fr 1fr;
-      gap:12px;
-      position:relative;
-      z-index:1;
+      gap: 12px;
+      padding: 12px;
     }
-    .tile{
+    .device{
       border-radius: 22px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.05);
       padding: 14px;
-      min-height: 94px;
       display:flex;
       align-items:center;
-      justify-content:space-between;
-      gap:12px;
+      gap: 12px;
       position:relative;
       overflow:hidden;
+      cursor:pointer;
+      user-select:none;
+      transition: transform .16s ease, border-color .2s ease, background .2s ease;
+      min-height: 76px;
     }
-    .tile::after{
+    .device:active{ transform: scale(.99); }
+    .device::before{
       content:"";
-      position:absolute;inset:0;
-      background: radial-gradient(260px 120px at 10% 0%, rgba(138,107,255,.18), rgba(0,0,0,0) 60%);
+      position:absolute; inset:-2px;
+      background: radial-gradient(220px 160px at 20% 15%, rgba(180,155,255,.18), transparent 55%);
       pointer-events:none;
     }
-    .tileLeft{
+    .dIcon{
+      width:46px;height:46px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      display:grid;place-items:center;
+      box-shadow: 0 16px 30px rgba(0,0,0,.25);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    .dText{
       display:flex;
-      align-items:center;
-      gap:12px;
-      min-width:0;
-      position:relative;
-      z-index:1;
+      flex-direction:column;
+      gap: 4px;
+      min-width: 0;
     }
-    .ico{
-      width:42px;height:42px;
-      border-radius:16px;
-      display:flex;align-items:center;justify-content:center;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(16,18,30,.55);
-      backdrop-filter: blur(14px) saturate(130%);
-      -webkit-backdrop-filter: blur(14px) saturate(130%);
-      box-shadow: 0 10px 22px rgba(0,0,0,.18);
-    }
-    .ico img{width:22px;height:22px;opacity:.95}
-    .tileTitle{
-      font-weight:900;
-      font-size:16px;
+    .dName{
+      font-weight: 900;
       letter-spacing:-.01em;
-      margin:0;
+      font-size: 18px;
+      line-height: 1.05;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
     }
-    .tileSub{
-      margin:2px 0 0;
-      color:var(--muted2);
-      font-weight:700;
-      font-size:12px;
+    .dMeta{
+      font-weight: 700;
+      color: rgba(255,255,255,.55);
+      font-size: 13px;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
-      max-width: 150px;
     }
 
     /* Switch */
-    .sw{
-      width:52px;height:32px;
+    .switch{
+      margin-left:auto;
+      width: 52px;
+      height: 30px;
       border-radius: 999px;
-      background: rgba(255,255,255,.14);
-      border:1px solid rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.08);
       position:relative;
-      cursor:pointer;
-      user-select:none;
       flex:0 0 auto;
-      z-index:2;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.18);
+      transition: background .2s ease, border-color .2s ease;
     }
-    .sw i{
+    .switch i{
       position:absolute;
-      top:50%;
-      transform:translateY(-50%);
-      left:4px;
-      width:24px;height:24px;
-      border-radius:999px;
+      top: 3px; left: 3px;
+      width: 24px; height: 24px;
+      border-radius: 999px;
       background: rgba(255,255,255,.92);
-      box-shadow: 0 10px 20px rgba(0,0,0,.25);
-      transition: left .18s ease, background .18s ease;
+      box-shadow: 0 10px 18px rgba(0,0,0,.35);
+      transition: transform .22s cubic-bezier(.2,.9,.2,1);
     }
-    .sw.on{
-      background: linear-gradient(90deg, rgba(138,107,255,.95), rgba(181,166,255,.95));
-      border-color: rgba(255,255,255,.16);
-      box-shadow: 0 0 26px rgba(138,107,255,.22);
+    .device.on .switch{
+      background: linear-gradient(90deg, rgba(123,92,255,.70), rgba(180,155,255,.55));
+      border-color: rgba(180,155,255,.30);
     }
-    .sw.on i{left:24px;background:#0a0b12}
+    .device.on .switch i{
+      transform: translateX(22px);
+    }
 
-    /* AI Center */
+    /* AI Центр */
     .ai{
-      padding: 16px;
-      position:relative;
-      z-index:1;
+      padding: 14px;
     }
-    .ai h3{
-      margin:0 0 10px;
-      font-size:16px;
-      font-weight:900;
+    .aiTitle{
+      font-weight: 950;
+      font-size: 18px;
       letter-spacing:-.01em;
-      color: var(--text);
+      margin: 0 0 10px;
+      color: rgba(255,255,255,.88);
     }
     .input{
       width:100%;
       border-radius: 18px;
-      border:1px solid rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.12);
       background: rgba(255,255,255,.06);
       padding: 14px 14px;
-      color: var(--text);
+      color: rgba(255,255,255,.92);
       outline:none;
-      font-weight:750;
+      font-weight: 700;
+      font-size: 15px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
     }
-    .input::placeholder{color:rgba(238,240,255,.45);font-weight:700}
+    .input::placeholder{ color: rgba(255,255,255,.45); font-weight: 650; }
     .btn{
-      margin-top:12px;
+      margin-top: 12px;
       width:100%;
+      border:0;
+      border-radius: 22px;
       padding: 16px 16px;
-      border-radius: 20px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: linear-gradient(90deg, rgba(138,107,255,.95), rgba(181,166,255,.95));
-      color:#0a0b12;
-      font-weight:1000;
-      letter-spacing:-.01em;
-      font-size:18px;
+      font-weight: 950;
+      letter-spacing:.01em;
+      font-size: 18px;
+      color: rgba(255,255,255,.92);
+      background: linear-gradient(90deg, var(--accentA), var(--accentB));
+      box-shadow: 0 18px 50px rgba(123,92,255,.35);
       cursor:pointer;
-      box-shadow: 0 16px 44px rgba(138,107,255,.26);
-      transition: transform .12s ease, box-shadow .2s ease, filter .2s ease;
+      transition: transform .16s ease, filter .2s ease, box-shadow .2s ease;
     }
     .btn:active{
       transform: scale(.985);
-      box-shadow: 0 10px 26px rgba(138,107,255,.34);
-      filter: brightness(1.02);
+      box-shadow: 0 10px 28px rgba(123,92,255,.32);
     }
-    .hint{
-      margin-top:10px;
-      color:var(--muted2);
-      font-weight:700;
-      font-size:12.5px;
-      line-height:1.35;
+    .aiHint{
+      margin-top: 10px;
+      color: rgba(255,255,255,.52);
+      font-weight: 700;
+      font-size: 12px;
+      line-height: 1.35;
     }
 
-    /* NAV (Telegram-like + premium) */
-    .nav{
+    /* ====== Pages ====== */
+    .page{
+      display:none;
+      position:relative;
+      z-index:10; /* выше hero */
+    }
+    .page.active{ display:block; }
+
+    /* Заголовки вторых экранов */
+    .pageTitle{
+      margin: 14px 2px 10px;
+    }
+    .pageTitle h2{
+      margin:0;
+      font-size: 46px;
+      font-weight: 950;
+      letter-spacing:-.03em;
+      text-shadow: 0 10px 28px rgba(0,0,0,.40);
+    }
+    .pageTitle p{
+      margin: 8px 0 0;
+      color: rgba(255,255,255,.55);
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing:.01em;
+    }
+
+    /* Карточки сцен */
+    .sceneGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 12px;
+    }
+    .scene{
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.05);
+      padding: 14px;
+      min-height: 140px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      position:relative;
+      overflow:hidden;
+      cursor:pointer;
+      transition: transform .16s ease;
+    }
+    .scene:active{ transform: scale(.99); }
+    .scene h3{
+      margin:0;
+      font-size: 20px;
+      font-weight: 950;
+      letter-spacing:-.02em;
+    }
+    .scene p{
+      margin: 8px 0 0;
+      color: rgba(255,255,255,.55);
+      font-weight: 750;
+      font-size: 13px;
+      line-height: 1.25;
+    }
+    .scene .run{
+      margin-top: 12px;
+      align-self:flex-start;
+      border: 1px solid rgba(180,155,255,.28);
+      background: linear-gradient(90deg, rgba(123,92,255,.55), rgba(180,155,255,.34));
+      color: rgba(255,255,255,.92);
+      font-weight: 950;
+      padding: 10px 14px;
+      border-radius: 16px;
+      box-shadow: 0 14px 34px rgba(123,92,255,.24);
+    }
+
+    /* Профиль (демо) */
+    .profileBox{ padding: 14px; }
+    .kv{
+      display:flex; gap:12px; align-items:center;
+    }
+    .avatar{
+      width:56px;height:56px;border-radius:18px;
+      border:1px solid rgba(255,255,255,.12);
+      background: radial-gradient(60px 60px at 30% 25%, rgba(255,255,255,.12), rgba(255,255,255,.05));
+      display:grid;place-items:center;
+      box-shadow: 0 16px 30px rgba(0,0,0,.25);
+    }
+    .kv .who{
+      display:flex; flex-direction:column; gap:4px;
+      min-width:0;
+    }
+    .kv .who b{ font-size:18px; font-weight:950; letter-spacing:-.01em; }
+    .kv .who span{ color: rgba(255,255,255,.55); font-weight:750; font-size:13px; }
+
+    .list{
+      margin-top: 12px;
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+    }
+    .item{
+      padding: 12px 12px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.05);
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .item:active{ transform: scale(.995); }
+    .item .k{ color: rgba(255,255,255,.88); font-weight: 900; }
+    .item .v{ margin-left:auto; color: rgba(255,255,255,.55); font-weight: 800; }
+
+    /* ====== Dock (Telegram-like premium) ====== */
+    .dockWrap{
       position:fixed;
       left:0; right:0;
       bottom:0;
-      z-index:200;
-      padding: 10px 12px calc(env(safe-area-inset-bottom) + 10px);
-      pointer-events:none; /* чтобы только внутрянка ловила клики */
+      z-index:100;
+      padding: 0 12px calc(var(--safeBot) + 10px);
+      pointer-events:none; /* важно: клики только по самому доку */
     }
-    .navInner{
-      max-width: var(--max);
-      margin:0 auto;
-      height: var(--navH);
+
+    .dock{
+      pointer-events:auto;
+      max-width: var(--maxW);
+      margin: 0 auto;
+      height: var(--dockH);
       border-radius: 26px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(16,18,30,.62);
-      backdrop-filter: blur(22px) saturate(150%);
-      -webkit-backdrop-filter: blur(22px) saturate(150%);
-      box-shadow: 0 22px 70px rgba(0,0,0,.50);
-      display:flex;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 24px 70px rgba(0,0,0,.60);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      display:grid;
+      grid-template-columns: 1fr 1fr 1.15fr 1fr 1fr;
       align-items:center;
-      justify-content:space-between;
-      padding: 10px 12px;
-      gap:10px;
-      pointer-events:auto; /* клики */
-      position:relative;
       overflow:hidden;
+      position:relative;
     }
-    .navInner::before{
+    .dock::before{
       content:"";
-      position:absolute;inset:-2px;
+      position:absolute; inset:-2px;
       background:
-        radial-gradient(420px 120px at 50% 0%, rgba(138,107,255,.22), rgba(0,0,0,0) 60%),
-        linear-gradient(90deg, rgba(138,107,255,.10), rgba(181,166,255,.06));
+        radial-gradient(260px 140px at 50% 0%, rgba(180,155,255,.22), transparent 60%),
+        linear-gradient(90deg, rgba(123,92,255,.10), transparent 40%, rgba(83,209,255,.08));
       pointer-events:none;
     }
 
-    .navItem{
-      width: 72px;
-      height: 58px;
-      border-radius: 18px;
-      border:1px solid transparent;
-      background: rgba(255,255,255,.04);
+    .dockBtn{
+      height:100%;
+      background:none;
+      border:0;
+      color: rgba(255,255,255,.55);
       display:flex;
       flex-direction:column;
-      align-items:center;
       justify-content:center;
-      gap:6px;
-      color: rgba(238,240,255,.72);
-      font-weight:850;
-      font-size:12px;
+      align-items:center;
+      gap: 6px;
+      font-weight: 850;
       cursor:pointer;
-      user-select:none;
-      transition: transform .15s ease, background .2s ease, border-color .2s ease, color .2s ease;
       position:relative;
-      z-index:1;
+      transition: color .2s ease, transform .16s ease;
+      user-select:none;
     }
-    .navItem img{width:20px;height:20px;opacity:.95}
-    .navItem:active{transform:scale(.98)}
-    .navItem.active{
-      color:#0a0b12;
-      background: linear-gradient(90deg, rgba(138,107,255,.98), rgba(181,166,255,.98));
-      border-color: rgba(255,255,255,.18);
-      box-shadow: 0 16px 40px rgba(138,107,255,.26);
+    .dockBtn:active{ transform: scale(.98); }
+
+    .dockBtn .lbl{
+      font-size: 12px;
+      letter-spacing:.01em;
+    }
+    .dockBtn svg{
+      width: 22px; height:22px;
+      opacity: .9;
+      filter: drop-shadow(0 10px 16px rgba(0,0,0,.35));
+    }
+    .dockBtn.active{
+      color: rgba(255,255,255,.92);
+    }
+    .dockBtn.active::after{
+      content:"";
+      position:absolute;
+      left: 16px; right: 16px;
+      bottom: 10px;
+      height: 4px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accentA), var(--accentB));
+      box-shadow: 0 0 24px rgba(123,92,255,.55);
     }
 
-    .navPlus{
-      width: 64px;
-      height: 64px;
-      border-radius: 22px;
-      border:1px solid rgba(255,255,255,.14);
-      background: linear-gradient(180deg, rgba(181,166,255,.98), rgba(138,107,255,.98));
+    /* Центр “+” */
+    .dockPlus{
+      height:100%;
       display:flex;
-      align-items:center;
       justify-content:center;
-      box-shadow: 0 18px 50px rgba(138,107,255,.28);
+      align-items:center;
+      position:relative;
+    }
+    .plusBtn{
+      width: 58px;
+      height: 58px;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.06));
+      box-shadow: 0 26px 70px rgba(123,92,255,.40);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      display:grid;
+      place-items:center;
       cursor:pointer;
-      user-select:none;
-      transform: translateY(-16px);
+      transform: translateY(-12px);
+      transition: transform .16s ease, box-shadow .2s ease, filter .2s ease;
+      position:relative;
+      overflow:hidden;
+    }
+    .plusBtn::before{
+      content:"";
+      position:absolute; inset:-2px;
+      background: radial-gradient(90px 90px at 40% 30%, rgba(180,155,255,.45), transparent 60%),
+                  radial-gradient(110px 90px at 80% 20%, rgba(83,209,255,.22), transparent 60%);
+      pointer-events:none;
+    }
+    .plusBtn:active{
+      transform: translateY(-12px) scale(.97);
+      box-shadow: 0 18px 48px rgba(123,92,255,.34);
+      filter: brightness(1.06);
+    }
+    .plusBtn span{
+      font-size: 30px;
+      font-weight: 950;
+      color: rgba(255,255,255,.92);
+      text-shadow: 0 10px 18px rgba(0,0,0,.35);
+      line-height:1;
       position:relative;
       z-index:2;
-      transition: transform .15s ease, box-shadow .2s ease, filter .2s ease;
-    }
-    .navPlus img{width:24px;height:24px;filter: drop-shadow(0 8px 18px rgba(0,0,0,.25))}
-    .navPlus:active{
-      transform: translateY(-16px) scale(.98);
-      box-shadow: 0 12px 34px rgba(138,107,255,.34);
-      filter: brightness(1.03);
     }
 
-    /* pages */
-    .page{display:none}
-    .page.active{display:block}
+    /* ====== Utilities ====== */
+    .mt8{ margin-top:8px; }
+    .mt12{ margin-top:12px; }
+    .mt14{ margin-top:14px; }
+    .mt16{ margin-top:16px; }
+    .pb0{ padding-bottom:0 !important; }
+    .hidden{ display:none !important; }
 
-    /* small helper for perfect alignment */
-    .sp8{height:8px}
+    /* small screens fixes */
+    @media (max-width: 360px){
+      .h1{ font-size: 46px; }
+      .hero{ height: 260px; }
+    }
   </style>
 </head>
 
 <body>
-  <div class="app" id="app">
-    <div class="topbar">
-      <div class="topbarRow">
-        <div class="tbtn" id="menuBtn" aria-label="Меню">☰</div>
-        <div class="titleMini">
-          AURA
-          <span id="pageHint">Дом</span>
-        </div>
-        <div class="tbtn" id="moreBtn" aria-label="Ещё">⋯</div>
+  <div class="app">
+    <!-- top (под телегой) -->
+    <div class="topBar">
+      <div class="brand">
+        <div class="name">AURA</div>
+        <div class="sub">Premium • Telegram Mini App</div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <button class="iconBtn" id="menuBtn" aria-label="Меню">
+          <!-- burger -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.82)" stroke-width="2" stroke-linecap="round">
+            <path d="M5 7h14M5 12h14M5 17h14"></path>
+          </svg>
+        </button>
+        <button class="iconBtn" id="moreBtn" aria-label="Еще">
+          <!-- dots -->
+          <svg viewBox="0 0 24 24" fill="rgba(255,255,255,.82)">
+            <circle cx="6" cy="12" r="2"></circle>
+            <circle cx="12" cy="12" r="2"></circle>
+            <circle cx="18" cy="12" r="2"></circle>
+          </svg>
+        </button>
       </div>
     </div>
 
-    <div class="hero"></div>
+    <div class="viewport">
 
-    <div class="wrap">
-      <div class="container">
+      <!-- HOME -->
+      <section class="page active" id="page-home">
+        <div class="hero" aria-hidden="true"></div>
 
-        <!-- PAGE: HOME -->
-        <section class="page active" id="page-home">
-          <div class="hblock">
-            <h1 class="h1">Мой дом</h1>
-            <p class="sub">Устройства готовы · AURA Premium</p>
-            <div class="sp8"></div>
+        <div class="titleBlock">
+          <h1 class="h1">Мой дом</h1>
+          <p class="hSub">Устройства готовы • AURA Premium</p>
+
+          <div class="section mt12">
+            <div class="pill" style="width:100%;">
+              <i class="dot"></i>
+              <span>Всё спокойно</span>
+              <div class="time" id="nowTime">—:—</div>
+            </div>
           </div>
 
-          <div class="pill card" style="padding:14px 14px;">
-            <span class="dot"></span>
-            <b>Всё спокойно</b>
-            <small id="timeNow">—</small>
-          </div>
-
-          <div class="card comfort">
-            <div class="row">
+          <div class="section mt14 card meter">
+            <div class="meterHead">
               <div>
-                <div class="label">Индекс комфорта</div>
-                <div class="big">Комфорт</div>
+                <div class="meterTitle">Индекс комфорта</div>
               </div>
-              <div class="big" id="comfortPct">82%</div>
+              <div class="meterValue"><span id="comfortVal">82</span>%</div>
             </div>
             <div class="bar"><i id="comfortBar"></i></div>
-            <div class="meta">Эко · <b id="ecoPct">11%</b> · Цифровое спокойствие · <b>ON</b> · Гео · <b>OFF</b></div>
+            <div class="meterMeta">Эко • <b>11%</b> • Цифровое спокойствие • <b>ON</b> • Гео • <b>OFF</b></div>
           </div>
 
-          <div class="card">
-            <div class="moods" id="moods">
-              <div class="chip active" data-mode="cozy">Уют</div>
-              <div class="chip" data-mode="focus">Фокус</div>
-              <div class="chip" data-mode="energy">Энергия</div>
-              <div class="chip" data-mode="calm">Спокойствие</div>
+          <div class="section card">
+            <div style="padding:12px 12px 0; font-weight:900; color:rgba(255,255,255,.78);">
+              Режимы настроения
+            </div>
+            <div class="chips" id="moodChips">
+              <button class="chip active" data-mood="cozy">Уют</button>
+              <button class="chip" data-mood="focus">Фокус</button>
+              <button class="chip" data-mood="energy">Энергия</button>
+              <button class="chip" data-mood="calm">Спокойствие</button>
             </div>
           </div>
 
-          <div class="card">
-            <div class="grid">
-              <div class="tile">
-                <div class="tileLeft">
-                  <div class="ico"><img alt="" src="./assets/icons/home.svg"></div>
-                  <div style="min-width:0">
-                    <p class="tileTitle">Свет</p>
-                    <p class="tileSub" id="lightSub">Гостиная · 60%</p>
-                  </div>
+          <div class="section card">
+            <div style="padding:12px 12px 0; font-weight:900; color:rgba(255,255,255,.78);">
+              Быстрое управление
+            </div>
+            <div class="grid2" id="quickGrid">
+              <div class="device on" data-device="light">
+                <div class="dIcon">
+                  <!-- bulb -->
+                  <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.86)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 18h6"></path>
+                    <path d="M10 22h4"></path>
+                    <path d="M8 14a6 6 0 1 1 8 0c-1 1-2 2-2 4h-4c0-2-1-3-2-4z"></path>
+                  </svg>
                 </div>
-                <div class="sw on" id="swLight" role="switch" aria-checked="true"><i></i></div>
+                <div class="dText">
+                  <div class="dName">Свет</div>
+                  <div class="dMeta">Гостиная • 60%</div>
+                </div>
+                <div class="switch"><i></i></div>
               </div>
 
-              <div class="tile">
-                <div class="tileLeft">
-                  <div class="ico"><img alt="" src="./assets/icons/catalog.svg"></div>
-                  <div style="min-width:0">
-                    <p class="tileTitle">TV</p>
-                    <p class="tileSub" id="tvSub">Гостиная · Выкл</p>
-                  </div>
+              <div class="device" data-device="tv">
+                <div class="dIcon">
+                  <!-- tv -->
+                  <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.86)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="6" width="18" height="12" rx="2"></rect>
+                    <path d="M8 20h8"></path>
+                  </svg>
                 </div>
-                <div class="sw" id="swTv" role="switch" aria-checked="false"><i></i></div>
+                <div class="dText">
+                  <div class="dName">ТВ</div>
+                  <div class="dMeta">Гостиная • Выкл</div>
+                </div>
+                <div class="switch"><i></i></div>
               </div>
 
-              <div class="tile">
-                <div class="tileLeft">
-                  <div class="ico"><img alt="" src="./assets/icons/gear.svg"></div>
-                  <div style="min-width:0">
-                    <p class="tileTitle">Розетки</p>
-                    <p class="tileSub" id="plugSub">Кухня · 1 активна</p>
-                  </div>
+              <div class="device on" data-device="sockets">
+                <div class="dIcon">
+                  <!-- plug -->
+                  <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.86)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8 3v6"></path>
+                    <path d="M16 3v6"></path>
+                    <path d="M7 9h10"></path>
+                    <path d="M12 9v6a4 4 0 0 1-4 4H7"></path>
+                  </svg>
                 </div>
-                <div class="sw on" id="swPlug" role="switch" aria-checked="true"><i></i></div>
+                <div class="dText">
+                  <div class="dName">Розетки</div>
+                  <div class="dMeta">Кухня • 1 активна</div>
+                </div>
+                <div class="switch"><i></i></div>
               </div>
 
-              <div class="tile">
-                <div class="tileLeft">
-                  <div class="ico"><img alt="" src="./assets/icons/scenes.svg"></div>
-                  <div style="min-width:0">
-                    <p class="tileTitle">Пылесос</p>
-                    <p class="tileSub" id="vacSub">Дом · Выкл</p>
-                  </div>
+              <div class="device" data-device="vacuum">
+                <div class="dIcon">
+                  <!-- vacuum -->
+                  <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.86)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10 3h4"></path>
+                    <path d="M9 7h6"></path>
+                    <path d="M8 22h8"></path>
+                    <path d="M10 7v15"></path>
+                    <path d="M14 7v15"></path>
+                  </svg>
                 </div>
-                <div class="sw" id="swVac" role="switch" aria-checked="false"><i></i></div>
+                <div class="dText">
+                  <div class="dName">Пылесос</div>
+                  <div class="dMeta">Дом • Выкл</div>
+                </div>
+                <div class="switch"><i></i></div>
               </div>
             </div>
           </div>
 
-          <div class="card ai">
-            <h3>AI Центр</h3>
+          <div class="section card ai">
+            <div class="aiTitle">AI Центр</div>
             <input class="input" id="aiInput" placeholder="Например: сделай уютно, свет 30%, тише" />
             <button class="btn" id="aiRun">Выполнить</button>
-            <div class="hint">AI понимает контекст: время · погода · присутствие · привычки (демо)</div>
+            <div class="aiHint">AI понимает контекст: время • погода • присутствие • привычки (демо)</div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <!-- PAGE: SCENES -->
-        <section class="page" id="page-scenes">
-          <div class="card" style="padding:16px;">
-            <div class="label" style="margin-bottom:6px;">Сцены</div>
-            <div class="big" style="font-size:22px;">Скоро будет красиво ✨</div>
-            <div class="meta" style="margin-top:10px;">Добавим: пресеты настроения, расписания, авто-сцены по погоде/гео.</div>
+      <!-- SCENES -->
+      <section class="page" id="page-scenes">
+        <div class="pageTitle">
+          <h2>Сцены</h2>
+          <p>Быстрые режимы для настроения и привычек</p>
+        </div>
+
+        <div class="card">
+          <div class="chips" id="sceneChips" style="padding-top:14px;">
+            <button class="chip active" data-scene-cat="morning">Утро</button>
+            <button class="chip" data-scene-cat="evening">Вечер</button>
+            <button class="chip" data-scene-cat="movie">Кино</button>
+            <button class="chip" data-scene-cat="sleep">Сон</button>
+            <button class="chip" data-scene-cat="work">Работа</button>
           </div>
-        </section>
 
-        <!-- PAGE: PROFILE -->
-        <section class="page" id="page-profile">
-          <div class="card" style="padding:16px;">
-            <div class="label" style="margin-bottom:6px;">Профиль</div>
-            <div class="big" style="font-size:22px;">AURA ID</div>
-            <div class="meta" style="margin-top:10px;">Здесь будет: домочадцы, роли, гостевой доступ, безопасность, история.</div>
+          <div class="sceneGrid" id="sceneGrid">
+            <div class="scene" data-scene="movie">
+              <div>
+                <h3>Кино</h3>
+                <p>Тёплый свет • 15%<br/>ТВ включён</p>
+              </div>
+              <div class="run">Запустить</div>
+            </div>
+
+            <div class="scene" data-scene="sleep">
+              <div>
+                <h3>Сон</h3>
+                <p>Свет выкл • Тишина<br/>23°</p>
+              </div>
+              <div class="run">Запустить</div>
+            </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <!-- PAGE: AI -->
-        <section class="page" id="page-ai">
-          <div class="card ai">
-            <h3>AI</h3>
-            <input class="input" placeholder="Например: включи ночной режим и поставь тёплый свет" />
-            <button class="btn">Сформировать план</button>
-            <div class="hint">Дальше добавим: память, рекомендации, объяснение «почему», журнал действий.</div>
+      <!-- PROFILE -->
+      <section class="page" id="page-profile">
+        <div class="pageTitle">
+          <h2>Профиль</h2>
+          <p>Безопасность, совместный доступ и память команд</p>
+        </div>
+
+        <div class="card profileBox">
+          <div class="kv">
+            <div class="avatar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="2" stroke-linecap="round">
+                <path d="M20 21a8 8 0 0 0-16 0"></path>
+                <circle cx="12" cy="8" r="4"></circle>
+              </svg>
+            </div>
+            <div class="who">
+              <b>AURA Premium</b>
+              <span>Профиль • Демо-аккаунт</span>
+            </div>
           </div>
-        </section>
 
-      </div>
+          <div class="list">
+            <div class="item" id="shareHome">
+              <span class="k">Совместный дом</span>
+              <span class="v">Пригласить</span>
+            </div>
+            <div class="item" id="geoMode">
+              <span class="k">Гео-режим</span>
+              <span class="v">OFF</span>
+            </div>
+            <div class="item" id="digitalCalm">
+              <span class="k">Цифровое спокойствие</span>
+              <span class="v">ON</span>
+            </div>
+            <div class="item" id="security">
+              <span class="k">Безопасность</span>
+              <span class="v">Проверить</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- AI -->
+      <section class="page" id="page-ai">
+        <div class="pageTitle">
+          <h2>AI</h2>
+          <p>Проактивные подсказки, история команд и “эмоциональный дом”</p>
+        </div>
+
+        <div class="card ai">
+          <div class="aiTitle">Память и история (демо)</div>
+          <input class="input" id="aiMemory" placeholder="Например: запомни, что я люблю тёплый свет вечером" />
+          <button class="btn" id="aiSave">Сохранить</button>
+          <div class="aiHint" id="aiLog" style="margin-top:12px;">
+            Последние действия появятся здесь.
+          </div>
+        </div>
+      </section>
+
     </div>
 
-    <!-- NAV -->
-    <div class="nav">
-      <div class="navInner" id="nav">
-        <div class="navItem active" data-go="home">
-          <img alt="" src="./assets/icons/home.svg">
-          Дом
+    <!-- Dock -->
+    <div class="dockWrap" aria-label="Навигация">
+      <div class="dock">
+        <button class="dockBtn active" data-tab="home" aria-label="Дом">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M3 10.5 12 3l9 7.5"></path>
+            <path d="M5 10v10h14V10"></path>
+          </svg>
+          <div class="lbl">Дом</div>
+        </button>
+
+        <button class="dockBtn" data-tab="scenes" aria-label="Сцены">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M5 6h14"></path>
+            <path d="M5 12h14"></path>
+            <path d="M5 18h14"></path>
+          </svg>
+          <div class="lbl">Сцены</div>
+        </button>
+
+        <div class="dockPlus">
+          <button class="plusBtn" id="plusBtn" aria-label="Добавить">
+            <span>+</span>
+          </button>
         </div>
 
-        <div class="navItem" data-go="scenes">
-          <img alt="" src="./assets/icons/scenes.svg">
-          Сцены
-        </div>
+        <button class="dockBtn" data-tab="profile" aria-label="Профиль">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M20 21a8 8 0 0 0-16 0"></path>
+            <circle cx="12" cy="8" r="4"></circle>
+          </svg>
+          <div class="lbl">Профиль</div>
+        </button>
 
-        <div class="navPlus" id="navPlus" aria-label="Добавить">
-          <img alt="" src="./assets/icons/plus.svg">
-        </div>
-
-        <div class="navItem" data-go="profile">
-          <img alt="" src="./assets/icons/gear.svg">
-          Профиль
-        </div>
-
-        <div class="navItem" data-go="ai">
-          <img alt="" src="./assets/icons/tips.svg">
-          AI
-        </div>
+        <button class="dockBtn" data-tab="ai" aria-label="AI">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M12 2v3"></path>
+            <path d="M12 19v3"></path>
+            <path d="M4.22 4.22l2.12 2.12"></path>
+            <path d="M17.66 17.66l2.12 2.12"></path>
+            <path d="M2 12h3"></path>
+            <path d="M19 12h3"></path>
+            <path d="M4.22 19.78l2.12-2.12"></path>
+            <path d="M17.66 6.34l2.12-2.12"></path>
+            <circle cx="12" cy="12" r="4"></circle>
+          </svg>
+          <div class="lbl">AI</div>
+        </button>
       </div>
     </div>
   </div>
 
   <script>
-    // время справа в плашке
+    // ==== iOS: жесты/зум (надежно) ====
+    document.addEventListener('gesturestart', (e) => e.preventDefault(), {passive:false});
+    document.addEventListener('gesturechange', (e) => e.preventDefault(), {passive:false});
+    document.addEventListener('gestureend', (e) => e.preventDefault(), {passive:false});
+    document.addEventListener('touchmove', function(e){
+      if(e.scale && e.scale !== 1) e.preventDefault();
+    }, {passive:false});
+
+    // ==== Time ====
+    const nowTime = document.getElementById('nowTime');
     function pad(n){ return String(n).padStart(2,'0'); }
-    function setTime(){
+    function tick(){
       const d = new Date();
-      const t = pad(d.getHours()) + ":" + pad(d.getMinutes());
-      const el = document.getElementById("timeNow");
-      if(el) el.textContent = t;
+      nowTime.textContent = pad(d.getHours()) + ":" + pad(d.getMinutes());
     }
-    setTime();
-    setInterval(setTime, 15000);
+    tick(); setInterval(tick, 15000);
 
-    // переключатель (универсальный)
-    function bindSwitch(id, onText){
-      const el = document.getElementById(id);
-      if(!el) return;
-      el.addEventListener("click", () => {
-        el.classList.toggle("on");
-        el.setAttribute("aria-checked", el.classList.contains("on") ? "true" : "false");
-      });
+    // ==== Comfort ====
+    const comfortVal = document.getElementById('comfortVal');
+    const comfortBar = document.getElementById('comfortBar');
+    function setComfort(v){
+      const vv = Math.max(0, Math.min(100, v|0));
+      comfortVal.textContent = vv;
+      comfortBar.style.width = vv + "%";
     }
-    bindSwitch("swLight");
-    bindSwitch("swTv");
-    bindSwitch("swPlug");
-    bindSwitch("swVac");
+    setComfort(82);
 
-    // moods
-    const moods = document.getElementById("moods");
-    if(moods){
-      moods.addEventListener("click", (e) => {
-        const chip = e.target.closest(".chip");
-        if(!chip) return;
-        [...moods.querySelectorAll(".chip")].forEach(x=>x.classList.remove("active"));
-        chip.classList.add("active");
-      });
-    }
-
-    // nav pages (фикс кликабельности + ровность)
+    // ==== Tabs (dock) ====
     const pages = {
-      home: document.getElementById("page-home"),
-      scenes: document.getElementById("page-scenes"),
-      profile: document.getElementById("page-profile"),
-      ai: document.getElementById("page-ai")
+      home: document.getElementById('page-home'),
+      scenes: document.getElementById('page-scenes'),
+      profile: document.getElementById('page-profile'),
+      ai: document.getElementById('page-ai'),
     };
-    const hint = document.getElementById("pageHint");
 
-    function showPage(key){
-      Object.keys(pages).forEach(k => pages[k].classList.toggle("active", k===key));
-      document.querySelectorAll(".navItem").forEach(i => i.classList.toggle("active", i.dataset.go===key));
-      if(hint){
-        hint.textContent = (key==="home"?"Дом":key==="scenes"?"Сцены":key==="profile"?"Профиль":"AI");
-      }
-      // мягкий скролл наверх при смене вкладки
-      window.scrollTo({top:0, behavior:"smooth"});
+    function openTab(name){
+      Object.keys(pages).forEach(k => pages[k].classList.toggle('active', k === name));
+      document.querySelectorAll('.dockBtn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+
+      // hero нужен только на home, но он внутри home и так пропадает вместе со страницей.
+      // важное: сброс скролла "мягко"
+      window.scrollTo({top: 0, behavior: 'smooth'});
     }
 
-    document.getElementById("nav").addEventListener("click", (e)=>{
-      const it = e.target.closest(".navItem");
-      if(!it) return;
-      showPage(it.dataset.go);
+    document.querySelectorAll('.dockBtn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        openTab(btn.dataset.tab);
+      });
     });
 
-    // plus action demo
-    document.getElementById("navPlus").addEventListener("click", ()=>{
-      // быстрый premium "tap" + демо
-      const btn = document.getElementById("navPlus");
-      btn.style.filter = "brightness(1.05)";
-      setTimeout(()=>btn.style.filter="", 180);
-      alert("AURA: Добавление устройства / сцены (демо)");
+    // плюс = быстрый AI
+    document.getElementById('plusBtn').addEventListener('click', ()=>{
+      openTab('ai');
+      setTimeout(()=> document.getElementById('aiMemory').focus(), 250);
     });
 
-    // AI demo
-    document.getElementById("aiRun").addEventListener("click", ()=>{
-      const val = (document.getElementById("aiInput").value || "").trim();
-      alert(val ? ("AURA выполнит: " + val) : "Напиши команду 🙂");
+    // ==== Mood chips ====
+    document.getElementById('moodChips').addEventListener('click', (e)=>{
+      const b = e.target.closest('.chip');
+      if(!b) return;
+      document.querySelectorAll('#moodChips .chip').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+
+      // демо-реакция на режим
+      const mood = b.dataset.mood;
+      if(mood === 'cozy') setComfort(82);
+      if(mood === 'focus') setComfort(76);
+      if(mood === 'energy') setComfort(88);
+      if(mood === 'calm') setComfort(91);
     });
 
-    // доп. анти-зум для iOS жестов
-    document.addEventListener('gesturestart', function (e) { e.preventDefault(); });
+    // ==== Quick devices toggles ====
+    document.getElementById('quickGrid').addEventListener('click', (e)=>{
+      const d = e.target.closest('.device');
+      if(!d) return;
+      d.classList.toggle('on');
+      // маленький "дорогой" отклик
+      d.animate([{transform:'scale(1)'},{transform:'scale(.99)'},{transform:'scale(1)'}], {duration:180, easing:'ease-out'});
+    });
+
+    // ==== Scenes page chips (категории) ====
+    document.getElementById('sceneChips').addEventListener('click', (e)=>{
+      const b = e.target.closest('.chip');
+      if(!b) return;
+      document.querySelectorAll('#sceneChips .chip').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      // демо фильтр (пока только визуально)
+    });
+
+    // ==== Scenes run ====
+    document.getElementById('sceneGrid').addEventListener('click', (e)=>{
+      const scene = e.target.closest('.scene');
+      if(!scene) return;
+      const name = scene.dataset.scene;
+      // демо: переносим результат на Дом
+      openTab('home');
+      const input = document.getElementById('aiInput');
+      input.value = name === 'movie' ? 'Сцена: Кино — свет 15%, ТВ включить' : 'Сцена: Сон — всё выключить, 23°';
+      input.animate([{opacity:1},{opacity:.6},{opacity:1}], {duration:240, easing:'ease-out'});
+    });
+
+    // ==== AI actions ====
+    const aiLog = document.getElementById('aiLog');
+
+    document.getElementById('aiRun').addEventListener('click', ()=>{
+      const t = (document.getElementById('aiInput').value || '').trim();
+      aiLog.textContent = t ? ('Выполнено (демо): ' + t) : 'Выполнено (демо).';
+      aiLog.animate([{opacity:.6},{opacity:1}], {duration:180, easing:'ease-out'});
+    });
+
+    document.getElementById('aiSave').addEventListener('click', ()=>{
+      const t = (document.getElementById('aiMemory').value || '').trim();
+      aiLog.textContent = t ? ('Сохранено (демо): ' + t) : 'Сохранено (демо).';
+      aiLog.animate([{opacity:.6},{opacity:1}], {duration:180, easing:'ease-out'});
+    });
+
+    // ==== top bar buttons (демо) ====
+    document.getElementById('menuBtn').addEventListener('click', ()=>{
+      aiLog.textContent = 'Меню (демо): устройства • комнаты • доступ • безопасность';
+      aiLog.animate([{opacity:.6},{opacity:1}], {duration:180, easing:'ease-out'});
+    });
+    document.getElementById('moreBtn').addEventListener('click', ()=>{
+      aiLog.textContent = 'Ещё (демо): настройки • экспорт • версия • о проекте';
+      aiLog.animate([{opacity:.6},{opacity:1}], {duration:180, easing:'ease-out'});
+    });
+
+    // профиль клики (демо)
+    document.getElementById('shareHome').addEventListener('click', ()=> aiLog.textContent = 'Приглашение отправлено (демо).');
+    document.getElementById('geoMode').addEventListener('click', ()=> aiLog.textContent = 'Гео-режим переключён (демо).');
+    document.getElementById('digitalCalm').addEventListener('click', ()=> aiLog.textContent = 'Цифровое спокойствие обновлено (демо).');
+    document.getElementById('security').addEventListener('click', ()=> aiLog.textContent = 'Проверка безопасности (демо).');
   </script>
 </body>
 </html>
