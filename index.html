@@ -1,1554 +1,1105 @@
 <!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,viewport-fit=cover"/>
-  <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>AURA</title>
 
   <style>
     :root{
-      --bg0:#070A12;
-      --bg1:#0A0F1D;
-      --card:rgba(255,255,255,.07);
-      --card2:rgba(255,255,255,.09);
+      --bg0:#0a0b10;
+      --bg1:#0e1020;
+      --card:rgba(255,255,255,.06);
+      --card2:rgba(255,255,255,.08);
       --stroke:rgba(255,255,255,.10);
       --stroke2:rgba(255,255,255,.14);
+      --txt:#eef0ff;
+      --muted:rgba(238,240,255,.62);
+      --muted2:rgba(238,240,255,.45);
+      --accent:#8b6bff;
+      --accent2:#b9a6ff;
+      --green:#2ee59d;
 
-      --text:#EAF0FF;
-      --muted:rgba(234,240,255,.62);
+      --r16:16px;
+      --r20:20px;
+      --r24:24px;
 
-      --accent:#8C6CFF;
-      --accent2:#B28DFF;
-      --good:#2EE6A6;
-
-      --r18:18px;
-      --r22:22px;
-      --r26:26px;
-
-      --shadow: 0 18px 50px rgba(0,0,0,.55);
-      --blur: blur(18px);
-
-      --safeT: env(safe-area-inset-top);
-      --safeB: env(safe-area-inset-bottom);
-      --safeL: env(safe-area-inset-left);
-      --safeR: env(safe-area-inset-right);
-
-      --dockH: 74px;
-      --dockPad: calc(10px + var(--safeB));
-      --pagePadB: calc(var(--dockH) + var(--dockPad) + 12px);
-      --pagePadT: calc(14px + var(--safeT));
+      --pad:16px;
+      --dockH:78px; /* реальная высота дока (без safe-area) */
     }
 
-    *{ box-sizing:border-box; }
-    html,body{ height:100%; }
+    *{box-sizing:border-box}
+    html,body{height:100%}
     body{
       margin:0;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display","SF Pro Text", Inter, system-ui, Segoe UI, Roboto, Arial, sans-serif;
-      background: radial-gradient(1200px 700px at 20% -10%, rgba(140,108,255,.25), transparent 60%),
-                  radial-gradient(900px 650px at 80% 20%, rgba(178,141,255,.18), transparent 55%),
+      background: radial-gradient(1200px 700px at 50% -120px, rgba(140,100,255,.40), transparent 60%),
+                  radial-gradient(1000px 700px at 10% 10%, rgba(70,90,255,.22), transparent 60%),
                   linear-gradient(180deg, var(--bg0), var(--bg1));
-      color:var(--text);
+      color:var(--txt);
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Segoe UI",Roboto,Inter,Arial,sans-serif;
+      -webkit-font-smoothing:antialiased;
       overflow-x:hidden;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
+      touch-action:pan-y; /* помогает убрать pinch на части браузеров */
     }
 
-    /* Запрет жестов зума на iOS */
-    body{ overscroll-behavior-y: none; }
-    .noSelect{ -webkit-user-select:none; user-select:none; }
+    /* убираем выделение/лупу */
+    *{-webkit-tap-highlight-color:transparent}
+    button{font:inherit}
 
+    /* SAFE AREA */
+    .safeTop{padding-top: env(safe-area-inset-top);}
+    .safeBottom{padding-bottom: env(safe-area-inset-bottom);}
+
+    /* LAYOUT */
     .app{
-      min-height:100vh;
-      padding-bottom: var(--pagePadB);
+      min-height:100%;
+      display:flex;
+      flex-direction:column;
     }
 
-    /* ===== Top Telegram-like bar ===== */
-    .tgTop{
-      position: sticky;
+    /* TOP BAR (в стиле “дорого” и ровно) */
+    .topbar{
+      position:sticky;
       top:0;
       z-index:50;
-      padding: calc(10px + var(--safeT)) calc(14px + var(--safeR)) 10px calc(14px + var(--safeL));
-      background: linear-gradient(180deg, rgba(7,10,18,.90), rgba(7,10,18,.45));
-      backdrop-filter: var(--blur);
-      border-bottom: 1px solid rgba(255,255,255,.06);
+      padding: calc(10px + env(safe-area-inset-top)) var(--pad) 10px;
+      background: linear-gradient(180deg, rgba(10,11,16,.88), rgba(10,11,16,.55) 60%, rgba(10,11,16,0));
+      backdrop-filter: blur(18px);
     }
-    .tgTopRow{
+    .toprow{
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:12px;
     }
-    .tgTitle{
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      flex:1;
-      min-width:0;
-    }
-    .tgTitle .name{
-      font-weight:900;
-      letter-spacing:.10em;
-      font-size:13px;
-      opacity:.95;
-    }
-    .tgTitle .sub{
-      font-size:12px;
-      color:var(--muted);
-      margin-top:2px;
-    }
-    .tgBtn{
+    .pillBtn{
       width:44px;height:44px;
       border-radius:14px;
-      display:grid;place-items:center;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.06);
-      backdrop-filter: var(--blur);
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.06);
+      backdrop-filter: blur(18px);
+      display:grid;
+      place-items:center;
       box-shadow: 0 10px 30px rgba(0,0,0,.35);
-      cursor:pointer;
-      flex:0 0 auto;
     }
-    .tgBtn:active{ transform: scale(.98); }
-    .tgIcon{ width:20px;height:20px; opacity:.92; }
+    .brand{
+      text-align:center;
+      line-height:1.1;
+      user-select:none;
+    }
+    .brand .logo{
+      letter-spacing:.35em;
+      font-weight:800;
+      font-size:15px;
+      opacity:.95;
+    }
+    .brand .sub{
+      font-size:12px;
+      color:var(--muted2);
+      margin-top:3px;
+    }
 
-    /* ===== Hero ===== */
+    /* MAIN */
+    .main{
+      flex:1;
+      padding: 8px var(--pad) calc(var(--dockH) + env(safe-area-inset-bottom) + 18px);
+    }
+
+    /* HERO */
     .hero{
       position:relative;
-      height: 260px;
-      margin: 0 calc(0px + var(--safeL)) 0 calc(0px + var(--safeR));
+      border-radius: var(--r24);
       overflow:hidden;
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.04);
+      min-height:220px;
+      box-shadow: 0 24px 70px rgba(0,0,0,.55);
+      margin-bottom:14px;
     }
     .heroImg{
       position:absolute; inset:0;
       background:
-        radial-gradient(800px 420px at 35% 15%, rgba(140,108,255,.30), transparent 55%),
-        linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,.78));
+        radial-gradient(700px 260px at 30% 20%, rgba(140,100,255,.40), transparent 60%),
+        radial-gradient(600px 240px at 80% 10%, rgba(120,160,255,.22), transparent 62%),
+        linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.65));
+      background-size:cover;
+      background-position:center;
+      transform: scale(1.03);
+      filter: saturate(1.08);
     }
-    .heroImg::before{
-      content:"";
-      position:absolute; inset:-2px;
-      background-image: url("assets/IMG_1348.jpeg");
-      background-size: cover;
-      background-position: center;
-      filter: saturate(1.05) contrast(1.05);
-      transform: scale(1.02);
-      opacity:.95;
+    /* если у тебя есть assets/hero.jpg — подхватит */
+    .heroImg.hasPhoto{
+      background-image:
+        linear-gradient(180deg, rgba(0,0,0,.08), rgba(0,0,0,.78)),
+        url("assets/hero.jpg");
     }
-    .heroFade{
+    .heroShade{
       position:absolute; inset:0;
-      background: linear-gradient(180deg, rgba(7,10,18,.10) 0%, rgba(7,10,18,.65) 55%, rgba(7,10,18,1) 100%);
+      background: radial-gradient(900px 250px at 50% 85%, rgba(0,0,0,.55), transparent 60%);
+      pointer-events:none;
     }
-
-    /* ===== Layout ===== */
-    .wrap{
-      padding: 14px calc(14px + var(--safeR)) 0 calc(14px + var(--safeL));
-      max-width: 560px;
-      margin: 0 auto;
-    }
-
-    .h1{
-      font-size:44px;
-      line-height:1.0;
-      font-weight:950;
-      letter-spacing:-.03em;
-      margin: -10px 0 6px;
-    }
-    .h2{
-      font-size:18px;
-      color:var(--muted);
-      margin:0 0 14px;
-    }
-
-    .pill{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      padding:12px 14px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.06);
-      backdrop-filter: var(--blur);
-      box-shadow: 0 14px 40px rgba(0,0,0,.35);
-      width: fit-content;
-      max-width: 100%;
-    }
-    .dot{
-      width:10px;height:10px;border-radius:99px;
-      background: var(--good);
-      box-shadow: 0 0 0 6px rgba(46,230,166,.12);
-      flex:0 0 auto;
-    }
-    .pillText{
-      font-weight:800;
-      letter-spacing:-.01em;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      max-width: 70vw;
-    }
-
-    .card{
-      border-radius: var(--r26);
-      border: 1px solid rgba(255,255,255,.08);
-      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
-      backdrop-filter: var(--blur);
-      box-shadow: var(--shadow);
-    }
-    .cardPad{ padding: 16px; }
-    .cardTitle{
-      font-weight:950;
-      letter-spacing:-.02em;
-      font-size:18px;
-      margin:0 0 10px;
-    }
-    .cardSub{
-      color:var(--muted);
-      font-size:13px;
-      margin: 0;
-      line-height:1.35;
-    }
-
-    .grid2{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-    @media (max-width:380px){
-      .grid2{ grid-template-columns:1fr; }
-    }
-
-    .miniCard{
-      border-radius: 22px;
-      border:1px solid rgba(255,255,255,.09);
-      background: rgba(255,255,255,.06);
-      backdrop-filter: var(--blur);
-      padding: 14px;
-      min-height: 140px;
+    .heroContent{
       position:relative;
-      overflow:hidden;
-      box-shadow: 0 16px 40px rgba(0,0,0,.40);
-      cursor:pointer;
+      padding: 18px;
+      display:flex;
+      flex-direction:column;
+      justify-content:flex-end;
+      min-height:220px;
+      gap:10px;
     }
-    .miniCard:active{ transform: scale(.99); }
-
-    .miniIcon{
-      width:54px;height:54px;border-radius:18px;
-      display:grid;place-items:center;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.07);
-      backdrop-filter: var(--blur);
-      box-shadow: 0 18px 40px rgba(0,0,0,.35);
-      margin-bottom:12px;
+    .hTitle{
+      font-size:46px;
+      font-weight:900;
+      letter-spacing:-.03em;
+      margin:0;
     }
-    .miniIcon svg{ width:24px;height:24px; opacity:.95; }
-    .miniH{
-      font-size:22px;
-      font-weight:950;
-      letter-spacing:-.02em;
-      margin:0 0 6px;
-      line-height:1.05;
-    }
-    .miniP{
+    .hSub{
       margin:0;
       color:var(--muted);
-      font-size:13px;
-      line-height:1.35;
+      font-size:14px;
+      font-weight:600;
     }
 
-    /* ===== Comfort bar ===== */
-    .meterRow{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:10px;
+    /* status pill */
+    .statusRow{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:2px;}
+    .statusPill{
+      display:flex; align-items:center; gap:10px;
+      padding:12px 14px;
+      border-radius: 999px;
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.06);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 16px 40px rgba(0,0,0,.35);
     }
-    .meterRow .left{
-      display:flex; flex-direction:column; gap:4px;
-      min-width:0;
+    .dot{
+      width:10px;height:10px;border-radius:50%;
+      background:var(--green);
+      box-shadow:0 0 20px rgba(46,229,157,.45);
     }
-    .meterRow .kicker{
-      color:var(--muted);
-      font-size:12px;
-      letter-spacing:.08em;
-      text-transform:uppercase;
+    .statusText{font-weight:800}
+    .statusTime{color:var(--muted2); font-weight:700}
+
+    /* Cards */
+    .card{
+      border-radius: var(--r24);
+      border:1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+      backdrop-filter: blur(18px);
+      box-shadow: 0 18px 55px rgba(0,0,0,.45);
     }
-    .meterRow .value{
-      font-size:28px;
-      font-weight:950;
-      letter-spacing:-.03em;
+    .cardPad{padding:16px}
+    .cardTitle{
+      margin:0 0 10px;
+      font-weight:900;
+      letter-spacing:-.02em;
+      font-size:18px;
     }
-    .meter{
-      height:12px;
-      border-radius:999px;
-      background: rgba(255,255,255,.10);
+    .rowBetween{display:flex; align-items:center; justify-content:space-between; gap:12px;}
+    .muted{color:var(--muted)}
+    .muted2{color:var(--muted2)}
+
+    /* comfort */
+    .meterTitle{font-weight:900; font-size:22px; margin:0;}
+    .meterPct{font-weight:900; font-size:28px;}
+    .bar{
+      height:12px; border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.06);
       overflow:hidden;
-      border:1px solid rgba(255,255,255,.08);
+      margin-top:12px;
     }
-    .meter > i{
-      display:block;
-      height:100%;
-      width: 82%;
+    .bar > i{
+      display:block; height:100%; width:82%;
       border-radius:999px;
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
-      box-shadow: 0 0 18px rgba(140,108,255,.45);
+      background: linear-gradient(90deg, rgba(139,107,255,.9), rgba(185,166,255,.95));
+      box-shadow: 0 10px 22px rgba(139,107,255,.32);
     }
     .metaLine{
       margin-top:10px;
-      color:rgba(234,240,255,.56);
+      font-weight:700;
       font-size:12px;
-      letter-spacing:-.01em;
+      color:rgba(238,240,255,.55);
+      letter-spacing:.02em;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
 
-    /* ===== Chips ===== */
-    .chips{
+    /* segmented */
+    .seg{
       display:flex;
       gap:10px;
       overflow:auto;
-      padding: 6px 14px 12px 2px;
-      padding-right: 22px;
+      padding: 2px;
       -webkit-overflow-scrolling: touch;
-      scrollbar-width:none;
     }
-    .chips::-webkit-scrollbar{ display:none; }
-    .chip{
-      padding: 10px 16px;
+    .seg::-webkit-scrollbar{display:none}
+    .seg button{
+      flex:0 0 auto;
+      padding: 12px 16px;
       border-radius: 999px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.06);
-      color: rgba(234,240,255,.82);
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.05);
+      color: rgba(238,240,255,.85);
       font-weight:900;
       letter-spacing:-.01em;
-      white-space: nowrap;
-      cursor:pointer;
-      flex:0 0 auto;
     }
-    .chip.on{
-      background: linear-gradient(180deg, rgba(140,108,255,.78), rgba(140,108,255,.38));
-      border-color: rgba(140,108,255,.55);
-      box-shadow: 0 18px 40px rgba(140,108,255,.28);
-      color:#0B0F1A;
+    .seg button.active{
+      background: linear-gradient(180deg, rgba(139,107,255,.95), rgba(139,107,255,.65));
+      border-color: rgba(185,166,255,.55);
+      box-shadow: 0 14px 34px rgba(139,107,255,.22);
+      color:#0b0b12;
     }
-    .chip:active{ transform: scale(.99); }
 
-    /* ===== Quick Controls ===== */
-    .qc{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:12px;
-      padding-top: 8px;
-    }
+    /* grid quick control */
+    .grid2{display:grid; grid-template-columns: 1fr 1fr; gap:12px;}
     .tile{
-      border-radius: 22px;
+      border-radius: 20px;
       border:1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.06);
-      backdrop-filter: var(--blur);
-      padding: 14px;
+      background: rgba(255,255,255,.05);
+      padding:14px;
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:12px;
-      min-height: 74px;
-      box-shadow: 0 16px 40px rgba(0,0,0,.35);
+      min-height:84px;
     }
-    .tileL{
-      display:flex; align-items:center; gap:12px;
-      min-width:0;
-    }
-    .tileI{
-      width:42px;height:42px;border-radius:14px;
+    .tileL{display:flex; align-items:center; gap:12px; min-width:0;}
+    .ico{
+      width:44px;height:44px;border-radius:14px;
+      background: rgba(0,0,0,.18);
       border:1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.08);
-      display:grid;place-items:center;
+      display:grid; place-items:center;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
       flex:0 0 auto;
     }
-    .tileI svg{ width:20px;height:20px; opacity:.95; }
-    .tileT{
-      display:flex; flex-direction:column; gap:3px;
-      min-width:0;
-    }
-    .tileT b{
-      font-size:16px;
-      font-weight:950;
-      letter-spacing:-.02em;
+    .tileTxt{min-width:0;}
+    .tileName{
+      font-weight:900;
+      margin:0;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
-      max-width: 46vw;
     }
-    .tileT span{
-      font-size:12px;
-      color:var(--muted);
+    .tileSub{
+      margin:4px 0 0;
+      font-weight:800;
+      color:rgba(238,240,255,.55);
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
-      max-width: 46vw;
     }
 
-    /* Switch */
-    .sw{
-      width:52px; height:30px;
+    /* toggle */
+    .switch{position:relative; width:54px; height:30px; flex:0 0 auto;}
+    .switch input{display:none}
+    .track{
+      position:absolute; inset:0;
       border-radius:999px;
+      background: rgba(255,255,255,.12);
       border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.10);
-      position:relative;
-      cursor:pointer;
-      flex:0 0 auto;
     }
-    .sw i{
+    .knob{
       position:absolute; top:3px; left:3px;
-      width:24px;height:24px;border-radius:999px;
+      width:24px;height:24px;border-radius:50%;
       background: rgba(255,255,255,.92);
-      box-shadow: 0 10px 22px rgba(0,0,0,.35);
+      box-shadow:0 8px 20px rgba(0,0,0,.35);
       transition: transform .18s ease;
     }
-    .sw.on{
-      background: linear-gradient(90deg, rgba(140,108,255,.90), rgba(178,141,255,.85));
-      border-color: rgba(140,108,255,.55);
-      box-shadow: 0 0 24px rgba(140,108,255,.25);
+    .switch input:checked + .track{
+      background: linear-gradient(90deg, rgba(139,107,255,.95), rgba(185,166,255,.90));
+      border-color: rgba(185,166,255,.45);
     }
-    .sw.on i{ transform: translateX(22px); background:#0B0F1A; }
+    .switch input:checked ~ .knob{transform: translateX(24px);}
 
-    /* ===== AI Center ===== */
-    .aiBox{
-      display:flex;
-      gap:12px;
-      align-items:center;
-      margin-top:10px;
-    }
+    /* AI */
+    .aiRow{display:flex; flex-direction:column; gap:12px;}
     .input{
-      flex:1;
-      border-radius: 18px;
+      width:100%;
+      border-radius:16px;
       border:1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.06);
-      padding: 14px 14px;
-      color: var(--text);
-      outline:none;
-      font-weight:700;
-      letter-spacing:-.01em;
-    }
-    .input::placeholder{ color: rgba(234,240,255,.45); font-weight:700; }
-    .btn{
-      border:0;
-      border-radius: 22px;
-      padding: 14px 16px;
-      font-weight:950;
-      letter-spacing:-.02em;
-      cursor:pointer;
-      color:#0B0F1A;
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
-      box-shadow: 0 20px 50px rgba(140,108,255,.28);
-      white-space:nowrap;
-    }
-    .btn:active{ transform: scale(.99); }
-    .btn.secondary{
-      background: rgba(255,255,255,.10);
-      color: var(--text);
-      border:1px solid rgba(255,255,255,.12);
-      box-shadow: none;
-    }
-
-    /* ===== Screens ===== */
-    .screen{ display:none; }
-    .screen.on{ display:block; }
-
-    .sectionGap{ margin-top: 14px; }
-    .sectionHead{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      margin: 6px 2px 10px;
-    }
-    .sectionHead h3{
-      margin:0;
-      font-size:14px;
-      letter-spacing:.10em;
-      text-transform:uppercase;
-      color: rgba(234,240,255,.55);
-      font-weight:950;
-    }
-    .tag{
-      font-size:12px;
-      color: rgba(234,240,255,.60);
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:999px;
-      padding: 8px 10px;
       background: rgba(255,255,255,.05);
+      padding:14px 14px;
+      color:rgba(238,240,255,.92);
+      font-weight:800;
+      outline:none;
+    }
+    .btn{
+      width:100%;
+      border:0;
+      border-radius: 18px;
+      padding: 16px 16px;
+      font-weight:1000;
+      letter-spacing:-.02em;
+      color:#0b0b12;
+      background: linear-gradient(180deg, rgba(139,107,255,1), rgba(185,166,255,1));
+      box-shadow: 0 18px 40px rgba(139,107,255,.25);
+      transform: translateZ(0);
+    }
+    .btn:active{transform: scale(.985)}
+    .tiny{
+      font-size:12px;
+      color:rgba(238,240,255,.55);
+      font-weight:800;
+      line-height:1.35;
     }
 
-    /* ===== Dock (Telegram-like + premium) ===== */
+    /* PAGES */
+    .page{display:none}
+    .page.active{display:block}
+
+    /* TELEGRAM-STYLE DOCK (кликабельный, не перекрывает контент) */
+    .dockWrap{
+      position:fixed;
+      left:0; right:0;
+      bottom:0;
+      z-index:70;
+      padding: 10px var(--pad) calc(10px + env(safe-area-inset-bottom));
+      pointer-events:none; /* чтобы не блокировал клики в контенте, кроме самого дока */
+    }
     .dock{
-      position: fixed;
-      left: calc(10px + var(--safeL));
-      right: calc(10px + var(--safeR));
-      bottom: calc(10px + var(--safeB));
-      z-index: 80;
+      pointer-events:auto;
+      height: var(--dockH);
       border-radius: 26px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(12,16,28,.70);
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(20,22,34,.72);
       backdrop-filter: blur(22px);
-      box-shadow: 0 24px 70px rgba(0,0,0,.60);
-      padding: 10px 10px;
+      box-shadow: 0 26px 70px rgba(0,0,0,.55);
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap: 8px;
+      padding: 10px 12px;
+      gap:10px;
     }
-    .dockBtn{
-      flex:1;
-      min-width:64px;
+    .dockItem{
+      width: 74px;
+      height: 58px;
+      border-radius:18px;
       display:flex;
       flex-direction:column;
       align-items:center;
       justify-content:center;
       gap:6px;
-      padding: 10px 8px;
-      border-radius: 18px;
-      cursor:pointer;
+      color:rgba(238,240,255,.72);
       border:1px solid transparent;
-      position:relative;
-      color: rgba(234,240,255,.66);
-    }
-    .dockBtn svg{ width:20px;height:20px; opacity:.9; }
-    .dockBtn span{
-      font-size:12px;
+      background: transparent;
       font-weight:900;
-      letter-spacing:-.01em;
-      white-space:normal;
-      overflow:visible;
-      text-overflow:clip;
-      line-height:1.05;
-      text-align:center;
+      font-size:12px;
+      user-select:none;
     }
-    .dockBtn.on{
-      color: var(--text);
-      background: rgba(255,255,255,.06);
-      border-color: rgba(255,255,255,.10);
-    }
-    .dockBtn.on::after{
-      content:"";
-      position:absolute;
-      inset:-1px;
-      border-radius: 18px;
-      pointer-events:none;
-      background:
-        radial-gradient(120px 60px at 50% 0%, rgba(140,108,255,.35), transparent 60%),
-        radial-gradient(120px 60px at 50% 100%, rgba(178,141,255,.22), transparent 65%);
-      mix-blend-mode: screen;
+    .dockItem svg{opacity:.9}
+    .dockItem.active{
+      color: #10101a;
+      background: linear-gradient(180deg, rgba(139,107,255,1), rgba(185,166,255,1));
+      border-color: rgba(185,166,255,.55);
+      box-shadow: 0 16px 36px rgba(139,107,255,.20);
     }
 
-    .dockPlus{
-      flex: 0 0 auto;
-      width:62px;height:62px;
-      border-radius:22px;
-      border:1px solid rgba(255,255,255,.14);
-      background: linear-gradient(180deg, rgba(140,108,255,.92), rgba(178,141,255,.72));
-      box-shadow: 0 28px 80px rgba(140,108,255,.32);
-      display:grid;place-items:center;
-      cursor:pointer;
-      position:relative;
+    .dockCenter{
+      width: 74px; height: 74px;
+      margin-top:-22px;
+      border-radius: 26px;
+      border:1px solid rgba(255,255,255,.16);
+      background: radial-gradient(50px 40px at 50% 30%, rgba(255,255,255,.28), transparent 70%),
+                  linear-gradient(180deg, rgba(139,107,255,1), rgba(185,166,255,1));
+      box-shadow: 0 26px 60px rgba(139,107,255,.25);
+      display:grid;
+      place-items:center;
+      color:#0b0b12;
+      font-weight:1000;
+      user-select:none;
     }
-    .dockPlus svg{ width:22px;height:22px; color:#0B0F1A; }
-    .dockPlus:active{ transform: scale(.98); }
+    .dockCenter:active{transform: scale(.985)}
 
-    /* ===== Bottom sheet ===== */
+    /* SHEET (как в Яндексе “Добавить”) */
     .sheetOverlay{
       position:fixed; inset:0;
       background: rgba(0,0,0,.55);
       backdrop-filter: blur(6px);
-      z-index: 120;
-      display:none;
+      opacity:0;
+      pointer-events:none;
+      transition: opacity .18s ease;
+      z-index:80;
     }
-    .sheetOverlay.on{ display:block; }
+    .sheetOverlay.show{opacity:1; pointer-events:auto;}
     .sheet{
-      position:fixed;
-      left: 0; right: 0;
-      bottom: -100%;
-      z-index: 130;
-      padding: 10px calc(14px + var(--safeR)) calc(18px + var(--safeB)) calc(14px + var(--safeL));
-      transition: transform .28s ease;
-      transform: translateY(100%);
+      position:fixed; left:0; right:0; bottom:-100%;
+      z-index:90;
+      transition: transform .24s ease;
+      transform: translateY(110%);
+      padding: 10px var(--pad) calc(18px + env(safe-area-inset-bottom));
     }
-    .sheet.on{ transform: translateY(0%); }
+    .sheet.show{transform: translateY(0);}
     .sheetCard{
-      max-width: 560px;
-      margin: 0 auto;
       border-radius: 28px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(12,16,28,.78);
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(20,22,34,.86);
       backdrop-filter: blur(24px);
-      box-shadow: 0 30px 90px rgba(0,0,0,.70);
+      box-shadow: 0 30px 90px rgba(0,0,0,.65);
       overflow:hidden;
     }
-    .sheetGrip{
-      width: 44px; height: 5px; border-radius:999px;
-      background: rgba(255,255,255,.20);
-      margin: 10px auto 8px;
+    .sheetGrab{
+      height:18px; display:grid; place-items:center;
+    }
+    .grab{
+      width:44px;height:5px;border-radius:99px;
+      background: rgba(255,255,255,.22);
     }
     .sheetHead{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding: 10px 14px 8px;
-      gap: 10px;
+      padding: 4px 16px 10px;
+      display:flex; align-items:flex-end; justify-content:space-between; gap:12px;
     }
-    .sheetHead h4{
+    .sheetTitle{
+      font-weight:1000;
+      font-size:28px;
       margin:0;
-      font-size:24px;
-      font-weight:950;
-      letter-spacing:-.02em;
+      letter-spacing:-.03em;
     }
-    .sheetClose{
-      width:40px;height:40px;border-radius:14px;
+    .sheetGrid{
+      padding: 0 16px 14px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+    }
+    .sheetTile{
+      border-radius: 20px;
       border:1px solid rgba(255,255,255,.10);
       background: rgba(255,255,255,.06);
-      display:grid;place-items:center;
-      cursor:pointer;
+      padding:14px;
+      min-height:104px;
+      display:flex; flex-direction:column; justify-content:space-between;
+      font-weight:1000;
     }
-    .sheetClose:active{ transform: scale(.98); }
-    .sheetBody{ padding: 10px 14px 14px; }
-    .sheetItem{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
+    .sheetTile small{color:rgba(238,240,255,.55); font-weight:900}
+    .sheetList{
+      padding: 6px 10px 14px;
+      display:flex; flex-direction:column; gap:6px;
+    }
+    .sheetRow{
+      display:flex; align-items:center; justify-content:space-between;
       gap:12px;
       padding: 12px 12px;
-      border-radius: 18px;
-      border:1px solid rgba(255,255,255,.08);
+      border-radius: 16px;
       background: rgba(255,255,255,.04);
-      margin-bottom:10px;
-      cursor:pointer;
-    }
-    .sheetItem:active{ transform: scale(.99); }
-    .sheetItem .l{
-      display:flex; align-items:center; gap:12px;
-      min-width:0;
-    }
-    .sheetItem .ic{
-      width:42px;height:42px;border-radius:14px;
-      display:grid;place-items:center;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.06);
-    }
-    .sheetItem .t{
-      display:flex; flex-direction:column; gap:3px;
-      min-width:0;
-    }
-    .sheetItem .t b{
+      border:1px solid rgba(255,255,255,.08);
       font-weight:950;
-      letter-spacing:-.02em;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      max-width: 62vw;
     }
-    .sheetItem .t span{
-      font-size:12px;
-      color:var(--muted);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      max-width: 62vw;
-    }
-    .chev{
-      opacity:.55;
-    }
-
-    /* ===== Toast ===== */
-    .toast{
-      position:fixed;
-      left: 14px;
-      right: 14px;
-      bottom: calc(var(--dockH) + var(--dockPad) + 16px);
-      z-index: 200;
-      display:none;
-    }
-    .toast.on{ display:block; }
-    .toastBox{
-      max-width:560px;margin:0 auto;
-      border-radius: 18px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(12,16,28,.80);
-      backdrop-filter: blur(18px);
-      box-shadow: 0 20px 70px rgba(0,0,0,.60);
-      padding: 12px 14px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-    }
-    .toastBox b{ font-weight:950; }
-    .toastBox span{ color: var(--muted); font-size:12px; }
-
-    /* ===== Back button row (inside screens) ===== */
-    .backRow{
-      display:flex; align-items:center; justify-content:space-between;
-      gap:10px;
-      margin: 6px 0 12px;
-    }
-    .backRow .left{
-      display:flex; align-items:center; gap:10px; min-width:0;
-    }
-    .backBtn{
-      width:42px;height:42px;border-radius:14px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.06);
-      display:grid;place-items:center;
-      cursor:pointer;
+    .sheetRow .left{display:flex; align-items:center; gap:12px; min-width:0;}
+    .sheetRow .badge{
+      width:34px;height:34px;border-radius:12px;
+      display:grid; place-items:center;
+      background: rgba(139,107,255,.18);
+      border:1px solid rgba(185,166,255,.25);
       flex:0 0 auto;
     }
-    .backBtn:active{ transform: scale(.98); }
-    .backRow h2{
-      margin:0;
-      font-size:34px;
-      font-weight:950;
-      letter-spacing:-.03em;
-      line-height:1.0;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      max-width: 68vw;
+    .sheetRow .txt{min-width:0}
+    .sheetRow .txt div{
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
     }
+    .chev{opacity:.55}
 
-    /* Fix: hero may be missing, keep stable background */
-    .heroImg::before{
-      background-color: #0B1020;
+    /* TOAST */
+    .toast{
+      position:fixed; left:50%; bottom: calc(var(--dockH) + env(safe-area-inset-bottom) + 18px);
+      transform: translateX(-50%) translateY(16px);
+      background: rgba(0,0,0,.75);
+      border:1px solid rgba(255,255,255,.10);
+      color:rgba(255,255,255,.92);
+      padding: 10px 12px;
+      border-radius: 999px;
+      font-weight:900;
+      opacity:0;
+      pointer-events:none;
+      z-index:120;
+      transition: opacity .18s ease, transform .18s ease;
     }
+    .toast.show{opacity:1; transform: translateX(-50%) translateY(0);}
+
+    /* helper */
+    .sp12{height:12px}
+    .sp14{height:14px}
+    .sp16{height:16px}
+    .sp18{height:18px}
   </style>
 </head>
 
-<body class="noSelect">
-  <div class="tgTop">
-    <div class="tgTopRow">
-      <button class="tgBtn" id="btnMenu" aria-label="Menu">
-        <svg class="tgIcon" viewBox="0 0 24 24" fill="none">
-          <path d="M5 7h14M5 12h14M5 17h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
-        </svg>
-      </button>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div class="toprow">
+        <button class="pillBtn" id="btnMenu" aria-label="Меню">
+          <!-- burger -->
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M4 7h16M4 12h16M4 17h12" stroke="rgba(238,240,255,.92)" stroke-width="2.2" stroke-linecap="round"/>
+          </svg>
+        </button>
 
-      <div class="tgTitle">
-        <div class="name">A U R A</div>
-        <div class="sub" id="topSub">Дом</div>
+        <div class="brand">
+          <div class="logo">A U R A</div>
+          <div class="sub" id="brandSub">Дом</div>
+        </div>
+
+        <button class="pillBtn" id="btnMore" aria-label="Еще">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M6 12h.01M12 12h.01M18 12h.01" stroke="rgba(238,240,255,.92)" stroke-width="3.2" stroke-linecap="round"/>
+          </svg>
+        </button>
       </div>
-
-      <button class="tgBtn" id="btnMore" aria-label="More">
-        <svg class="tgIcon" viewBox="0 0 24 24" fill="none">
-          <path d="M5.5 12a1.7 1.7 0 1 0 0 .01zM12 12a1.7 1.7 0 1 0 0 .01zM18.5 12a1.7 1.7 0 1 0 0 .01z" fill="currentColor"/>
-        </svg>
-      </button>
-    </div>
-  </div>
-
-  <div class="app" id="app">
-    <div class="hero">
-      <div class="heroImg"></div>
-      <div class="heroFade"></div>
     </div>
 
-    <div class="wrap">
-
+    <div class="main">
       <!-- HOME -->
-      <section class="screen on" id="screen-home">
-        <div class="h1">Мой дом</div>
-        <div class="h2">Устройства готовы · AURA Premium</div>
-
-        <div class="pill" id="statusPill">
-          <div class="dot"></div>
-          <div class="pillText" id="statusText">Всё спокойно</div>
-        </div>
-
-        <div class="sectionGap"></div>
-
-        <div class="grid2">
-          <div class="miniCard" id="cardAlice">
-            <div class="miniIcon">
-              <svg viewBox="0 0 24 24" fill="none">
-                <path d="M12 3c4.5 0 8 3.2 8 7.4 0 2.2-1.1 4.1-2.8 5.5l1 3.1-3.3-1.8a9.7 9.7 0 0 1-2.9.5c-4.5 0-8-3.2-8-7.4S7.5 3 12 3Z" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
-              </svg>
+      <section class="page active" id="page-home">
+        <div class="hero">
+          <div class="heroImg" id="heroImg"></div>
+          <div class="heroShade"></div>
+          <div class="heroContent">
+            <h1 class="hTitle">Мой дом</h1>
+            <p class="hSub">Устройства готовы · AURA Premium</p>
+            <div class="statusRow">
+              <div class="statusPill">
+                <span class="dot"></span>
+                <span class="statusText">Всё спокойно</span>
+              </div>
+              <div class="statusTime" id="timeNow">—:—</div>
             </div>
-            <h4 class="miniH">Подключить Алису</h4>
-            <p class="miniP">OAuth-подключение через безопасный шлюз (нужен backend).</p>
           </div>
+        </div>
 
-          <div class="miniCard" id="cardSmart">
-            <div class="miniIcon">
-              <svg viewBox="0 0 24 24" fill="none">
-                <path d="M4.5 10.5 12 4l7.5 6.5v8.5a1.5 1.5 0 0 1-1.5 1.5h-3.6v-6.2a2.4 2.4 0 0 0-2.4-2.4h0a2.4 2.4 0 0 0-2.4 2.4V21H6a1.5 1.5 0 0 1-1.5-1.5v-9Z" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
-              </svg>
+        <div class="card cardPad">
+          <div class="rowBetween">
+            <div>
+              <div class="muted2" style="font-weight:900">Индекс комфорта</div>
+              <div class="meterTitle">Комфорт</div>
             </div>
-            <h4 class="miniH">Устройства</h4>
-            <p class="miniP">Свет, розетки, ТВ, климат — всё по блокам.</p>
+            <div class="meterPct" id="comfortPct">82%</div>
+          </div>
+          <div class="bar"><i id="comfortBar"></i></div>
+          <div class="metaLine" id="metaLine">Эко · 11% · Цифровое спокойствие · ON · Гео · OFF</div>
+        </div>
+
+        <div class="sp14"></div>
+
+        <div class="card cardPad">
+          <div class="rowBetween">
+            <h3 class="cardTitle">Режимы настроения</h3>
+            <div class="muted2" style="font-weight:900">Эмоциональный дом</div>
+          </div>
+          <div class="seg" id="moods">
+            <button class="active" data-mood="cozy">Уют</button>
+            <button data-mood="focus">Фокус</button>
+            <button data-mood="energy">Энергия</button>
+            <button data-mood="calm">Спокойствие</button>
           </div>
         </div>
 
-        <div class="sectionGap"></div>
+        <div class="sp14"></div>
 
         <div class="card cardPad">
-          <div class="meterRow">
-            <div class="left">
-              <div class="kicker">Индекс комфорта</div>
-              <div class="value" id="comfortLabel">Комфорт · 82%</div>
+          <div class="rowBetween">
+            <h3 class="cardTitle">Быстрое управление</h3>
+            <div class="muted2" style="font-weight:900">Контекстный UI</div>
+          </div>
+
+          <div class="grid2" style="margin-top:12px">
+            <div class="tile">
+              <div class="tileL">
+                <div class="ico">💡</div>
+                <div class="tileTxt">
+                  <p class="tileName">Свет</p>
+                  <p class="tileSub">Гостиная · 60%</p>
+                </div>
+              </div>
+              <label class="switch" aria-label="Свет">
+                <input type="checkbox" id="swLight" checked>
+                <span class="track"></span>
+                <span class="knob"></span>
+              </label>
             </div>
-            <div class="tag" id="ecoTag">Эко · 11%</div>
+
+            <div class="tile">
+              <div class="tileL">
+                <div class="ico">📺</div>
+                <div class="tileTxt">
+                  <p class="tileName">TV</p>
+                  <p class="tileSub">Гостиная · Выкл</p>
+                </div>
+              </div>
+              <label class="switch" aria-label="TV">
+                <input type="checkbox" id="swTV">
+                <span class="track"></span>
+                <span class="knob"></span>
+              </label>
+            </div>
+
+            <div class="tile">
+              <div class="tileL">
+                <div class="ico">🔌</div>
+                <div class="tileTxt">
+                  <p class="tileName">Розетки</p>
+                  <p class="tileSub">Кухня · 1 активна</p>
+                </div>
+              </div>
+              <label class="switch" aria-label="Розетки">
+                <input type="checkbox" id="swPlugs" checked>
+                <span class="track"></span>
+                <span class="knob"></span>
+              </label>
+            </div>
+
+            <div class="tile">
+              <div class="tileL">
+                <div class="ico">🧹</div>
+                <div class="tileTxt">
+                  <p class="tileName">Пылесос</p>
+                  <p class="tileSub">Дом · Выкл</p>
+                </div>
+              </div>
+              <label class="switch" aria-label="Пылесос">
+                <input type="checkbox" id="swVac">
+                <span class="track"></span>
+                <span class="knob"></span>
+              </label>
+            </div>
           </div>
-          <div class="meter"><i id="comfortBar"></i></div>
-          <div class="metaLine" id="metaLine">Цифровое спокойствие · ON · Гео · OFF</div>
         </div>
 
-        <div class="sectionGap"></div>
+        <div class="sp14"></div>
 
         <div class="card cardPad">
-          <div class="sectionHead">
-            <h3>Режимы настроения</h3>
-            <div class="tag">Эмоциональный дом</div>
-          </div>
-          <div class="chips" id="moodChips">
-            <button class="chip on" data-mood="cozy">Уют</button>
-            <button class="chip" data-mood="focus">Фокус</button>
-            <button class="chip" data-mood="energy">Энергия</button>
-            <button class="chip" data-mood="calm">Спокойствие</button>
-          </div>
-        </div>
-
-        <div class="sectionGap"></div>
-
-        <div class="card cardPad">
-          <div class="sectionHead">
-            <h3>Быстрое управление</h3>
-            <div class="tag">Контекстный UI</div>
+          <div class="rowBetween">
+            <h3 class="cardTitle">AI Центр</h3>
+            <div class="muted2" style="font-weight:900">Проактивный слой</div>
           </div>
 
-          <div class="qc" id="qcGrid">
-            <!-- tiles injected -->
+          <div class="aiRow" style="margin-top:12px">
+            <input class="input" id="aiInput" placeholder="Например: сделай уютно, свет 30%, тише" />
+            <button class="btn" id="btnRun">Выполнить</button>
+
+            <div class="rowBetween" style="gap:10px">
+              <button class="pillBtn" id="btnLinkAlice" style="width:auto;padding:0 14px;gap:10px;display:flex">
+                <span style="width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.35);display:inline-block"></span>
+                <span style="font-weight:1000;color:rgba(238,240,255,.92)">Подключить Алису</span>
+              </button>
+              <div class="tiny" id="linkState">Не подключено</div>
+            </div>
+
+            <div class="tiny">AI понимает контекст: время · погода · присутствие · привычки (демо). Реальное управление появится после подключения.</div>
           </div>
         </div>
-
-        <div class="sectionGap"></div>
-
-        <div class="card cardPad">
-          <div class="sectionHead">
-            <h3>AI Центр</h3>
-            <div class="tag">Проактивный слой</div>
-          </div>
-          <div class="aiBox">
-            <input class="input" id="aiInput" placeholder="Например: сделай уютно, свет 30%, тише"/>
-            <button class="btn" id="aiRun">Выполнить</button>
-          </div>
-          <p class="cardSub" style="margin-top:10px;">
-            AI понимает контекст: время · погода · присутствие · привычки (демо-логика на фронте).
-          </p>
-        </div>
-
       </section>
 
       <!-- SCENES -->
-      <section class="screen" id="screen-scenes">
-        <div class="backRow">
-          <div class="left">
-            <button class="backBtn" id="backFromScenes" aria-label="Back">
-              <svg class="tgIcon" viewBox="0 0 24 24" fill="none">
-                <path d="M15 6 9 12l6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
-            <h2>Сцены</h2>
-          </div>
-          <button class="btn secondary" id="btnCreateScene">Создать</button>
-        </div>
+      <section class="page" id="page-scenes">
+        <h1 class="hTitle" style="margin:6px 0 6px">Сцены</h1>
+        <p class="hSub" style="margin:0 0 14px">Быстрые режимы для настроения и привычек</p>
 
         <div class="card cardPad">
-          <div class="sectionHead">
-            <h3>Быстрые сценарии</h3>
-            <div class="tag">Как в Яндексе</div>
+          <div class="seg" id="sceneSeg">
+            <button class="active">Утро</button>
+            <button>Вечер</button>
+            <button>Кино</button>
+            <button>Сон</button>
+            <button>Работа</button>
           </div>
-          <div class="chips" id="sceneChips">
-            <button class="chip on" data-cat="all">Все</button>
-            <button class="chip" data-cat="comfort">Комфорт</button>
-            <button class="chip" data-cat="light">Освещение</button>
-            <button class="chip" data-cat="security">Безопасность</button>
-            <button class="chip" data-cat="kids">Детский</button>
+          <div class="sp12"></div>
+
+          <div class="grid2">
+            <div class="card" style="border-radius:22px;padding:16px">
+              <div style="font-weight:1000;font-size:20px">Кино</div>
+              <div class="muted" style="font-weight:900;margin-top:6px">Тёплый свет · 15% · TV включён</div>
+              <div class="sp12"></div>
+              <button class="btn" data-action="scene:movie">Запустить</button>
+            </div>
+            <div class="card" style="border-radius:22px;padding:16px">
+              <div style="font-weight:1000;font-size:20px">Сон</div>
+              <div class="muted" style="font-weight:900;margin-top:6px">Свет выкл · Тишина · 23°</div>
+              <div class="sp12"></div>
+              <button class="btn" data-action="scene:sleep">Запустить</button>
+            </div>
           </div>
-          <div class="grid2" id="sceneGrid"></div>
         </div>
       </section>
 
       <!-- CATALOG -->
-      <section class="screen" id="screen-catalog">
-        <div class="backRow">
-          <div class="left">
-            <button class="backBtn" id="backFromCatalog" aria-label="Back">
-              <svg class="tgIcon" viewBox="0 0 24 24" fill="none">
-                <path d="M15 6 9 12l6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
-            <h2>Каталог</h2>
-          </div>
-          <button class="btn secondary" id="btnConnect">Подключить</button>
-        </div>
+      <section class="page" id="page-catalog">
+        <h1 class="hTitle" style="margin:6px 0 6px">Каталог</h1>
+        <p class="hSub" style="margin:0 0 14px">Устройства, интеграции и рекомендации</p>
 
         <div class="card cardPad">
-          <div class="sectionHead">
-            <h3>Устройства</h3>
-            <div class="tag" id="catalogState">Демо</div>
-          </div>
-
-          <div class="grid2">
-            <div class="miniCard" id="cat1">
-              <div class="miniIcon">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M12 3a6 6 0 0 1 6 6c0 2.3-1.1 4.1-2.6 5.7-.9 1-1.4 2.2-1.4 3.6V20H10v-1.7c0-1.4-.5-2.6-1.4-3.6C7.1 13.1 6 11.3 6 9a6 6 0 0 1 6-6Z" stroke="currentColor" stroke-width="1.9"/>
-                  <path d="M10 22h4" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
-                </svg>
-              </div>
-              <h4 class="miniH">Освещение</h4>
-              <p class="miniP">Сцены света, диммеры, датчики (демо).</p>
+          <div class="rowBetween">
+            <div>
+              <div style="font-weight:1000;font-size:18px">Подключённые устройства</div>
+              <div class="muted" style="font-weight:900;margin-top:6px" id="devicesHint">Нажми «Подключить Алису», чтобы загрузить список</div>
             </div>
-
-            <div class="miniCard" id="cat2">
-              <div class="miniIcon">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M7 8.5A5 5 0 0 1 17 8.5v3.7c0 .7.3 1.4.8 1.9l1.2 1.2c.5.5.2 1.4-.5 1.4H5.5c-.7 0-1-.9-.5-1.4l1.2-1.2c.5-.5.8-1.2.8-1.9V8.5Z" stroke="currentColor" stroke-width="1.9"/>
-                  <path d="M10 19.5a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
-                </svg>
-              </div>
-              <h4 class="miniH">Безопасность</h4>
-              <p class="miniP">Охрана, датчики, тревоги (демо).</p>
-            </div>
+            <button class="pillBtn" id="btnReload" aria-label="Обновить">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M20 12a8 8 0 1 1-2.3-5.6" stroke="rgba(238,240,255,.92)" stroke-width="2.2" stroke-linecap="round"/>
+                <path d="M20 4v6h-6" stroke="rgba(238,240,255,.92)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
           </div>
+          <div class="sp12"></div>
+          <div id="deviceList" class="sheetList" style="padding:0;gap:10px"></div>
         </div>
       </section>
 
       <!-- TIPS -->
-      <section class="screen" id="screen-tips">
-        <div class="backRow">
-          <div class="left">
-            <button class="backBtn" id="backFromTips" aria-label="Back">
-              <svg class="tgIcon" viewBox="0 0 24 24" fill="none">
-                <path d="M15 6 9 12l6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
-            <h2>Советы</h2>
-          </div>
-          <button class="btn secondary" id="btnProactive">Проактив</button>
-        </div>
+      <section class="page" id="page-tips">
+        <h1 class="hTitle" style="margin:6px 0 6px">Советы</h1>
+        <p class="hSub" style="margin:0 0 14px">Проактивные подсказки и “эмоциональный дом”</p>
 
         <div class="card cardPad">
-          <div class="sectionHead">
-            <h3>Что нового</h3>
-            <div class="tag">Для счастья</div>
-          </div>
-
-          <div class="sheetItem" id="tip1">
-            <div class="l">
-              <div class="ic">🌱</div>
-              <div class="t">
-                <b>Эко-метрики</b>
-                <span>Отслеживай экономию энергии и привычки.</span>
+          <div class="cardTitle">Сегодня</div>
+          <div class="sheetRow" style="margin-top:10px">
+            <div class="left">
+              <div class="badge">🌿</div>
+              <div class="txt">
+                <div>Эко-режим</div>
+                <div class="muted2" style="font-weight:900">Снизить яркость на 8% вечером</div>
               </div>
             </div>
             <div class="chev">›</div>
           </div>
-
-          <div class="sheetItem" id="tip2">
-            <div class="l">
-              <div class="ic">🧘</div>
-              <div class="t">
-                <b>Цифровое спокойствие</b>
-                <span>Ночные режимы, тишина, мягкий свет.</span>
-              </div>
-            </div>
-            <div class="chev">›</div>
-          </div>
-
-          <div class="sheetItem" id="tip3">
-            <div class="l">
-              <div class="ic">👨‍👩‍👧</div>
-              <div class="t">
-                <b>Социальный дом</b>
-                <span>Совместный доступ через Telegram (скоро).</span>
+          <div class="sheetRow">
+            <div class="left">
+              <div class="badge">🧘</div>
+              <div class="txt">
+                <div>Цифровое спокойствие</div>
+                <div class="muted2" style="font-weight:900">Тише уведомления после 22:30</div>
               </div>
             </div>
             <div class="chev">›</div>
           </div>
         </div>
       </section>
-
-      <!-- PROFILE -->
-      <section class="screen" id="screen-profile">
-        <div class="backRow">
-          <div class="left">
-            <button class="backBtn" id="backFromProfile" aria-label="Back">
-              <svg class="tgIcon" viewBox="0 0 24 24" fill="none">
-                <path d="M15 6 9 12l6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
-            <h2>Профиль</h2>
-          </div>
-          <button class="btn secondary" id="btnExport">Экспорт</button>
-        </div>
-
-        <div class="card cardPad">
-          <div class="sectionHead">
-            <h3>Подключения</h3>
-            <div class="tag" id="connTag">Не подключено</div>
-          </div>
-
-          <div class="sheetItem" id="openConnect">
-            <div class="l">
-              <div class="ic">🟣</div>
-              <div class="t">
-                <b>Яндекс / Алиса</b>
-                <span>Подключить умный дом через OAuth-шлюз</span>
-              </div>
-            </div>
-            <div class="chev">›</div>
-          </div>
-
-          <div class="sectionGap"></div>
-
-          <div class="sectionHead">
-            <h3>Режимы</h3>
-            <div class="tag">Premium</div>
-          </div>
-
-          <div class="sheetItem">
-            <div class="l">
-              <div class="ic">📍</div>
-              <div class="t">
-                <b>Гео-режим</b>
-                <span>Автосцены по выходу/приходу</span>
-              </div>
-            </div>
-            <div class="sw" data-toggle="geo"><i></i></div>
-          </div>
-
-          <div class="sheetItem">
-            <div class="l">
-              <div class="ic">🧒</div>
-              <div class="t">
-                <b>Детский режим</b>
-                <span>Ограничения и безопасные сцены</span>
-              </div>
-            </div>
-            <div class="sw" data-toggle="kids"><i></i></div>
-          </div>
-
-          <div class="sheetItem">
-            <div class="l">
-              <div class="ic">🌙</div>
-              <div class="t">
-                <b>Цифровое спокойствие</b>
-                <span>Ночной авто-режим</span>
-              </div>
-            </div>
-            <div class="sw on" data-toggle="calm"><i></i></div>
-          </div>
-
-        </div>
-      </section>
-
-      <!-- AI -->
-      <section class="screen" id="screen-ai">
-        <div class="backRow">
-          <div class="left">
-            <button class="backBtn" id="backFromAI" aria-label="Back">
-              <svg class="tgIcon" viewBox="0 0 24 24" fill="none">
-                <path d="M15 6 9 12l6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
-            <h2>AI</h2>
-          </div>
-          <button class="btn secondary" id="btnMemory">Память</button>
-        </div>
-
-        <div class="card cardPad">
-          <div class="sectionHead">
-            <h3>Проактивные подсказки</h3>
-            <div class="tag">Демо-мозг</div>
-          </div>
-          <p class="cardSub">
-            Здесь будет настоящая AI-надстройка над умным домом: контекст, привычки, приоритеты, объяснимость действий.
-          </p>
-          <div class="sectionGap"></div>
-          <button class="btn" id="btnSuggestion">Сгенерировать совет</button>
-        </div>
-      </section>
-
-    </div>
-  </div>
-
-  <!-- Dock -->
-  <nav class="dock" id="dock">
-    <div class="dockBtn on" data-tab="home">
-      <svg viewBox="0 0 24 24" fill="none"><path d="M4.5 10.5 12 4l7.5 6.5v8.5a1.5 1.5 0 0 1-1.5 1.5h-3.6v-6.2a2.4 2.4 0 0 0-2.4-2.4h0a2.4 2.4 0 0 0-2.4 2.4V21H6a1.5 1.5 0 0 1-1.5-1.5v-9Z" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></svg>
-      <span>Дом</span>
     </div>
 
-    <div class="dockBtn" data-tab="scenes">
-      <svg viewBox="0 0 24 24" fill="none"><path d="M6 7h12M6 12h12M6 17h8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
-      <span>Сцены</span>
-    </div>
-
-    <button class="dockPlus" id="dockPlus" aria-label="Add">
-      <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
-    </button>
-
-    <div class="dockBtn" data-tab="profile">
-      <svg viewBox="0 0 24 24" fill="none"><path d="M12 12a4 4 0 1 0-0.01 0ZM4.5 20c1.8-3.7 5-5.5 7.5-5.5S17.7 16.3 19.5 20" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <span>Профиль</span>
-    </div>
-
-    <div class="dockBtn" data-tab="ai">
-      <svg viewBox="0 0 24 24" fill="none"><path d="M8.5 9.5a3.5 3.5 0 0 1 7 0v2a3.5 3.5 0 0 1-7 0v-2Z" stroke="currentColor" stroke-width="1.9"/><path d="M7 14.5c0 2 2.2 3.5 5 3.5s5-1.5 5-3.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
-      <span>AI</span>
-    </div>
-  </nav>
-
-  <!-- Toast -->
-  <div class="toast" id="toast">
-    <div class="toastBox">
-      <div>
-        <b id="toastTitle">Готово</b><br/>
-        <span id="toastText">Действие выполнено</span>
-      </div>
-      <button class="btn secondary" id="toastOk" style="padding:10px 12px;border-radius:14px;">Ок</button>
-    </div>
-  </div>
-
-  <!-- Sheet -->
-  <div class="sheetOverlay" id="sheetOverlay"></div>
-  <div class="sheet" id="sheet">
-    <div class="sheetCard">
-      <div class="sheetGrip"></div>
-      <div class="sheetHead">
-        <h4 id="sheetTitle">Добавить</h4>
-        <button class="sheetClose" id="sheetClose" aria-label="Close">
-          <svg class="tgIcon" viewBox="0 0 24 24" fill="none">
-            <path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+    <!-- DOCK -->
+    <div class="dockWrap">
+      <div class="dock" role="tablist" aria-label="Навигация">
+        <button class="dockItem active" data-page="home" aria-label="Дом">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M4 11.5 12 4l8 7.5V20a1.8 1.8 0 0 1-1.8 1.8H5.8A1.8 1.8 0 0 1 4 20v-8.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
           </svg>
+          Дом
+        </button>
+
+        <button class="dockItem" data-page="scenes" aria-label="Сцены">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M6 7h12M6 12h12M6 17h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          Сцены
+        </button>
+
+        <button class="dockCenter" id="dockAdd" aria-label="Добавить">+</button>
+
+        <button class="dockItem" data-page="catalog" aria-label="Каталог">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M7 4h10a2 2 0 0 1 2 2v14H5V6a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="2"/>
+            <path d="M8 8h8M8 12h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          Каталог
+        </button>
+
+        <button class="dockItem" data-page="tips" aria-label="Советы">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M12 21s7-4.5 7-11a7 7 0 1 0-14 0c0 6.5 7 11 7 11Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M12 10v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M12 7h.01" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+          </svg>
+          Советы
         </button>
       </div>
-      <div class="sheetBody" id="sheetBody">
-        <!-- items injected -->
+    </div>
+
+    <!-- SHEET -->
+    <div class="sheetOverlay" id="sheetOverlay"></div>
+    <div class="sheet" id="sheet">
+      <div class="sheetCard">
+        <div class="sheetGrab"><div class="grab"></div></div>
+        <div class="sheetHead">
+          <h2 class="sheetTitle">Добавить</h2>
+          <button class="pillBtn" id="sheetClose" aria-label="Закрыть">✕</button>
+        </div>
+
+        <div class="sheetGrid">
+          <div class="sheetTile" data-add="alice">
+            <div style="font-size:28px">🧠</div>
+            <div>Устройство с Алисой</div>
+            <small>Яндекс / Xiaomi / JBL…</small>
+          </div>
+          <div class="sheetTile" data-add="smarthome">
+            <div style="font-size:28px">💡</div>
+            <div>Устройство умного дома</div>
+            <small>Свет / розетки / TV…</small>
+          </div>
+        </div>
+
+        <div class="sheetList">
+          <div class="sheetRow" data-add="scene">
+            <div class="left">
+              <div class="badge">🎬</div>
+              <div class="txt"><div>Сценарий</div><div class="muted2" style="font-weight:900">Автоматизации и привычки</div></div>
+            </div>
+            <div class="chev">›</div>
+          </div>
+          <div class="sheetRow" data-add="home">
+            <div class="left">
+              <div class="badge">🏠</div>
+              <div class="txt"><div>Дом</div><div class="muted2" style="font-weight:900">Адреса и помещения</div></div>
+            </div>
+            <div class="chev">›</div>
+          </div>
+          <div class="sheetRow" data-add="people">
+            <div class="left">
+              <div class="badge">👥</div>
+              <div class="txt"><div>Людей</div><div class="muted2" style="font-weight:900">Совместное управление</div></div>
+            </div>
+            <div class="chev">›</div>
+          </div>
+          <div class="sheetRow" data-add="room">
+            <div class="left">
+              <div class="badge">🧩</div>
+              <div class="txt"><div>Комнату</div><div class="muted2" style="font-weight:900">Группировка устройств</div></div>
+            </div>
+            <div class="chev">›</div>
+          </div>
+          <div class="sheetRow" data-add="group">
+            <div class="left">
+              <div class="badge">📁</div>
+              <div class="txt"><div>Группу</div><div class="muted2" style="font-weight:900">Комнаты / зоны / метки</div></div>
+            </div>
+            <div class="chev">›</div>
+          </div>
+        </div>
       </div>
     </div>
+
+    <div class="toast" id="toast">Готово</div>
   </div>
 
-  <script>
-    // ===== iOS: запрет pinch-zoom =====
-    document.addEventListener('gesturestart', (e)=>e.preventDefault(), {passive:false});
-    document.addEventListener('gesturechange', (e)=>e.preventDefault(), {passive:false});
-    document.addEventListener('gestureend', (e)=>e.preventDefault(), {passive:false});
+<script>
+  /* ====== базовые утилиты ====== */
+  const $ = (s, r=document) => r.querySelector(s);
+  const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+  const toast = (t) => {
+    const el = $("#toast");
+    el.textContent = t;
+    el.classList.add("show");
+    clearTimeout(window.__t);
+    window.__t = setTimeout(()=>el.classList.remove("show"), 1500);
+  };
 
-    // ===== Telegram WebApp (если внутри TG) =====
-    const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-    if(tg){
-      try{
-        tg.expand();
-        tg.ready();
-        // tg.disableVerticalSwipes(); // можно включить позже, если нужно
-      }catch(_){}
+  /* ====== время ====== */
+  function tick(){
+    const d = new Date();
+    const hh = String(d.getHours()).padStart(2,"0");
+    const mm = String(d.getMinutes()).padStart(2,"0");
+    $("#timeNow").textContent = `${hh}:${mm}`;
+  }
+  tick(); setInterval(tick, 10_000);
+
+  /* ====== hero фото: если есть assets/hero.jpg — применим ====== */
+  (function(){
+    const img = new Image();
+    img.onload = () => $("#heroImg").classList.add("hasPhoto");
+    img.src = "assets/hero.jpg";
+  })();
+
+  /* ====== навигация ====== */
+  const pages = {
+    home: $("#page-home"),
+    scenes: $("#page-scenes"),
+    catalog: $("#page-catalog"),
+    tips: $("#page-tips"),
+  };
+  function setPage(key){
+    Object.values(pages).forEach(p=>p.classList.remove("active"));
+    pages[key].classList.add("active");
+
+    $$(".dockItem").forEach(b=>b.classList.toggle("active", b.dataset.page===key));
+
+    const sub = {
+      home:"Дом", scenes:"Сцены", catalog:"Каталог", tips:"Советы"
+    }[key] || "Дом";
+    $("#brandSub").textContent = sub;
+
+    // прокрутка вверх аккуратно
+    window.scrollTo({top:0, behavior:"instant"});
+  }
+  $$(".dockItem").forEach(b=>{
+    b.addEventListener("click", ()=> setPage(b.dataset.page));
+  });
+
+  /* ====== Mood сегменты ====== */
+  $("#moods").addEventListener("click", (e)=>{
+    const btn = e.target.closest("button");
+    if(!btn) return;
+    $$("#moods button").forEach(x=>x.classList.remove("active"));
+    btn.classList.add("active");
+    toast("Режим: " + btn.textContent);
+  });
+
+  /* ====== bottom sheet ====== */
+  const overlay = $("#sheetOverlay");
+  const sheet = $("#sheet");
+
+  function openSheet(){
+    overlay.classList.add("show");
+    sheet.classList.add("show");
+  }
+  function closeSheet(){
+    overlay.classList.remove("show");
+    sheet.classList.remove("show");
+  }
+  $("#dockAdd").addEventListener("click", openSheet);
+  $("#sheetClose").addEventListener("click", closeSheet);
+  overlay.addEventListener("click", closeSheet);
+
+  // клики по пунктам sheet
+  sheet.addEventListener("click", (e)=>{
+    const t = e.target.closest("[data-add]");
+    if(!t) return;
+    closeSheet();
+    const k = t.dataset.add;
+
+    if(k==="alice"){
+      linkAlice();
+      return;
     }
+    toast("Добавить: " + ({
+      smarthome:"Устройство умного дома",
+      scene:"Сценарий",
+      home:"Дом",
+      people:"Людей",
+      room:"Комнату",
+      group:"Группу"
+    }[k] || k));
+  });
 
-    const $ = (q)=>document.querySelector(q);
-    const $$ = (q)=>Array.from(document.querySelectorAll(q));
+  /* ====== “демо” убираем: делаем реальные клики ====== */
+  $$("[data-action]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const act = btn.dataset.action;
+      toast("Запуск: " + (act.split(":")[1] || act));
+    });
+  });
 
-    // ===== State =====
-    const state = {
-      tab: "home",
-      mood: "cozy",
-      comfort: 82,
-      eco: 11,
-      flags: {
-        geo: false,
-        kids: false,
-        calm: true
-      },
-      alice: {
-        connected: false,
-        token: localStorage.getItem("aura_alice_token") || ""
-      },
-      devices: [
-        { id:"light", name:"Свет", room:"Гостиная", info:"60%", on:true, icon:"bulb" },
-        { id:"tv", name:"TV", room:"Гостиная", info:"Выкл", on:false, icon:"tv" },
-        { id:"plug", name:"Розетки", room:"Кухня", info:"1 активна", on:true, icon:"plug" },
-        { id:"vac", name:"Пылесос", room:"Дом", info:"Выкл", on:false, icon:"vac" }
-      ]
-    };
+  $("#btnMenu").addEventListener("click", ()=> toast("Меню (в разработке)"));
+  $("#btnMore").addEventListener("click", ()=> toast("Ещё (в разработке)"));
 
-    // ===== Icons =====
-    const icons = {
-      bulb:`<svg viewBox="0 0 24 24" fill="none"><path d="M12 3a6 6 0 0 1 6 6c0 2.3-1.1 4.1-2.6 5.7-.9 1-1.4 2.2-1.4 3.6V20H10v-1.7c0-1.4-.5-2.6-1.4-3.6C7.1 13.1 6 11.3 6 9a6 6 0 0 1 6-6Z" stroke="currentColor" stroke-width="1.9"/><path d="M10 22h4" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>`,
-      tv:`<svg viewBox="0 0 24 24" fill="none"><path d="M5 7.5h14A2.5 2.5 0 0 1 21.5 10v6A2.5 2.5 0 0 1 19 18.5H5A2.5 2.5 0 0 1 2.5 16v-6A2.5 2.5 0 0 1 5 7.5Z" stroke="currentColor" stroke-width="1.9"/><path d="M8 21h8" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>`,
-      plug:`<svg viewBox="0 0 24 24" fill="none"><path d="M9 3v7M15 3v7M7 10h10v3a5 5 0 0 1-5 5h0a5 5 0 0 1-5-5v-3Z" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 18v3" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>`,
-      vac:`<svg viewBox="0 0 24 24" fill="none"><path d="M8 7a4 4 0 0 1 8 0v5a4 4 0 0 1-8 0V7Z" stroke="currentColor" stroke-width="1.9"/><path d="M6 21h12" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>`
-    };
+  /* ====== запрет pinch-zoom (дополнительно) ====== */
+  document.addEventListener("gesturestart", (e)=> e.preventDefault());
+  document.addEventListener("gesturechange", (e)=> e.preventDefault());
+  document.addEventListener("gestureend", (e)=> e.preventDefault());
 
-    // ===== Toast =====
-    let toastTimer = null;
-    function toast(title, text){
-      $("#toastTitle").textContent = title;
-      $("#toastText").textContent = text;
-      $("#toast").classList.add("on");
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(()=>$("#toast").classList.remove("on"), 2400);
-      if(tg) try{ tg.HapticFeedback.impactOccurred("light"); }catch(_){}
+  /* ====== Подключение Алисы через Worker ====== */
+  // ВАЖНО: сюда вставь URL своего Cloudflare Worker (пример: https://aura-auth.yourname.workers.dev)
+  const WORKER_BASE = "https://REPLACE_WITH_YOUR_WORKER_DOMAIN";
+
+  // session id (чтобы Worker понял, кому сохранить токен)
+  function getSession(){
+    let s = localStorage.getItem("aura_session");
+    if(!s){
+      s = crypto.randomUUID();
+      localStorage.setItem("aura_session", s);
     }
-    $("#toastOk").addEventListener("click", ()=>$("#toast").classList.remove("on"));
+    return s;
+  }
 
-    // ===== Navigation =====
-    const screens = {
-      home: $("#screen-home"),
-      scenes: $("#screen-scenes"),
-      catalog: $("#screen-catalog"),
-      tips: $("#screen-tips"),
-      profile: $("#screen-profile"),
-      ai: $("#screen-ai")
-    };
-
-    function setTab(tab){
-      state.tab = tab;
-      Object.keys(screens).forEach(k=>{
-        screens[k].classList.toggle("on", k===tab);
-      });
-      $$(".dockBtn").forEach(b=>b.classList.toggle("on", b.dataset.tab===tab));
-
-      const subMap = {home:"Дом", scenes:"Сцены", catalog:"Каталог", tips:"Советы", profile:"Профиль", ai:"AI"};
-      $("#topSub").textContent = subMap[tab] || "Дом";
-
-      // При уходе на "Сцены/Каталог/Советы" — делаем фон “единым цветом” (как просил)
-      // но без потери hero на главной.
-      document.querySelector(".hero").style.display = (tab==="home") ? "block" : "none";
-
-      // Scroll to top for clean UX
-      window.scrollTo({top:0, behavior:"instant"});
-
-      if(tg) try{ tg.HapticFeedback.selectionChanged(); }catch(_){}
+  function tgOpen(url){
+    if(window.Telegram && Telegram.WebApp && Telegram.WebApp.openLink){
+      Telegram.WebApp.openLink(url);
+      return true;
     }
+    return false;
+  }
 
-    $$(".dockBtn").forEach(btn=>{
-      btn.addEventListener("click", ()=>setTab(btn.dataset.tab));
-    });
+  async function linkAlice(){
+    const session = getSession();
+    const back = location.href.split("#")[0];
+    const url = `${WORKER_BASE}/auth/start?session=${encodeURIComponent(session)}&redirect=${encodeURIComponent(back)}`;
+    toast("Открываю вход Яндекс…");
+    if(!tgOpen(url)) location.href = url;
+  }
 
-    // Back buttons
-    $("#backFromScenes").addEventListener("click", ()=>setTab("home"));
-    $("#backFromCatalog").addEventListener("click", ()=>setTab("home"));
-    $("#backFromTips").addEventListener("click", ()=>setTab("home"));
-    $("#backFromProfile").addEventListener("click", ()=>setTab("home"));
-    $("#backFromAI").addEventListener("click", ()=>setTab("home"));
+  $("#btnLinkAlice").addEventListener("click", linkAlice);
 
-    // ===== Mood =====
-    $("#moodChips").addEventListener("click", (e)=>{
-      const btn = e.target.closest(".chip");
-      if(!btn) return;
-      $$("#moodChips .chip").forEach(x=>x.classList.remove("on"));
-      btn.classList.add("on");
-      state.mood = btn.dataset.mood;
-      applyMood();
-    });
-
-    function applyMood(){
-      // premium subtle adjustments
-      const moodMap = {
-        cozy: {comfort: 91, eco: 11, status:"Всё спокойно", meta:"Цифровое спокойствие · ON · Гео · OFF"},
-        focus:{comfort: 76, eco: 8, status:"Фокус активен", meta:"Тишина · Уведомления · MIN · Гео · OFF"},
-        energy:{comfort: 83, eco: 9, status:"Энергия на максимум", meta:"Свет ярче · Музыка · ON · Гео · OFF"},
-        calm:{comfort: 88, eco: 12, status:"Спокойствие", meta:"Ночной режим · ON · Тишина · ON"}
-      };
-      const m = moodMap[state.mood];
-      state.comfort = m.comfort;
-      state.eco = m.eco;
-      $("#statusText").textContent = m.status;
-      $("#metaLine").textContent = m.meta;
-      renderMeter();
-      toast("Режим", m.status);
+  // состояние подключения
+  async function refreshLinkState(){
+    const session = getSession();
+    try{
+      const r = await fetch(`${WORKER_BASE}/api/status?session=${encodeURIComponent(session)}`);
+      const j = await r.json();
+      $("#linkState").textContent = j.linked ? "Подключено" : "Не подключено";
+      $("#linkState").style.color = j.linked ? "rgba(46,229,157,.9)" : "rgba(238,240,255,.55)";
+    }catch(e){
+      $("#linkState").textContent = "Worker недоступен";
+      $("#linkState").style.color = "rgba(238,240,255,.55)";
     }
+  }
 
-    function renderMeter(){
-      $("#comfortLabel").textContent = `Комфорт · ${state.comfort}%`;
-      $("#ecoTag").textContent = `Эко · ${state.eco}%`;
-      $("#comfortBar").style.width = `${state.comfort}%`;
-    }
-
-    // ===== Quick Controls =====
-    function renderQC(){
-      const grid = $("#qcGrid");
-      grid.innerHTML = "";
-      state.devices.forEach(d=>{
-        const tile = document.createElement("div");
-        tile.className = "tile";
-        tile.innerHTML = `
-          <div class="tileL">
-            <div class="tileI">${icons[d.icon] || ""}</div>
-            <div class="tileT">
-              <b title="${d.name}">${d.name}</b>
-              <span title="${d.room} · ${d.info}">${d.room} · ${d.info}</span>
-            </div>
-          </div>
-          <div class="sw ${d.on ? "on":""}" data-dev="${d.id}"><i></i></div>
-        `;
-        grid.appendChild(tile);
-      });
-    }
-
-    $("#qcGrid").addEventListener("click", (e)=>{
-      const sw = e.target.closest(".sw");
-      if(!sw) return;
-      const id = sw.dataset.dev;
-      const dev = state.devices.find(x=>x.id===id);
-      if(!dev) return;
-      dev.on = !dev.on;
-      sw.classList.toggle("on", dev.on);
-      toast(dev.name, dev.on ? "Включено" : "Выключено");
-
-      // HERE: реальная интеграция будет вызывать backend -> Алиса API
-      // пока — демо
-    });
-
-    // ===== AI demo logic =====
-    $("#aiRun").addEventListener("click", ()=>{
-      const text = ($("#aiInput").value||"").trim();
-      if(!text){ toast("AI", "Напиши команду"); return; }
-
-      // mini parser
-      const lower = text.toLowerCase();
-      if(lower.includes("уют")) { state.mood="cozy"; $$("#moodChips .chip").forEach(x=>x.classList.toggle("on", x.dataset.mood==="cozy")); applyMood(); }
-      if(lower.includes("фокус")) { state.mood="focus"; $$("#moodChips .chip").forEach(x=>x.classList.toggle("on", x.dataset.mood==="focus")); applyMood(); }
-      if(lower.includes("энерг")) { state.mood="energy"; $$("#moodChips .chip").forEach(x=>x.classList.toggle("on", x.dataset.mood==="energy")); applyMood(); }
-      if(lower.includes("спокой")) { state.mood="calm"; $$("#moodChips .chip").forEach(x=>x.classList.toggle("on", x.dataset.mood==="calm")); applyMood(); }
-
-      toast("AI", "Команда применена");
-      $("#aiInput").value="";
-    });
-
-    // ===== Scenes =====
-    const scenes = [
-      {cat:"comfort", name:"Кино", desc:"Тёплый свет · 15% · TV", btn:"Запустить"},
-      {cat:"comfort", name:"Сон", desc:"Свет выкл · Тишина · 23°", btn:"Запустить"},
-      {cat:"light", name:"Рассвет", desc:"Плавный свет · 12 мин", btn:"Запустить"},
-      {cat:"security", name:"Охрана", desc:"Двери · ON · Датчики", btn:"Запустить"},
-      {cat:"kids", name:"Детский", desc:"Ночник · 10% · Тишина", btn:"Запустить"}
-    ];
-
-    function renderScenes(cat="all"){
-      const grid = $("#sceneGrid");
-      grid.innerHTML = "";
-      scenes.filter(s=>cat==="all" ? true : s.cat===cat).slice(0,4).forEach(s=>{
-        const c = document.createElement("div");
-        c.className = "miniCard";
-        c.innerHTML = `
-          <div class="miniIcon">✨</div>
-          <h4 class="miniH">${s.name}</h4>
-          <p class="miniP">${s.desc}</p>
-          <div style="margin-top:12px;">
-            <button class="btn" style="width:100%;border-radius:20px;">${s.btn}</button>
-          </div>
-        `;
-        c.querySelector("button").addEventListener("click",(e)=>{
-          e.stopPropagation();
-          toast("Сцена", `${s.name} запущена`);
-        });
-        grid.appendChild(c);
-      });
-    }
-    $("#sceneChips").addEventListener("click",(e)=>{
-      const b = e.target.closest(".chip");
-      if(!b) return;
-      $$("#sceneChips .chip").forEach(x=>x.classList.remove("on"));
-      b.classList.add("on");
-      renderScenes(b.dataset.cat);
-    });
-
-    $("#btnCreateScene").addEventListener("click", ()=>{
-      openSheet("Создать", [
-        {title:"Сценарий", sub:"Собери правила и действия", icon:"🎬", action:()=>toast("Создать", "Редактор сцен будет следующим шагом")},
-        {title:"Комната", sub:"Группировать устройства", icon:"🏠", action:()=>toast("Комнаты", "Откроем мастер комнат")},
-      ]);
-    });
-
-    // ===== Profile toggles =====
-    $$(`.sw[data-toggle]`).forEach(sw=>{
-      const key = sw.dataset.toggle;
-      sw.classList.toggle("on", !!state.flags[key]);
-      sw.addEventListener("click",(e)=>{
-        e.stopPropagation();
-        state.flags[key] = !state.flags[key];
-        sw.classList.toggle("on", state.flags[key]);
-        toast("Режим", `${key.toUpperCase()} · ${state.flags[key] ? "ON":"OFF"}`);
-        $("#metaLine").textContent = `Цифровое спокойствие · ${state.flags.calm ? "ON":"OFF"} · Гео · ${state.flags.geo ? "ON":"OFF"}`;
-      });
-    });
-
-    // ===== Sheet =====
-    const overlay = $("#sheetOverlay");
-    const sheet = $("#sheet");
-    const sheetBody = $("#sheetBody");
-    const sheetTitle = $("#sheetTitle");
-
-    function openSheet(title="Добавить", items=[]){
-      sheetTitle.textContent = title;
-      sheetBody.innerHTML = "";
-      items.forEach(it=>{
-        const row = document.createElement("div");
-        row.className = "sheetItem";
-        row.innerHTML = `
-          <div class="l">
-            <div class="ic">${it.icon || "➕"}</div>
-            <div class="t">
-              <b>${it.title}</b>
-              <span>${it.sub || ""}</span>
+  async function loadDevices(){
+    const session = getSession();
+    $("#deviceList").innerHTML = "";
+    try{
+      const r = await fetch(`${WORKER_BASE}/api/devices?session=${encodeURIComponent(session)}`);
+      const j = await r.json();
+      if(!j.ok){
+        $("#devicesHint").textContent = j.error || "Не удалось загрузить";
+        toast(j.error || "Ошибка");
+        return;
+      }
+      const items = j.devices || [];
+      $("#devicesHint").textContent = items.length ? `Найдено устройств: ${items.length}` : "Устройств нет";
+      const wrap = $("#deviceList");
+      items.slice(0,30).forEach(d=>{
+        const el = document.createElement("div");
+        el.className = "sheetRow";
+        el.innerHTML = `
+          <div class="left">
+            <div class="badge">⚡️</div>
+            <div class="txt">
+              <div>${escapeHtml(d.name || "Устройство")}</div>
+              <div class="muted2" style="font-weight:900">${escapeHtml(d.type || "device")} · ${escapeHtml(d.room || "—")}</div>
             </div>
           </div>
           <div class="chev">›</div>
         `;
-        row.addEventListener("click", ()=>{
-          closeSheet();
-          if(typeof it.action==="function") it.action();
-        });
-        sheetBody.appendChild(row);
+        el.addEventListener("click", ()=> toast("Открыть: " + (d.name || "Устройство")));
+        wrap.appendChild(el);
       });
-
-      overlay.classList.add("on");
-      sheet.classList.add("on");
-      if(tg) try{ tg.HapticFeedback.impactOccurred("medium"); }catch(_){}
+    }catch(e){
+      $("#devicesHint").textContent = "Ошибка сети";
+      toast("Ошибка сети");
     }
-    function closeSheet(){
-      overlay.classList.remove("on");
-      sheet.classList.remove("on");
-    }
-    overlay.addEventListener("click", closeSheet);
-    $("#sheetClose").addEventListener("click", closeSheet);
+  }
 
-    // Dock plus
-    $("#dockPlus").addEventListener("click", ()=>{
-      openSheet("Добавить", [
-        {title:"Устройство с Алисой", sub:"Яндекс, Xiaomi, JBL и другие", icon:"🟣", action:()=>openConnectFlow()},
-        {title:"Устройство умного дома", sub:"Свет, розетки, пылесос, ТВ", icon:"💡", action:()=>toast("Добавить", "Откроем мастер добавления (следующий шаг)")},
-        {title:"Сценарий", sub:"Автоматизация по событиям", icon:"🎬", action:()=>setTab("scenes")},
-        {title:"Дом", sub:"Адрес, комнаты, люди", icon:"🏠", action:()=>toast("Дом", "Мастер дома будет следующим шагом")},
-        {title:"Людей", sub:"Совместный доступ через Telegram", icon:"👥", action:()=>toast("Социальный дом", "Сделаем совместный доступ")},
-      ]);
-    });
+  $("#btnReload").addEventListener("click", loadDevices);
 
-    // Top buttons
-    $("#btnMenu").addEventListener("click", ()=>{
-      openSheet("Меню", [
-        {title:"Советы", sub:"Рекомендации и идеи", icon:"✨", action:()=>setTab("tips")},
-        {title:"Каталог", sub:"Подключения и устройства", icon:"🧩", action:()=>setTab("catalog")},
-        {title:"Профиль", sub:"Режимы и настройки", icon:"👤", action:()=>setTab("profile")},
-      ]);
-    });
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, (c)=>({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+    }[c]));
+  }
 
-    $("#btnMore").addEventListener("click", ()=>{
-      openSheet("Ещё", [
-        {title:"Подключить Алису", sub:"OAuth через безопасный шлюз", icon:"🟣", action:()=>openConnectFlow()},
-        {title:"Экспорт демо-данных", sub:"Сохранить конфиг", icon:"📦", action:()=>exportConfig()},
-        {title:"О приложении", sub:"AURA · Premium UI", icon:"ℹ️", action:()=>toast("AURA", "Premium UI/UX · Telegram Mini App")},
-      ]);
-    });
+  // AI button — пока демо, но кликается и НЕ ломает UI
+  $("#btnRun").addEventListener("click", ()=>{
+    const v = $("#aiInput").value.trim();
+    toast(v ? ("AI: " + v) : "Скажи команду");
+  });
 
-    // Cards
-    $("#cardAlice").addEventListener("click", ()=>openConnectFlow());
-    $("#cardSmart").addEventListener("click", ()=>setTab("catalog"));
+  refreshLinkState();
 
-    // Connect buttons
-    $("#btnConnect").addEventListener("click", ()=>openConnectFlow());
-    $("#openConnect").addEventListener("click", ()=>openConnectFlow());
-
-    function openConnectFlow(){
-      openSheet("Подключить Алису", [
-        {
-          title: state.alice.token ? "Токен сохранён" : "Ввести токен (временно)",
-          sub: "Это временно. Для реального подключения нужен OAuth-шлюз.",
-          icon:"🔑",
-          action:()=>{
-            const t = prompt("Вставь токен (временно). Реальный OAuth сделаем через backend.");
-            if(t && t.trim()){
-              state.alice.token = t.trim();
-              localStorage.setItem("aura_alice_token", state.alice.token);
-              state.alice.connected = true;
-              $("#connTag").textContent = "Подключено (токен сохранён)";
-              $("#catalogState").textContent = "Подключено (частично)";
-              toast("Алиса", "Токен сохранён");
-            }else{
-              toast("Алиса", "Токен не введён");
-            }
-          }
-        },
-        {
-          title:"Открыть OAuth (правильно)",
-          sub:"Нужен backend. Я дам тебе готовый Worker/Vercel.",
-          icon:"🟣",
-          action:()=>{
-            toast("OAuth", "Следующий шаг — подключаем безопасный шлюз");
-          }
-        }
-      ]);
-    }
-
-    // Export
-    $("#btnExport").addEventListener("click", exportConfig);
-    function exportConfig(){
-      const cfg = {
-        version:"AURA-PREMIUM-1",
-        mood: state.mood,
-        comfort: state.comfort,
-        eco: state.eco,
-        flags: state.flags,
-        devices: state.devices.map(d=>({id:d.id,on:d.on}))
-      };
-      navigator.clipboard?.writeText(JSON.stringify(cfg,null,2));
-      toast("Экспорт", "Конфиг скопирован в буфер");
-    }
-
-    // Tips
-    $("#btnProactive").addEventListener("click", ()=>{
-      toast("Проактив", "Сделаем правила: погода/время/присутствие");
-    });
-    $("#tip1").addEventListener("click", ()=>toast("Эко-метрики", "Добавим экран статистики и цели"));
-    $("#tip2").addEventListener("click", ()=>toast("Спокойствие", "Ночной режим + расписания"));
-    $("#tip3").addEventListener("click", ()=>toast("Социальный дом", "Доступ людям через TG"));
-
-    // AI page
-    $("#btnSuggestion").addEventListener("click", ()=>{
-      const ideas = [
-        "Сейчас вечер — включить тёплый свет 25% и тише уведомления?",
-        "Дома никого — включить охрану и выключить розетки?",
-        "Погода холодная — поднять температуру на 1°?"
-      ];
-      toast("Совет", ideas[Math.floor(Math.random()*ideas.length)]);
-    });
-    $("#btnMemory").addEventListener("click", ()=>{
-      toast("Память", "Скоро: история команд и привычки");
-    });
-
-    // Scenes chip initial
-    renderScenes("all");
-
-    // Init
-    function init(){
-      renderMeter();
-      renderQC();
-      $("#connTag").textContent = state.alice.token ? "Подключено (токен)" : "Не подключено";
-      $("#catalogState").textContent = state.alice.token ? "Подключено (частично)" : "Демо";
-      applyMood(); // will toast once; cancel it on first load to be quiet
-      // make first load quiet
-      $("#toast").classList.remove("on");
-    }
-    init();
-
-    // Make applyMood quiet on init:
-    function applyMoodQuiet(){
-      const was = $("#toast").classList.contains("on");
-      $("#toast").classList.remove("on");
-      applyMood();
-      if(!was) $("#toast").classList.remove("on");
-    }
-
-    // Optional: prevent accidental text selection
-    document.addEventListener("selectstart", (e)=>e.preventDefault());
-
-  </script>
+  // если вернулись после OAuth
+  if(new URLSearchParams(location.search).get("linked")==="1"){
+    toast("Алиса подключена");
+    refreshLinkState();
+    setTimeout(loadDevices, 350);
+  }
+</script>
 </body>
 </html>
